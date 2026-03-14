@@ -1,0 +1,9 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts", "src/node/index.ts"],
+  "out": "docs",
+  "name": "mimiq",
+  "readme": "README.md",
+  "excludePrivate": true,
+  "excludeInternal": true
+}
