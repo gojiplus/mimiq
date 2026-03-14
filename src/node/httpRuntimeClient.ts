@@ -7,10 +7,10 @@ import type {
   GetAggregateReportRequest,
   GetReportRequest,
   GetTraceRequest,
+  MimiqRuntimeClient,
   RunTrace,
   StartRunRequest,
   StartRunResponse,
-  UnderstudyRuntimeClient,
 } from "../types";
 
 export interface HttpRuntimeClientOptions {
@@ -20,7 +20,7 @@ export interface HttpRuntimeClientOptions {
 
 export function createHttpRuntimeClient(
   options: HttpRuntimeClientOptions,
-): UnderstudyRuntimeClient {
+): MimiqRuntimeClient {
   const { baseUrl, headers = {} } = options;
 
   async function request<T>(

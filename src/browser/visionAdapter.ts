@@ -115,7 +115,7 @@ async function analyzeScreenshot(
       availableActions: parsed.availableActions || [],
       stateMarkers: parsed.stateMarkers || [],
     };
-  } catch (e) {
+  } catch {
     console.error("Failed to parse vision response:", text);
     return {
       transcript: [],

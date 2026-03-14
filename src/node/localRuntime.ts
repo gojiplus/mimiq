@@ -10,12 +10,10 @@ import { parse as parseYaml } from "yaml";
 
 import {
   check,
-  checkResultSummary,
   Judge,
   resolvePersona,
   Simulator,
   type CheckResult,
-  type JudgeConfig as JudgeExpectation,
   type Scene,
   type Trace,
   type Turn,
@@ -82,15 +80,6 @@ function loadSceneById(sceneId: string, scenesDir?: string): Scene {
 function detectTerminalState(text: string): string | undefined {
   const match = text.match(/TERMINAL_STATE:\s*(\S+)/);
   return match?.[1];
-}
-
-function traceEntryToTurn(entry: TraceEntry): Turn | null {
-  if (entry.kind !== "message") return null;
-  return {
-    role: entry.actor === "user" ? "user" : "agent",
-    content: entry.text ?? "",
-    tool_calls: [],
-  };
 }
 
 export interface LocalRuntimeOptions {

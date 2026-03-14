@@ -1,1 +1,1 @@
-export { registerUnderstudyCommands } from "./commands";
+export { registerMimiqCommands } from "./commands";

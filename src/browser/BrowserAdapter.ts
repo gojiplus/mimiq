@@ -3,7 +3,7 @@ export type {
   AwaitSettledOptions,
   BrowserAdapter,
   BrowserSimAction,
-  RegisterUnderstudyCommandsOptions,
+  RegisterMimiqCommandsOptions,
   TranscriptTurn,
   UIActionTarget,
   UserToolAvailability,

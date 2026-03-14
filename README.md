@@ -1,10 +1,10 @@
-# @understudy/cypress
+# mimiq
 
 Cypress integration for end-to-end testing of agentic applications.
 
 ## Overview
 
-`@understudy/cypress` is a complete TypeScript solution for testing AI agents with simulated users. It provides:
+`mimiq` is a complete TypeScript solution for testing AI agents with simulated users. It provides:
 
 1. **Simulated users** - LLM-powered users that follow conversation plans
 2. **Deterministic checks** - Verify tool calls, terminal states, forbidden actions
@@ -19,7 +19,7 @@ No Python required. Everything runs in Node.js.
 ### 1. Install
 
 ```bash
-npm install @understudy/cypress --save-dev
+npm install mimiq --save-dev
 ```
 
 ### 2. Configure API Key
@@ -36,7 +36,7 @@ export SIMULATOR_MODEL=gpt-4o  # default
 **cypress.config.ts**
 ```ts
 import { defineConfig } from "cypress";
-import { setupUnderstudyTasks, createLocalRuntime } from "@understudy/cypress/node";
+import { setupUnderstudyTasks, createLocalRuntime } from "mimiq/node";
 
 export default defineConfig({
   e2e: {
@@ -54,7 +54,7 @@ export default defineConfig({
 
 **cypress/support/e2e.ts**
 ```ts
-import { createDefaultChatAdapter, registerUnderstudyCommands } from "@understudy/cypress";
+import { createDefaultChatAdapter, registerUnderstudyCommands } from "mimiq";
 
 registerUnderstudyCommands({
   browserAdapter: createDefaultChatAdapter({
@@ -177,7 +177,7 @@ Judges use majority voting across multiple samples for reliability.
 ### Built-in Rubrics
 
 ```ts
-import { BUILTIN_RUBRICS } from "@understudy/cypress";
+import { BUILTIN_RUBRICS } from "mimiq";
 
 // Available rubrics:
 BUILTIN_RUBRICS.TASK_COMPLETION
@@ -213,7 +213,7 @@ BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ @understudy/cypress                                                      │
+│ mimiq                                                                   │
 │                                                                         │
 │ Browser Layer (Cypress):                                                │
 │   - Captures UI state via data-test selectors                          │
