@@ -1,0 +1,65 @@
+{
+  "name": "mimiq",
+  "version": "0.1.0",
+  "description": "Simulate users and evaluate AI agents in Cypress e2e tests",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node/index.d.ts",
+      "default": "./dist/node/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "dev:app": "npm run dev --prefix examples/app",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "npm run cypress:run"
+  },
+  "peerDependencies": {
+    "cypress": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "cypress": "^14.0.0",
+    "eslint": "^8.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "yaml": "^2.8.2"
+  },
+  "keywords": [
+    "cypress",
+    "testing",
+    "e2e",
+    "agent",
+    "simulation",
+    "mimiq",
+    "llm",
+    "chatbot"
+  ],
+  "author": "Gaurav Sood",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/soodoku/mimiq"
+  },
+  "bugs": {
+    "url": "https://github.com/soodoku/mimiq/issues"
+  },
+  "homepage": "https://github.com/soodoku/mimiq#readme"
+}
