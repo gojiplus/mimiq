@@ -24,7 +24,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "dev:app": "npm run dev --prefix examples/app",
+    "dev:app": "npm run dev --prefix test/app",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test": "npm run cypress:run",
