@@ -1,7 +1,7 @@
 # mimiq
 
-[![npm version](https://img.shields.io/npm/v/mimiq.svg)](https://www.npmjs.com/package/mimiq)
-[![npm downloads](https://img.shields.io/npm/dm/mimiq.svg)](https://www.npmjs.com/package/mimiq)
+[![npm version](https://img.shields.io/npm/v/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
+[![npm downloads](https://img.shields.io/npm/dm/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
 [![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,7 +29,7 @@ No Python required. Everything runs in Node.js.
 ### 1. Install
 
 ```bash
-npm install mimiq --save-dev
+npm install @gojiplus/mimiq --save-dev
 ```
 
 ### 2. Configure API Key
@@ -46,7 +46,7 @@ export SIMULATOR_MODEL=gpt-4o  # default
 **cypress.config.ts**
 ```ts
 import { defineConfig } from "cypress";
-import { setupMimiqTasks, createLocalRuntime } from "mimiq/node";
+import { setupMimiqTasks, createLocalRuntime } from "@gojiplus/mimiq/node";
 
 export default defineConfig({
   e2e: {
@@ -64,7 +64,7 @@ export default defineConfig({
 
 **cypress/support/e2e.ts**
 ```ts
-import { createDefaultChatAdapter, registerMimiqCommands } from "mimiq";
+import { createDefaultChatAdapter, registerMimiqCommands } from "@gojiplus/mimiq";
 
 registerMimiqCommands({
   browserAdapter: createDefaultChatAdapter({
@@ -187,7 +187,7 @@ Judges use majority voting across multiple samples for reliability.
 ### Built-in Rubrics
 
 ```ts
-import { BUILTIN_RUBRICS } from "mimiq";
+import { BUILTIN_RUBRICS } from "@gojiplus/mimiq";
 
 // Available rubrics:
 BUILTIN_RUBRICS.TASK_COMPLETION
