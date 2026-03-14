@@ -1,5 +1,5 @@
 {
-  "name": "mimiq",
+  "name": "@gojiplus/mimiq",
   "version": "0.1.0",
   "description": "Simulate users and evaluate AI agents in Cypress e2e tests",
   "type": "module",
@@ -58,10 +58,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soodoku/mimiq.git"
+    "url": "git+https://github.com/gojiplus/mimiq.git"
   },
   "bugs": {
-    "url": "https://github.com/soodoku/mimiq/issues"
+    "url": "https://github.com/gojiplus/mimiq/issues"
   },
-  "homepage": "https://github.com/soodoku/mimiq#readme"
+  "homepage": "https://github.com/gojiplus/mimiq#readme"
 }

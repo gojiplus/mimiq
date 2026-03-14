@@ -1,7 +1,7 @@
 import {
   createDefaultChatAdapter,
   registerMimiqCommands,
-} from "../../src/index";
+} from "../../src";
 
 const chatAdapter = createDefaultChatAdapter({
   transcript: '[data-test="transcript"]',

@@ -1,6 +1,16 @@
 # mimiq
 
+[![npm version](https://img.shields.io/npm/v/mimiq.svg)](https://www.npmjs.com/package/mimiq)
+[![npm downloads](https://img.shields.io/npm/dm/mimiq.svg)](https://www.npmjs.com/package/mimiq)
+[![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Cypress integration for end-to-end testing of agentic applications.
+
+Testing AI agents is hard: manual testing is slow, real users are expensive,
+and LLM non-determinism makes assertions tricky. mimiq solves this with
+simulated users that follow scripts, plus deterministic checks on tool calls
+and terminal states.
 
 ## Overview
 
@@ -36,7 +46,7 @@ export SIMULATOR_MODEL=gpt-4o  # default
 **cypress.config.ts**
 ```ts
 import { defineConfig } from "cypress";
-import { setupUnderstudyTasks, createLocalRuntime } from "mimiq/node";
+import { setupMimiqTasks, createLocalRuntime } from "mimiq/node";
 
 export default defineConfig({
   e2e: {
@@ -45,7 +55,7 @@ export default defineConfig({
       const runtime = createLocalRuntime({
         scenesDir: "./scenes",
       });
-      setupUnderstudyTasks(on, { runtime });
+      setupMimiqTasks(on, { runtime });
       return config;
     },
   },
@@ -54,9 +64,9 @@ export default defineConfig({
 
 **cypress/support/e2e.ts**
 ```ts
-import { createDefaultChatAdapter, registerUnderstudyCommands } from "mimiq";
+import { createDefaultChatAdapter, registerMimiqCommands } from "mimiq";
 
-registerUnderstudyCommands({
+registerMimiqCommands({
   browserAdapter: createDefaultChatAdapter({
     transcript: '[data-test="transcript"]',
     messageRow: '[data-test="message-row"]',
@@ -103,14 +113,14 @@ expectations:
 
 ```ts
 describe("return flow", () => {
-  afterEach(() => cy.understudyCleanupRun());
+  afterEach(() => cy.mimiqCleanupRun());
 
   it("processes valid return", () => {
     cy.visit("/");
-    cy.understudyStartRun({ sceneId: "return_backpack" });
-    cy.understudyRunToCompletion();
+    cy.mimiqStartRun({ sceneId: "return_backpack" });
+    cy.mimiqRunToCompletion();
 
-    cy.understudyEvaluate().then((report) => {
+    cy.mimiqEvaluate().then((report) => {
       expect(report.passed).to.eq(true);
     });
   });
@@ -193,12 +203,12 @@ BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 
 | Command | Description |
 |---------|-------------|
-| `cy.understudyStartRun({ sceneId })` | Start a simulation |
-| `cy.understudyRunToCompletion()` | Run until done or max turns |
-| `cy.understudyRunTurn()` | Execute one turn |
-| `cy.understudyEvaluate()` | Run all checks and judges |
-| `cy.understudyGetTrace()` | Get conversation trace |
-| `cy.understudyCleanupRun()` | Clean up |
+| `cy.mimiqStartRun({ sceneId })` | Start a simulation |
+| `cy.mimiqRunToCompletion()` | Run until done or max turns |
+| `cy.mimiqRunTurn()` | Execute one turn |
+| `cy.mimiqEvaluate()` | Run all checks and judges |
+| `cy.mimiqGetTrace()` | Get conversation trace |
+| `cy.mimiqCleanupRun()` | Clean up |
 
 ## Environment Variables
 

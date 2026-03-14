@@ -2,9 +2,9 @@ node_modules/
 dist/
 .venv/
 
-cypress/videos/
-cypress/screenshots/
-cypress/downloads/
+test/videos/
+test/screenshots/
+test/downloads/
 
 .DS_Store
 *.log
