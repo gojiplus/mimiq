@@ -1,11 +1,10 @@
-# mimiq
+# mimiq: Cypress integration for end-to-end testing of agentic applications
 
 [![npm version](https://img.shields.io/npm/v/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
 [![npm downloads](https://img.shields.io/npm/dm/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
 [![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Cypress integration for end-to-end testing of agentic applications.
 
 Testing AI agents is hard: manual testing is slow, real users are expensive,
 and LLM non-determinism makes assertions tricky. mimiq solves this with
