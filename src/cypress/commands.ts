@@ -5,6 +5,7 @@ import type {
   RegisterMimiqCommandsOptions,
   RunTrace,
   StartRunRequest,
+  VisualAssertionResult,
 } from "../types";
 
 const RUN_ID_KEY = "__mimiqCurrentRunId";
@@ -28,6 +29,14 @@ function setTurnCount(turn: number): void {
   Cypress.env(TURN_KEY, turn);
 }
 
+export interface AccessibilityAuditOptions {
+  level?: "A" | "AA" | "AAA";
+}
+
+export interface VisualCompareOptions {
+  threshold?: number;
+}
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
@@ -41,6 +50,9 @@ declare global {
       mimiqCleanupRun(): Chainable<void>;
       mimiqGetReport(): Chainable<string>;
       mimiqGetAggregateReport(): Chainable<string>;
+      mimiqVisualAssert(query: string): Chainable<VisualAssertionResult>;
+      mimiqAccessibilityAudit(options?: AccessibilityAuditOptions): Chainable<VisualAssertionResult>;
+      mimiqVisualCompare(baselineName: string, options?: VisualCompareOptions): Chainable<VisualAssertionResult>;
     }
   }
 }
@@ -146,5 +158,23 @@ export function registerMimiqCommands(
 
   Cypress.Commands.add("mimiqGetAggregateReport", () => {
     return cy.task("mimiq:getAggregateReport", {}, { log: false }) as Cypress.Chainable<string>;
+  });
+
+  Cypress.Commands.add("mimiqVisualAssert", (query: string) => {
+    return cy.url().then((url) => {
+      return cy.task("mimiq:visualAssert", { url, query }, { log: false }) as Cypress.Chainable<VisualAssertionResult>;
+    });
+  });
+
+  Cypress.Commands.add("mimiqAccessibilityAudit", (options?: AccessibilityAuditOptions) => {
+    return cy.url().then((url) => {
+      return cy.task("mimiq:accessibilityAudit", { url, options }, { log: false }) as Cypress.Chainable<VisualAssertionResult>;
+    });
+  });
+
+  Cypress.Commands.add("mimiqVisualCompare", (baselineName: string, options?: VisualCompareOptions) => {
+    return cy.url().then((url) => {
+      return cy.task("mimiq:visualCompare", { url, baselineName, options }, { log: false }) as Cypress.Chainable<VisualAssertionResult>;
+    });
   });
 }

@@ -235,3 +235,12 @@ export interface RegisterMimiqCommandsOptions {
 export interface SetupMimiqTasksOptions {
   runtime: MimiqRuntimeClient;
 }
+
+export interface VisualAssertionResult {
+  passed: boolean;
+  answer: string;
+  confidence: number;
+  reasoning?: string;
+  screenshotPath?: string;
+  error?: string;
+}

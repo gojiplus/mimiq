@@ -5,6 +5,7 @@
 
 import type { Persona, Scene } from "./models";
 import { personaToPrompt, resolvePersona } from "./models";
+import { complete } from "./llm";
 
 const SIMULATOR_SYSTEM_PROMPT = `\
 You are simulating a user in a customer interaction. You are NOT the agent.
@@ -30,9 +31,7 @@ RULES:
 const FINISHED_SIGNAL = "<finished>";
 
 export interface SimulatorConfig {
-  apiKey?: string;
   model?: string;
-  baseUrl?: string;
 }
 
 export interface ConversationTurn {
@@ -57,16 +56,12 @@ export class Simulator {
     this.maxTurns = scene.max_turns ?? 15;
 
     this.config = {
-      apiKey: config.apiKey || process.env.OPENAI_API_KEY || "",
-      model: config.model || process.env.SIMULATOR_MODEL || "gpt-4o",
-      baseUrl: config.baseUrl || process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+      model:
+        config.model ||
+        process.env.SIMULATOR_MODEL ||
+        process.env.LLM_MODEL ||
+        "google/gemini-2.0-flash",
     };
-
-    if (!this.config.apiKey) {
-      throw new Error(
-        "No API key provided. Set OPENAI_API_KEY environment variable or pass apiKey in config.",
-      );
-    }
   }
 
   async nextTurn(history: ConversationTurn[]): Promise<string | null> {
@@ -75,29 +70,10 @@ export class Simulator {
     }
 
     const prompt = this.buildPrompt(history);
-
-    const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 256,
-      }),
+    const text = await complete(prompt, {
+      model: this.config.model,
+      maxTokens: 256,
     });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Simulator API error: ${response.status} ${text}`);
-    }
-
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>;
-    };
-    const text = data.choices[0]?.message?.content?.trim() || "";
 
     if (text.toLowerCase().includes(FINISHED_SIGNAL)) {
       return null;

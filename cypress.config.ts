@@ -1,5 +1,8 @@
 import { defineConfig } from "cypress";
+import { config as dotenvConfig } from "dotenv";
 import { setupMimiqTasks, createLocalRuntime } from "./src/node/index";
+
+dotenvConfig();
 
 export default defineConfig({
   e2e: {

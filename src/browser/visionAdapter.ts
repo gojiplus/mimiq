@@ -1,6 +1,7 @@
 /**
- * Vision-based browser adapter using Gemini's vision capabilities.
+ * Vision-based browser adapter using LLM vision capabilities via Vercel AI SDK.
  * Analyzes screenshots to extract UI state without requiring data-test selectors.
+ * Routes LLM calls through Cypress tasks to Node.js for multi-provider support.
  */
 
 import type {
@@ -42,7 +43,6 @@ Respond with ONLY valid JSON, no markdown or explanation:
 }`;
 
 export interface VisionAdapterConfig {
-  apiKey?: string;
   model?: string;
   screenshotSelector?: string;
   inputSelector?: string;
@@ -56,56 +56,11 @@ interface VisionAnalysisResult {
   stateMarkers: string[];
 }
 
-async function analyzeScreenshot(
-  imageBase64: string,
-  config: VisionAdapterConfig,
-): Promise<{
-  transcript: TranscriptTurn[];
-  availableActions: UIActionTarget[];
-  stateMarkers: string[];
-}> {
-  const apiKey = config.apiKey || Cypress.env("GOOGLE_API_KEY") || "";
-  const model = config.model || "gemini-2.0-flash";
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: VISION_EXTRACTION_PROMPT },
-              {
-                inline_data: {
-                  mime_type: "image/png",
-                  data: imageBase64,
-                },
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0,
-          maxOutputTokens: 2048,
-        },
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Vision API error: ${response.status} ${text}`);
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-
-  // Extract JSON from potential markdown code blocks
-  const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) ||
-                    text.match(/```\s*([\s\S]*?)\s*```/) ||
-                    [null, text];
+function parseAnalysisResponse(text: string): VisionAnalysisResult {
+  const jsonMatch =
+    text.match(/```json\s*([\s\S]*?)\s*```/) ||
+    text.match(/```\s*([\s\S]*?)\s*```/) ||
+    [null, text];
   const jsonStr = jsonMatch[1] || text;
 
   try {
@@ -134,23 +89,24 @@ export function createVisionAdapter(config: VisionAdapterConfig = {}): BrowserAd
     captureSnapshot(): Cypress.Chainable<AffordanceSnapshot> {
       return cy.screenshot({ capture: "viewport" }).then((details: unknown) => {
         const screenshotDetails = details as { path: string };
-        // Read the screenshot file and convert to base64
         return cy.readFile(screenshotDetails.path, "base64").then((imageBase64: string) => {
-          // Call vision API to analyze the screenshot
-          return cy.wrap(
-            analyzeScreenshot(imageBase64, config),
-            { timeout: 30000 }
-          ).then((rawResult: unknown) => {
-            const result = rawResult as VisionAnalysisResult;
-            const snapshot: AffordanceSnapshot = {
-              url: window.location.href,
-              transcript: result.transcript,
-              availableActions: result.availableActions,
-              availableUserTools: [],
-              stateMarkers: result.stateMarkers,
-            };
-            return snapshot;
-          });
+          return cy
+            .task("mimiq:llm:completeWithImage", {
+              prompt: VISION_EXTRACTION_PROMPT,
+              imageBase64,
+              config: { model: config.model, temperature: 0, maxTokens: 2048 },
+            })
+            .then((response: unknown) => {
+              const result = parseAnalysisResponse(response as string);
+              const snapshot: AffordanceSnapshot = {
+                url: window.location.href,
+                transcript: result.transcript,
+                availableActions: result.availableActions,
+                availableUserTools: [],
+                stateMarkers: result.stateMarkers,
+              };
+              return snapshot;
+            });
         });
       }) as unknown as Cypress.Chainable<AffordanceSnapshot>;
     },

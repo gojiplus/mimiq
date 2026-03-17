@@ -82,6 +82,16 @@ export function personaToPrompt(persona: Persona): string {
   return lines.join("\n");
 }
 
+export interface VisualAssertionExpectation {
+  query: string;
+  min_confidence?: number;
+}
+
+export interface AccessibilityAuditExpectation {
+  level?: "A" | "AA" | "AAA";
+  required_pass?: boolean;
+}
+
 export interface Expectations {
   required_tools?: string[];
   forbidden_tools?: string[];
@@ -91,6 +101,8 @@ export interface Expectations {
   forbidden_agents?: string[];
   required_agent_tools?: Record<string, string[]>;
   judges?: JudgeConfig[];
+  visual_assertions?: VisualAssertionExpectation[];
+  accessibility_audit?: AccessibilityAuditExpectation;
 }
 
 export interface JudgeConfig {

@@ -1,4 +1,5 @@
 import type { AffordanceSnapshot, TranscriptTurn } from "../types";
+import { complete } from "../core/llm";
 
 const SIMULATOR_SYSTEM_PROMPT = `\
 You are simulating a user in a customer interaction. You are NOT the agent.
@@ -24,9 +25,7 @@ RULES:
 const FINISHED_SIGNAL = "<finished>";
 
 export interface SimulatorConfig {
-  apiKey?: string;
   model?: string;
-  baseUrl?: string;
 }
 
 export interface Scene {
@@ -80,16 +79,12 @@ export class Simulator {
   constructor(scene: Scene, config: SimulatorConfig = {}) {
     this.scene = scene;
     this.config = {
-      apiKey: config.apiKey || process.env.OPENAI_API_KEY || "",
-      model: config.model || process.env.SIMULATOR_MODEL || "gpt-4o",
-      baseUrl: config.baseUrl || process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+      model:
+        config.model ||
+        process.env.SIMULATOR_MODEL ||
+        process.env.LLM_MODEL ||
+        "google/gemini-2.0-flash",
     };
-
-    if (!this.config.apiKey) {
-      throw new Error(
-        "No API key provided. Set OPENAI_API_KEY environment variable or pass apiKey in config.",
-      );
-    }
   }
 
   async nextTurn(snapshot: AffordanceSnapshot): Promise<string | null> {
@@ -100,29 +95,10 @@ export class Simulator {
     }
 
     const prompt = buildPrompt(this.scene, history);
-
-    const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 256,
-      }),
+    const text = await complete(prompt, {
+      model: this.config.model,
+      maxTokens: 256,
     });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`LLM API error: ${response.status} ${text}`);
-    }
-
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>;
-    };
-    const text = data.choices[0]?.message?.content?.trim() || "";
 
     if (text.toLowerCase().includes(FINISHED_SIGNAL)) {
       return null;

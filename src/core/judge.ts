@@ -5,6 +5,7 @@
 
 import type { Trace } from "./models";
 import { traceConversationText } from "./models";
+import { complete } from "./llm";
 
 const JUDGE_SYSTEM_PROMPT = `\
 You are evaluating the quality of an AI agent's conversation with a user.
@@ -24,10 +25,7 @@ export interface JudgeResult {
   unanimous: boolean;
 }
 
-export interface JudgeApiConfig {
-  apiKey?: string;
-  baseUrl?: string;
-}
+export type JudgeApiConfig = Record<string, never>;
 
 export class Judge {
   private rubric: string;
@@ -45,11 +43,12 @@ export class Judge {
   ) {
     this.rubric = rubric;
     this.samples = options.samples ?? 5;
-    this.model = options.model ?? process.env.JUDGE_MODEL ?? "gpt-4o";
-    this.config = {
-      apiKey: options.config?.apiKey ?? process.env.OPENAI_API_KEY ?? "",
-      baseUrl: options.config?.baseUrl ?? process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
-    };
+    this.model =
+      options.model ||
+      process.env.JUDGE_MODEL ||
+      process.env.LLM_MODEL ||
+      "google/gemini-2.0-flash";
+    this.config = options.config ?? {};
   }
 
   async evaluate(trace: Trace): Promise<JudgeResult> {
@@ -79,30 +78,13 @@ export class Judge {
     const prompt = JUDGE_SYSTEM_PROMPT.replace("{rubric}", this.rubric);
     const fullPrompt = `${prompt}\n\nCONVERSATION TRANSCRIPT:\n${conversation}`;
 
-    const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [{ role: "user", content: fullPrompt }],
-        max_tokens: 10,
-        temperature: 1.0,
-      }),
+    const text = await complete(fullPrompt, {
+      model: this.model,
+      maxTokens: 10,
+      temperature: 1.0,
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Judge API error: ${response.status} ${text}`);
-    }
-
-    const data = (await response.json()) as {
-      choices: Array<{ message: { content: string } }>;
-    };
-    const text = (data.choices[0]?.message?.content ?? "").trim().toUpperCase();
-    return text.startsWith("YES") ? 1 : 0;
+    return text.trim().toUpperCase().startsWith("YES") ? 1 : 0;
   }
 }
 

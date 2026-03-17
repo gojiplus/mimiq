@@ -1,6 +1,6 @@
 {
   "name": "@gojiplus/mimiq",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Simulate users and evaluate AI agents in Cypress e2e tests",
   "type": "module",
   "main": "./dist/index.js",
@@ -38,6 +38,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "cypress": "^14.0.0",
+    "dotenv": "^17.3.1",
     "eslint": "^8.0.0",
     "tsup": "^8.0.0",
     "typedoc": "^0.28.17",
@@ -63,5 +64,11 @@
   "bugs": {
     "url": "https://github.com/gojiplus/mimiq/issues"
   },
-  "homepage": "https://github.com/gojiplus/mimiq#readme"
+  "homepage": "https://github.com/gojiplus/mimiq#readme",
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.58",
+    "@ai-sdk/google": "^3.0.43",
+    "@ai-sdk/openai": "^3.0.41",
+    "ai": "^6.0.116"
+  }
 }

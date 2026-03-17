@@ -18,6 +18,11 @@ import {
   type Trace,
   type Turn,
 } from "../core";
+import {
+  runVisualAssertions,
+  accessibilityAudit,
+  type LayoutLensConfig,
+} from "../eval/layoutlens";
 import type {
   AdvanceRunRequest,
   AdvanceRunResponse,
@@ -84,12 +89,11 @@ function detectTerminalState(text: string): string | undefined {
 
 export interface LocalRuntimeOptions {
   simulatorConfig?: {
-    apiKey?: string;
     model?: string;
-    baseUrl?: string;
   };
   scenesDir?: string;
   tracesDir?: string;
+  layoutLensConfig?: LayoutLensConfig;
 }
 
 export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRuntimeClient {
@@ -291,6 +295,49 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
             name: `judge:${judgeConfig.name}`,
             passed: result.score === 1,
             details: `${result.score === 1 ? "YES" : "NO"} (agreement: ${(result.agreementRate * 100).toFixed(0)}%)`,
+          });
+        }
+      }
+
+      // Run visual assertions if configured
+      if (expectations.visual_assertions?.length && options.layoutLensConfig) {
+        const url = run.trace.metadata?.url as string | undefined;
+        if (url) {
+          const assertions = expectations.visual_assertions.map((a) => ({
+            query: a.query,
+            minConfidence: a.min_confidence,
+          }));
+          const visualResult = await runVisualAssertions(
+            url,
+            assertions,
+            options.layoutLensConfig
+          );
+          for (const result of visualResult.results) {
+            checks.push({
+              name: `visual:${result.query.slice(0, 30)}...`,
+              passed: result.passed,
+              details: result.result.error
+                ? `Error: ${result.result.error}`
+                : `Confidence: ${(result.result.confidence * 100).toFixed(0)}%`,
+            });
+          }
+        }
+      }
+
+      // Run accessibility audit if configured
+      if (expectations.accessibility_audit && options.layoutLensConfig) {
+        const url = run.trace.metadata?.url as string | undefined;
+        if (url) {
+          const auditResult = await accessibilityAudit(
+            url,
+            { level: expectations.accessibility_audit.level },
+            options.layoutLensConfig
+          );
+          const requiredPass = expectations.accessibility_audit.required_pass ?? true;
+          checks.push({
+            name: `accessibility:${expectations.accessibility_audit.level || "AA"}`,
+            passed: requiredPass ? auditResult.passed : true,
+            details: auditResult.error || auditResult.answer,
           });
         }
       }
