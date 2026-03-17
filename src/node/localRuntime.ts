@@ -5,8 +5,10 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
-import { join } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { parse as parseYaml } from "yaml";
+import nunjucks from "nunjucks";
 
 import {
   check,
@@ -31,6 +33,7 @@ import type {
   DoneAction,
   EvaluateRunRequest,
   EvaluationReport,
+  GenerateReportsResult,
   GetAggregateReportRequest,
   GetReportRequest,
   GetTraceRequest,
@@ -51,6 +54,11 @@ interface ActiveRun {
 
 const activeRuns = new Map<string, ActiveRun>();
 const completedRuns = new Map<string, { scene: Scene; trace: Trace; evaluation?: EvaluationReport }>();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const templatesDir = join(__dirname, "..", "templates");
+const nunjucksEnv = nunjucks.configure(templatesDir, { autoescape: true });
 
 function generateRunId(): string {
   return Math.random().toString(36).substring(2, 15);
@@ -427,6 +435,16 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const runs = Array.from(completedRuns.values());
       return generateAggregateReport(runs);
     },
+
+    async generateAllReports(): Promise<GenerateReportsResult> {
+      const runs = Array.from(completedRuns.values());
+      const indexHtml = generateAggregateReport(runs);
+      const runReports = runs.map((run) => ({
+        sceneId: run.scene.id,
+        html: generateHtmlReport(run.scene, run.trace, run.evaluation),
+      }));
+      return { indexHtml, runReports };
+    },
   };
 }
 
@@ -435,49 +453,11 @@ function generateHtmlReport(
   trace: Trace,
   evaluation?: EvaluationReport,
 ): string {
-  const turnHtml = trace.turns
-    .map((t) => {
-      const roleClass = t.role === "user" ? "user" : "agent";
-      const toolsHtml = t.tool_calls
-        .map((c) => `<div class="tool">🔧 ${c.tool_name}(${JSON.stringify(c.arguments)})</div>`)
-        .join("");
-      return `<div class="turn ${roleClass}"><strong>${t.role}:</strong> ${t.content}${toolsHtml}</div>`;
-    })
-    .join("\n");
-
-  const checksHtml = evaluation?.checks
-    .map((c) => `<div class="check ${c.passed ? "pass" : "fail"}">${c.passed ? "✓" : "✗"} ${c.name}: ${c.details}</div>`)
-    .join("\n") ?? "";
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <title>Mimiq Report - ${scene.id}</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-    .turn { padding: 10px; margin: 5px 0; border-radius: 8px; }
-    .user { background: #e3f2fd; }
-    .agent { background: #f5f5f5; }
-    .tool { font-size: 0.9em; color: #666; margin-left: 20px; }
-    .check { padding: 5px; }
-    .pass { color: green; }
-    .fail { color: red; }
-    h1 { color: #333; }
-    .summary { padding: 10px; background: ${evaluation?.passed ? "#c8e6c9" : "#ffcdd2"}; border-radius: 8px; }
-  </style>
-</head>
-<body>
-  <h1>Scene: ${scene.id}</h1>
-  <p>${scene.description ?? ""}</p>
-
-  <h2>Conversation</h2>
-  ${turnHtml}
-
-  <h2>Evaluation</h2>
-  <div class="summary">${evaluation?.passed ? "PASSED" : "FAILED"} - ${evaluation?.summary}</div>
-  ${checksHtml}
-</body>
-</html>`;
+  return nunjucksEnv.render("run_detail.html", {
+    scene,
+    trace,
+    evaluation: evaluation ?? { passed: false, checks: [], summary: "No evaluation" },
+  });
 }
 
 function generateAggregateReport(
@@ -485,41 +465,14 @@ function generateAggregateReport(
 ): string {
   const total = runs.length;
   const passed = runs.filter((r) => r.evaluation?.passed).length;
+  const failed = total - passed;
+  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
 
-  const rowsHtml = runs
-    .map((r) => {
-      const status = r.evaluation?.passed ? "✓ PASS" : "✗ FAIL";
-      const statusClass = r.evaluation?.passed ? "pass" : "fail";
-      return `<tr><td>${r.scene.id}</td><td class="${statusClass}">${status}</td><td>${r.evaluation?.summary ?? ""}</td></tr>`;
-    })
-    .join("\n");
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <title>Understudy Aggregate Report</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-    .pass { color: green; }
-    .fail { color: red; }
-    .summary { padding: 15px; background: #f5f5f5; border-radius: 8px; margin-bottom: 20px; }
-  </style>
-</head>
-<body>
-  <h1>Mimiq Report</h1>
-  <div class="summary">
-    <strong>Total:</strong> ${total} |
-    <strong>Passed:</strong> ${passed} |
-    <strong>Failed:</strong> ${total - passed} |
-    <strong>Pass Rate:</strong> ${total > 0 ? ((passed / total) * 100).toFixed(0) : 0}%
-  </div>
-
-  <table>
-    <thead><tr><th>Scene</th><th>Status</th><th>Summary</th></tr></thead>
-    <tbody>${rowsHtml}</tbody>
-  </table>
-</body>
-</html>`;
+  return nunjucksEnv.render("index.html", {
+    runs,
+    total,
+    passed,
+    failed,
+    pass_rate: passRate,
+  });
 }

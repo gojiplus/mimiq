@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import { cpSync } from "fs";
 
 export default defineConfig({
   entry: {
@@ -11,4 +12,7 @@ export default defineConfig({
   clean: true,
   target: "es2022",
   external: ["cypress"],
+  onSuccess: async () => {
+    cpSync("src/templates", "dist/templates", { recursive: true });
+  },
 });

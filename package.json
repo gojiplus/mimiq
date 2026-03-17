@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.15",
+    "@types/nunjucks": "^3.2.6",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "cypress": "^14.0.0",
@@ -70,6 +71,7 @@
     "@ai-sdk/anthropic": "^3.0.58",
     "@ai-sdk/google": "^3.0.43",
     "@ai-sdk/openai": "^3.0.41",
-    "ai": "^6.0.116"
+    "ai": "^6.0.116",
+    "nunjucks": "^3.2.4"
   }
 }

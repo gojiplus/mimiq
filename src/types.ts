@@ -200,6 +200,11 @@ export interface GetReportRequest {
 
 export type GetAggregateReportRequest = Record<string, never>;
 
+export interface GenerateReportsResult {
+  indexHtml: string;
+  runReports: Array<{ sceneId: string; html: string }>;
+}
+
 export interface MimiqRuntimeClient {
   startRun(input: StartRunRequest): Promise<StartRunResponse>;
   advanceRun(input: AdvanceRunRequest): Promise<AdvanceRunResponse>;
@@ -208,6 +213,7 @@ export interface MimiqRuntimeClient {
   cleanupRun(input: CleanupRunRequest): Promise<void>;
   getReport(input: GetReportRequest): Promise<string>;
   getAggregateReport(input: GetAggregateReportRequest): Promise<string>;
+  generateAllReports(): Promise<GenerateReportsResult>;
 }
 
 export interface AwaitSettledOptions {

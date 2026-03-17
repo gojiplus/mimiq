@@ -25,10 +25,13 @@ export default defineConfig({
       setupMimiqTasks(on, { runtime });
 
       on("after:run", async () => {
-        const html = await runtime.getAggregateReport({});
+        const { indexHtml, runReports } = await runtime.generateAllReports();
         const reportDir = path.join(__dirname, "test/reports");
         fs.mkdirSync(reportDir, { recursive: true });
-        fs.writeFileSync(path.join(reportDir, "index.html"), html);
+        fs.writeFileSync(path.join(reportDir, "index.html"), indexHtml);
+        for (const report of runReports) {
+          fs.writeFileSync(path.join(reportDir, `${report.sceneId}.html`), report.html);
+        }
       });
 
       return config;

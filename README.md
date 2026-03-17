@@ -218,6 +218,18 @@ BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 | `JUDGE_MODEL` | Model for judges (default: `gpt-4o`) |
 | `OPENAI_BASE_URL` | Base URL for OpenAI-compatible API |
 
+## HTML Reports
+
+mimiq generates rich, interactive HTML reports. See examples:
+
+- [Aggregate Report](test/reports/index.html) - Stats dashboard with all runs
+- [Run Detail: Return Flow](test/reports/return_eligible_backpack.html) - Conversation timeline with tool calls
+
+Generate reports after tests:
+```bash
+npm run test:report  # Runs tests and opens report
+```
+
 ## Architecture
 
 ```

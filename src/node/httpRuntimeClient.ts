@@ -4,6 +4,7 @@ import type {
   CleanupRunRequest,
   EvaluateRunRequest,
   EvaluationReport,
+  GenerateReportsResult,
   GetAggregateReportRequest,
   GetReportRequest,
   GetTraceRequest,
@@ -103,6 +104,10 @@ export function createHttpRuntimeClient(
         throw new Error(`HTTP ${response.status}: ${text}`);
       }
       return response.text();
+    },
+
+    async generateAllReports(): Promise<GenerateReportsResult> {
+      return request<GenerateReportsResult>("GET", "/reports/all");
     },
   };
 }
