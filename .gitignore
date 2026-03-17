@@ -5,6 +5,7 @@ dist/
 test/videos/
 test/screenshots/
 test/downloads/
+test/reports/
 
 .DS_Store
 *.log

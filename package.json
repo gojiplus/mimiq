@@ -28,6 +28,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test": "npm run cypress:run",
+    "test:report": "npm run cypress:run && open test/reports/index.html",
     "docs": "typedoc"
   },
   "peerDependencies": {
