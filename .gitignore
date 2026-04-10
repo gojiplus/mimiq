@@ -11,6 +11,7 @@ test-results/
 playwright-report/
 
 examples/outputs/gifs/*.gif
+!examples/outputs/gifs/track_order_via_button.gif
 examples/outputs/videos/*.webm
 examples/outputs/videos/*.mp4
 examples/outputs/screenshots/
