@@ -29,3 +29,5 @@ examples/outputs/reports/*.html
 *.tgz
 
 /docs
+/test/agent-server/src/__pycache__
+/test/agent-server/src

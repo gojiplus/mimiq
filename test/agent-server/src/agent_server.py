@@ -8,6 +8,7 @@ Endpoint:
 """
 
 import logging
+import os
 import uuid
 from typing import Any
 
@@ -239,74 +240,91 @@ async def chat(request: ChatRequest) -> ChatResponse:
     session_id = request.sessionId or str(uuid.uuid4())
     logger.info("Chat request session=%s message=%s", session_id, request.message[:50])
 
-    if session_id not in sessions:
-        logger.info("Creating new session %s", session_id)
-        session = await session_service.create_session(
-            app_name="customer_service",
+    try:
+        if session_id not in sessions:
+            logger.info("Creating new session %s", session_id)
+            session = await session_service.create_session(
+                app_name="customer_service",
+                user_id="test_user",
+                session_id=session_id,
+            )
+            sessions[session_id] = {
+                "runner": Runner(
+                    agent=customer_service_agent,
+                    app_name="customer_service",
+                    session_service=session_service,
+                ),
+                "session": session,
+            }
+
+        runner = sessions[session_id]["runner"]
+
+        user_content = types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=request.message)],
+        )
+
+        tool_calls: list[ToolCallInfo] = []
+        response_text = ""
+        terminal_state = None
+
+        async for event in runner.run_async(
             user_id="test_user",
             session_id=session_id,
+            new_message=user_content,
+        ):
+            if hasattr(event, "content") and event.content:
+                for part in event.content.parts:
+                    if hasattr(part, "text") and part.text:
+                        response_text += part.text
+                    if hasattr(part, "function_call") and part.function_call:
+                        fc = part.function_call
+                        logger.info("Tool call: %s", fc.name)
+                        tool_calls.append(ToolCallInfo(
+                            name=fc.name,
+                            args=dict(fc.args) if fc.args else {},
+                        ))
+                    if hasattr(part, "function_response") and part.function_response:
+                        fr = part.function_response
+                        for tc in tool_calls:
+                            if tc.name == fr.name and tc.result is None:
+                                tc.result = fr.response
+                                break
+
+        if "TERMINAL_STATE:" in response_text:
+            for line in response_text.split("\n"):
+                if "TERMINAL_STATE:" in line:
+                    terminal_state = line.split("TERMINAL_STATE:")[1].strip()
+                    logger.info("Terminal state reached: %s", terminal_state)
+                    break
+
+        return ChatResponse(
+            sessionId=session_id,
+            response=response_text,
+            toolCalls=tool_calls,
+            terminalState=terminal_state,
         )
-        sessions[session_id] = {
-            "runner": Runner(
-                agent=customer_service_agent,
-                app_name="customer_service",
-                session_service=session_service,
-            ),
-            "session": session,
-        }
-
-    runner = sessions[session_id]["runner"]
-
-    user_content = types.Content(
-        role="user",
-        parts=[types.Part.from_text(text=request.message)],
-    )
-
-    tool_calls: list[ToolCallInfo] = []
-    response_text = ""
-    terminal_state = None
-
-    async for event in runner.run_async(
-        user_id="test_user",
-        session_id=session_id,
-        new_message=user_content,
-    ):
-        if hasattr(event, "content") and event.content:
-            for part in event.content.parts:
-                if hasattr(part, "text") and part.text:
-                    response_text += part.text
-                if hasattr(part, "function_call") and part.function_call:
-                    fc = part.function_call
-                    logger.info("Tool call: %s", fc.name)
-                    tool_calls.append(ToolCallInfo(
-                        name=fc.name,
-                        args=dict(fc.args) if fc.args else {},
-                    ))
-                if hasattr(part, "function_response") and part.function_response:
-                    fr = part.function_response
-                    for tc in tool_calls:
-                        if tc.name == fr.name and tc.result is None:
-                            tc.result = fr.response
-                            break
-
-    if "TERMINAL_STATE:" in response_text:
-        for line in response_text.split("\n"):
-            if "TERMINAL_STATE:" in line:
-                terminal_state = line.split("TERMINAL_STATE:")[1].strip()
-                logger.info("Terminal state reached: %s", terminal_state)
-                break
-
-    return ChatResponse(
-        sessionId=session_id,
-        response=response_text,
-        toolCalls=tool_calls,
-        terminalState=terminal_state,
-    )
+    except Exception as e:
+        logger.exception("Chat error")
+        return ChatResponse(
+            sessionId=session_id,
+            response=f"I apologize, but I encountered an error: {e}. Please try again.",
+            toolCalls=[],
+            terminalState="error",
+        )
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+async def validate_config() -> None:
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY environment variable is required")
+    logger.info("API key configured: %s...", api_key[:10])
 
 
 def main() -> None:
