@@ -6,6 +6,17 @@ test/videos/
 test/screenshots/
 test/downloads/
 test/reports/
+test/recordings/
+test-results/
+playwright-report/
+
+examples/outputs/gifs/*.gif
+examples/outputs/videos/*.webm
+examples/outputs/videos/*.mp4
+examples/outputs/screenshots/
+examples/outputs/recordings/
+examples/outputs/reports/*.html
+!examples/outputs/**/.gitkeep
 
 .DS_Store
 *.log

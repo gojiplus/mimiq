@@ -2,11 +2,11 @@ import type {
   AdvanceRunResponse,
   AffordanceSnapshot,
   EvaluationReport,
-  RegisterMimiqCommandsOptions,
   RunTrace,
   StartRunRequest,
   VisualAssertionResult,
-} from "../types";
+} from "../../types";
+import type { CypressBrowserAdapter } from "../types";
 
 const RUN_ID_KEY = "__mimiqCurrentRunId";
 const TURN_KEY = "__mimiqTurnCount";
@@ -35,6 +35,17 @@ export interface AccessibilityAuditOptions {
 
 export interface VisualCompareOptions {
   threshold?: number;
+}
+
+export interface MimiqCommandDefaults {
+  maxTurns?: number;
+  settleTimeoutMs?: number;
+  failOnHealthCheck?: boolean;
+}
+
+export interface RegisterMimiqCommandsOptions {
+  browserAdapter: CypressBrowserAdapter;
+  defaults?: MimiqCommandDefaults;
 }
 
 declare global {

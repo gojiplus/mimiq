@@ -7,19 +7,11 @@
 import type {
   AffordanceSnapshot,
   AwaitSettledOptions,
-  BrowserAdapter,
   BrowserSimAction,
   TranscriptTurn,
   UIActionTarget,
-} from "../types";
-
-export interface HtmlCleanupOptions {
-  removeScripts?: boolean;
-  removeStyles?: boolean;
-  removeComments?: boolean;
-  preserveDataAttributes?: boolean;
-  removeHiddenElements?: boolean;
-}
+} from "../../../types";
+import type { CypressBrowserAdapter, HtmlCleanupOptions } from "../../types";
 
 export interface HtmlAdapterConfig {
   mode: "html" | "screenshot" | "hybrid";
@@ -197,7 +189,7 @@ function cleanHtml(html: string, options: HtmlCleanupOptions = {}): string {
 
 export function createHtmlAdapter(
   config: HtmlAdapterConfig
-): BrowserAdapter {
+): CypressBrowserAdapter {
   const inputSelector =
     config.inputSelector ||
     'input[type="text"], textarea, [contenteditable="true"]';
@@ -366,3 +358,5 @@ export function createHtmlAdapter(
     },
   };
 }
+
+export { type HtmlCleanupOptions };

@@ -1,0 +1,30 @@
+id: mobile_layout_check
+description: >
+  Validates UI layout works correctly on mobile viewport.
+  Uses visual assertions to check responsive design.
+
+starting_prompt: "Hi there"
+conversation_plan: |
+  Goal: Simple interaction to test mobile UI.
+  - Send a quick greeting
+  - Visual assertions will check mobile layout
+
+persona: cooperative
+max_turns: 2
+
+viewport:
+  width: 375
+  height: 667
+
+expectations:
+  allowed_terminal_states:
+    - greeting_complete
+    - conversation_ended
+
+  visual_assertions:
+    - query: "Is the chat interface properly sized for mobile viewport?"
+      min_confidence: 0.7
+    - query: "Is the input field easily tappable on a mobile screen?"
+      min_confidence: 0.7
+    - query: "Are messages readable without horizontal scrolling?"
+      min_confidence: 0.7

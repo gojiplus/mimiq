@@ -1,1 +1,0 @@
-export { registerMimiqCommands } from "./commands";

@@ -1,0 +1,20 @@
+{
+  "name": "mimiq-playwright-basic-example",
+  "version": "1.0.0",
+  "description": "Basic Playwright example for mimiq agent evaluation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:record": "MIMIQ_RECORDING=1 playwright test"
+  },
+  "dependencies": {
+    "@gojiplus/mimiq": "file:../.."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "typescript": "^5.4.0"
+  }
+}

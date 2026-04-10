@@ -173,6 +173,7 @@ export interface StartRunResponse {
 export interface AdvanceRunRequest {
   runId: string;
   snapshot: AffordanceSnapshot;
+  screenshotBuffer?: Buffer;
 }
 
 export interface AdvanceRunResponse {
@@ -220,24 +221,6 @@ export interface AwaitSettledOptions {
   timeoutMs?: number;
 }
 
-export interface BrowserAdapter {
-  captureSnapshot(): Cypress.Chainable<AffordanceSnapshot>;
-  executeAction(action: BrowserSimAction): Cypress.Chainable<void>;
-  awaitSettled(options?: AwaitSettledOptions): Cypress.Chainable<void>;
-  assertHealthy?(): Cypress.Chainable<void>;
-}
-
-export interface MimiqCommandDefaults {
-  maxTurns?: number;
-  settleTimeoutMs?: number;
-  failOnHealthCheck?: boolean;
-}
-
-export interface RegisterMimiqCommandsOptions {
-  browserAdapter: BrowserAdapter;
-  defaults?: MimiqCommandDefaults;
-}
-
 export interface SetupMimiqTasksOptions {
   runtime: MimiqRuntimeClient;
 }
@@ -249,4 +232,96 @@ export interface VisualAssertionResult {
   reasoning?: string;
   screenshotPath?: string;
   error?: string;
+}
+
+// Recording pipeline types
+
+export interface RecordingScreenshotConfig {
+  enabled: boolean;
+  timing: "before" | "after" | "both";
+  format: "png" | "jpeg";
+}
+
+export interface RecordingTranscriptConfig {
+  format: "json";
+  includeUiState: boolean;
+}
+
+export interface RecordingActionLogConfig {
+  enabled: boolean;
+  format: "markdown";
+}
+
+export interface RecordingConfig {
+  enabled: boolean;
+  outputDir: string;
+  screenshots: RecordingScreenshotConfig;
+  transcript: RecordingTranscriptConfig;
+  actionLog: RecordingActionLogConfig;
+  runNaming: "sequential" | "timestamp";
+  defaultRunCount: number;
+}
+
+export interface RecordingUiState {
+  url?: string;
+  agentStatus: "idle" | "working";
+  visibleMessages: number;
+}
+
+export interface RecordingToolCall {
+  tool: string;
+  args: JsonObject;
+  result?: JsonValue;
+}
+
+export interface RecordingTurn {
+  turn: number;
+  timestamp: string;
+  actor: "customer" | "agent";
+  type: "message" | "click" | "type" | "select" | "navigate";
+  content?: string;
+  target?: string;
+  toolCalls?: RecordingToolCall[];
+  screenshot?: string;
+  uiState?: RecordingUiState;
+}
+
+export interface RecordingTranscript {
+  runId: string;
+  sceneId: string;
+  startedAt: string;
+  finishedAt?: string;
+  turns: RecordingTurn[];
+  terminalState?: string;
+}
+
+export interface RecordingMetadata {
+  runId: string;
+  sceneId: string;
+  runNumber: number;
+  startedAt: string;
+  finishedAt?: string;
+  status: "running" | "completed" | "failed";
+  config: RecordingConfig;
+}
+
+export interface RunMultipleOptions {
+  sceneId?: string;
+  scenePath?: string;
+  scene?: JsonObject;
+  count: number;
+  onRunComplete?: (runId: string, report: EvaluationReport) => void;
+}
+
+export interface AggregateSummary {
+  sceneId: string;
+  totalRuns: number;
+  passedRuns: number;
+  failedRuns: number;
+  passRate: number;
+}
+
+export interface RunMultipleResult {
+  runs: EvaluationReport[];
+  summary: AggregateSummary;
 }

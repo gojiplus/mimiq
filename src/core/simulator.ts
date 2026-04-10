@@ -1,11 +1,14 @@
 /**
  * Simulator: generates user turns from scene, persona, and conversation history.
  * Ported from understudy Python package.
+ * Now implements SimulatorInterface for compatibility with browser agent simulators.
  */
 
 import type { Persona, Scene } from "./models";
 import { personaToPrompt, resolvePersona } from "./models";
 import { complete } from "./llm";
+import type { AffordanceSnapshot, MessageAction } from "../types";
+import type { SimulatorInterface, SimulatorResult } from "./simulatorInterface";
 
 const SIMULATOR_SYSTEM_PROMPT = `\
 You are simulating a user in a customer interaction. You are NOT the agent.
@@ -39,11 +42,16 @@ export interface ConversationTurn {
   content: string;
 }
 
-export class Simulator {
+/**
+ * LLM-based simulator that generates text messages.
+ * Implements SimulatorInterface for compatibility with the runtime.
+ */
+export class Simulator implements SimulatorInterface {
   private systemPrompt: string;
   private startingPrompt: string;
   private maxTurns: number;
   private config: Required<SimulatorConfig>;
+  private isFirstTurn: boolean = true;
 
   constructor(scene: Scene, config: SimulatorConfig = {}) {
     const persona: Persona = resolvePersona(scene.persona);
@@ -64,8 +72,29 @@ export class Simulator {
     };
   }
 
-  async nextTurn(history: ConversationTurn[]): Promise<string | null> {
-    if (history.length === 0) {
+  /**
+   * Generate next turn from snapshot.
+   * Implements SimulatorInterface.
+   */
+  async nextTurn(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
+    const history = this.snapshotToHistory(snapshot);
+    const text = await this.nextTurnFromHistory(history);
+
+    if (text === null) {
+      return { kind: "done", reason: "Simulator finished" };
+    }
+
+    const action: MessageAction = { kind: "message", text };
+    return action;
+  }
+
+  /**
+   * Legacy method: generate next turn from conversation history.
+   * Kept for backward compatibility.
+   */
+  async nextTurnFromHistory(history: ConversationTurn[]): Promise<string | null> {
+    if (history.length === 0 || this.isFirstTurn) {
+      this.isFirstTurn = false;
       return this.startingPrompt;
     }
 
@@ -80,6 +109,13 @@ export class Simulator {
     }
 
     return text;
+  }
+
+  private snapshotToHistory(snapshot: AffordanceSnapshot): ConversationTurn[] {
+    return snapshot.transcript.map((t) => ({
+      role: t.role as "user" | "assistant",
+      content: t.text,
+    }));
   }
 
   private buildPrompt(history: ConversationTurn[]): string {
@@ -98,5 +134,9 @@ export class Simulator {
 
   getStartingPrompt(): string {
     return this.startingPrompt;
+  }
+
+  async cleanup(): Promise<void> {
+    // No cleanup needed for LLM simulator
   }
 }

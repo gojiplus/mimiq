@@ -1,7 +1,7 @@
 {
   "name": "@gojiplus/mimiq",
-  "version": "0.2.0",
-  "description": "Simulate users and evaluate AI agents in Cypress e2e tests",
+  "version": "0.3.0",
+  "description": "Simulate users and evaluate AI agents in Cypress and Playwright e2e tests",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,6 +13,18 @@
     "./node": {
       "types": "./dist/node/index.d.ts",
       "default": "./dist/node/index.js"
+    },
+    "./cypress": {
+      "types": "./dist/adapters/cypress/index.d.ts",
+      "default": "./dist/adapters/cypress/index.js"
+    },
+    "./playwright": {
+      "types": "./dist/adapters/playwright/index.d.ts",
+      "default": "./dist/adapters/playwright/index.js"
+    },
+    "./simulators": {
+      "types": "./dist/simulators/index.d.ts",
+      "default": "./dist/simulators/index.js"
     }
   },
   "files": [
@@ -27,14 +39,30 @@
     "dev:app": "npm run dev --prefix test/app",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
+    "playwright:test": "playwright test",
     "test": "npm run cypress:run",
+    "test:playwright": "npm run playwright:test",
     "test:report": "npm run cypress:run && open test/reports/index.html",
     "docs": "typedoc"
   },
   "peerDependencies": {
+    "@browserbase/stagehand": "^2.0.0",
+    "@playwright/test": "^1.40.0",
     "cypress": "^14.0.0"
   },
+  "peerDependenciesMeta": {
+    "cypress": {
+      "optional": true
+    },
+    "@playwright/test": {
+      "optional": true
+    },
+    "@browserbase/stagehand": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.19.15",
     "@types/nunjucks": "^3.2.6",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -49,13 +77,16 @@
   },
   "keywords": [
     "cypress",
+    "playwright",
     "testing",
     "e2e",
     "agent",
     "simulation",
     "mimiq",
     "llm",
-    "chatbot"
+    "chatbot",
+    "browser-agent",
+    "stagehand"
   ],
   "author": "Gaurav Sood",
   "license": "MIT",

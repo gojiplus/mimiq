@@ -1,0 +1,32 @@
+id: form_visual_validation
+description: >
+  Validates form elements are properly displayed and accessible.
+  Tests visual layout and element presence.
+
+starting_prompt: "I need to update my account information"
+conversation_plan: |
+  Goal: Test form display during account update flow.
+  - Ask to update account
+  - Observe any forms displayed
+  - Visual assertions will validate the UI
+
+persona: cooperative
+max_turns: 5
+
+expectations:
+  allowed_terminal_states:
+    - account_update_started
+    - form_displayed
+    - conversation_ended
+
+  visual_assertions:
+    - query: "Is there a form or input area visible for updating information?"
+      min_confidence: 0.7
+    - query: "Are form labels clearly visible and readable?"
+      min_confidence: 0.7
+    - query: "Is there sufficient color contrast for text elements?"
+      min_confidence: 0.6
+
+  accessibility_audit:
+    level: A
+    required_pass: false

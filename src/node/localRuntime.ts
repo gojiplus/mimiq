@@ -1,5 +1,5 @@
 /**
- * Local runtime for Cypress tasks.
+ * Local runtime for browser tasks.
  * No external server required - simulation and evaluation happen in Node.js.
  */
 
@@ -14,11 +14,12 @@ import {
   check,
   Judge,
   resolvePersona,
-  Simulator,
+  createSimulator,
   type CheckResult,
   type Scene,
   type Trace,
   type Turn,
+  type SimulatorInterface,
 } from "../core";
 import {
   runVisualAssertions,
@@ -28,7 +29,6 @@ import {
 import type {
   AdvanceRunRequest,
   AdvanceRunResponse,
-  BrowserSimAction,
   CleanupRunRequest,
   DoneAction,
   EvaluateRunRequest,
@@ -42,14 +42,20 @@ import type {
   StartRunResponse,
   TraceEntry,
   MimiqRuntimeClient,
+  RecordingConfig,
 } from "../types";
+import {
+  RecordingCollector,
+  DEFAULT_RECORDING_CONFIG,
+} from "./recordingCollector";
 
 interface ActiveRun {
   runId: string;
   scene: Scene;
-  simulator: Simulator;
+  simulator: SimulatorInterface;
   trace: Trace;
   turnCount: number;
+  recorder?: RecordingCollector;
 }
 
 const activeRuns = new Map<string, ActiveRun>();
@@ -67,7 +73,6 @@ function generateRunId(): string {
 function loadSceneFromFile(path: string): Scene {
   const content = readFileSync(path, "utf-8");
   const data = parseYaml(content) as Scene;
-  // Resolve persona preset to full persona object
   data.persona = resolvePersona(data.persona);
   return data;
 }
@@ -102,6 +107,7 @@ export interface LocalRuntimeOptions {
   scenesDir?: string;
   tracesDir?: string;
   layoutLensConfig?: LayoutLensConfig;
+  recording?: Partial<RecordingConfig>;
 }
 
 export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRuntimeClient {
@@ -127,7 +133,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       }
 
       const runId = generateRunId();
-      const simulator = new Simulator(scene, options.simulatorConfig);
+      const simulator = createSimulator(scene, {
+        defaultSimulatorConfig: options.simulatorConfig,
+      });
 
       const trace: Trace = {
         scene_id: scene.id,
@@ -135,12 +143,23 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         started_at: new Date().toISOString(),
       };
 
+      const recordingConfig = {
+        ...DEFAULT_RECORDING_CONFIG,
+        ...options.recording,
+      };
+
+      let recorder: RecordingCollector | undefined;
+      if (recordingConfig.enabled) {
+        recorder = new RecordingCollector(scene.id, runId, recordingConfig);
+      }
+
       activeRuns.set(runId, {
         runId,
         scene,
         simulator,
         trace,
         turnCount: 0,
+        recorder,
       });
 
       return { runId };
@@ -155,7 +174,10 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const snapshot = input.snapshot;
       const traceDelta: TraceEntry[] = [];
 
-      // Record assistant messages from transcript
+      if (input.screenshotBuffer && run.recorder) {
+        await run.recorder.saveScreenshot(input.screenshotBuffer, "before");
+      }
+
       const lastAssistantTurn = [...snapshot.transcript]
         .reverse()
         .find((t) => t.role === "assistant");
@@ -183,9 +205,19 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
           };
           traceDelta.push(entry);
 
+          run.recorder?.recordTurn("agent", "message", {
+            content: lastAssistantTurn.text,
+            uiState: {
+              url: snapshot.url,
+              agentStatus: snapshot.stateMarkers?.includes("working") ? "working" : "idle",
+              visibleMessages: snapshot.transcript.length,
+            },
+          });
+
           const terminalState = detectTerminalState(lastAssistantTurn.text);
           if (terminalState) {
             run.trace.terminal_state = terminalState;
+            run.recorder?.setTerminalState(terminalState);
             traceDelta.push({
               id: Math.random().toString(36).substring(2, 10),
               actor: "assistant",
@@ -197,7 +229,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         }
       }
 
-      // Record tool calls from metadata
+      const recordedToolCalls: Array<{ tool: string; args: Record<string, unknown>; result?: unknown }> = [];
       if (snapshot.metadata?.toolCalls) {
         const toolCalls = snapshot.metadata.toolCalls as Array<{
           name: string;
@@ -224,11 +256,15 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
               result: tc.result as TraceEntry["result"],
               timestamp: new Date().toISOString(),
             });
+            recordedToolCalls.push({
+              tool: tc.name,
+              args: tc.args ?? {},
+              result: tc.result,
+            });
           }
         }
       }
 
-      // Check termination conditions
       if (run.trace.terminal_state) {
         const action: DoneAction = { kind: "done", reason: `Terminal state: ${run.trace.terminal_state}` };
         return { runId: input.runId, action, turn: run.turnCount, traceDelta };
@@ -239,38 +275,63 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         return { runId: input.runId, action, turn: run.turnCount, traceDelta };
       }
 
-      // Build conversation history for simulator
-      const history = snapshot.transcript.map((t) => ({
-        role: t.role as "user" | "assistant",
-        content: t.text,
-      }));
+      const result = await run.simulator.nextTurn(snapshot);
 
-      // Get next user turn from simulator
-      const userText = await run.simulator.nextTurn(history);
-
-      if (userText === null) {
-        const action: DoneAction = { kind: "done", reason: "Simulator finished" };
+      if (result === null || result.kind === "done") {
+        const reason = result?.kind === "done" ? result.reason : "Simulator finished";
+        const action: DoneAction = { kind: "done", reason };
         return { runId: input.runId, action, turn: run.turnCount, traceDelta };
       }
 
       run.turnCount++;
-      run.trace.turns.push({
-        role: "user",
-        content: userText,
-        tool_calls: [],
-        timestamp: new Date().toISOString(),
-      });
 
-      traceDelta.push({
-        id: Math.random().toString(36).substring(2, 10),
-        actor: "user",
-        kind: "message",
-        text: userText,
-        timestamp: new Date().toISOString(),
-      });
+      if (result.kind === "message") {
+        run.trace.turns.push({
+          role: "user",
+          content: result.text,
+          tool_calls: [],
+          timestamp: new Date().toISOString(),
+        });
 
-      const action: BrowserSimAction = { kind: "message", text: userText };
-      return { runId: input.runId, action, turn: run.turnCount, traceDelta };
+        traceDelta.push({
+          id: Math.random().toString(36).substring(2, 10),
+          actor: "user",
+          kind: "message",
+          text: result.text,
+          timestamp: new Date().toISOString(),
+        });
+
+        run.recorder?.recordTurn("customer", "message", {
+          content: result.text,
+          uiState: {
+            url: snapshot.url,
+            agentStatus: snapshot.stateMarkers?.includes("working") ? "working" : "idle",
+            visibleMessages: snapshot.transcript.length,
+          },
+        });
+      } else {
+        traceDelta.push({
+          id: Math.random().toString(36).substring(2, 10),
+          actor: "user",
+          kind: "action",
+          name: result.kind,
+          args: result as unknown as TraceEntry["args"],
+          timestamp: new Date().toISOString(),
+        });
+
+        const actionType = result.kind as "click" | "type" | "select" | "navigate";
+        run.recorder?.recordTurn("customer", actionType, {
+          target: "targetId" in result ? result.targetId : undefined,
+          content: "text" in result ? result.text : undefined,
+          uiState: {
+            url: snapshot.url,
+            agentStatus: snapshot.stateMarkers?.includes("working") ? "working" : "idle",
+            visibleMessages: snapshot.transcript.length,
+          },
+        });
+      }
+
+      return { runId: input.runId, action: result, turn: run.turnCount, traceDelta };
     },
 
     async evaluateRun(input: EvaluateRunRequest): Promise<EvaluationReport> {
@@ -281,7 +342,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
 
       run.trace.finished_at = new Date().toISOString();
 
-      // Run deterministic checks
       const expectations = run.scene.expectations ?? {};
       const checkResult: CheckResult = check(run.trace, expectations);
 
@@ -291,7 +351,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         details: c.detail,
       }));
 
-      // Run LLM judges if configured
       if (expectations.judges?.length) {
         for (const judgeConfig of expectations.judges) {
           const judge = new Judge(judgeConfig.rubric, {
@@ -307,7 +366,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         }
       }
 
-      // Run visual assertions if configured
       if (expectations.visual_assertions?.length && options.layoutLensConfig) {
         const url = run.trace.metadata?.url as string | undefined;
         if (url) {
@@ -332,7 +390,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         }
       }
 
-      // Run accessibility audit if configured
       if (expectations.accessibility_audit && options.layoutLensConfig) {
         const url = run.trace.metadata?.url as string | undefined;
         if (url) {
@@ -361,7 +418,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         summary: `${passedCount}/${checks.length} checks passed`,
       };
 
-      // Save trace
       const traceFile = join(tracesDir, `${run.runId}.json`);
       writeFileSync(
         traceFile,
@@ -378,6 +434,18 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
 
       completedRuns.set(run.runId, { scene: run.scene, trace: run.trace, evaluation });
 
+      if (run.recorder) {
+        if (passed) {
+          run.recorder.finalize();
+        } else {
+          run.recorder.markFailed();
+        }
+      }
+
+      if (run.simulator.cleanup) {
+        await run.simulator.cleanup();
+      }
+
       return evaluation;
     },
 
@@ -387,7 +455,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         throw new Error(`Run not found: ${input.runId}`);
       }
 
-      // Convert internal Trace to RunTrace format
       const entries: TraceEntry[] = [];
       for (const turn of run.trace.turns) {
         entries.push({
@@ -417,11 +484,14 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
     },
 
     async cleanupRun(input: CleanupRunRequest): Promise<void> {
+      const run = activeRuns.get(input.runId);
+      if (run?.simulator.cleanup) {
+        await run.simulator.cleanup();
+      }
       activeRuns.delete(input.runId);
     },
 
     async getReport(_input: GetReportRequest): Promise<string> {
-      // Simple HTML report
       const runs = Array.from(completedRuns.values());
       if (runs.length === 0) {
         return "<html><body><p>No completed runs</p></body></html>";

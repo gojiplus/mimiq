@@ -1,0 +1,40 @@
+id: return_request
+description: >
+  Customer wants to return a recently purchased item.
+  Tests the return initiation flow.
+
+starting_prompt: "I'd like to return something I bought last week"
+conversation_plan: |
+  Goal: Successfully initiate a return for order ORD-20042.
+  - Explain the item doesn't fit my needs.
+  - Provide order ID ORD-20042 when asked.
+  - Confirm the return instructions.
+
+persona: cooperative
+max_turns: 12
+
+context:
+  customer:
+    name: Sam Rivera
+    email: sam@example.com
+  orders:
+    ORD-20042:
+      items:
+        - name: Running Shoes
+          sku: RS-300
+          category: footwear
+          price: 119.99
+      date: "2025-03-10"
+      status: delivered
+      return_eligible: true
+      return_deadline: "2025-04-10"
+
+expectations:
+  required_tools:
+    - lookup_order
+    - create_return
+  forbidden_tools:
+    - issue_refund
+  allowed_terminal_states:
+    - return_initiated
+    - return_label_sent

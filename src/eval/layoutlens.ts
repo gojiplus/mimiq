@@ -1,6 +1,6 @@
 /**
  * LayoutLens integration for visual assertions and accessibility audits.
- * Bridges Node.js/Cypress with the Python layoutlens library via child process.
+ * Supports both CLI (child process) and HTTP bridge modes.
  */
 
 import { spawn } from "child_process";
@@ -21,6 +21,7 @@ export interface LayoutLensConfig {
   pythonPath?: string;
   timeout?: number;
   screenshotDir?: string;
+  httpEndpoint?: string;
 }
 
 export interface VisualAssertionConfig {
@@ -41,6 +42,56 @@ export interface VisualCompareConfig {
 function ensureScreenshotDir(dir: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+async function runLayoutLensHttp(
+  endpoint: string,
+  path: string,
+  body: Record<string, unknown>,
+  timeout: number = 60000
+): Promise<LayoutLensResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const url = `${endpoint}${path}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return {
+        passed: false,
+        answer: "",
+        confidence: 0,
+        error: `HTTP ${response.status}: ${response.statusText}`,
+      };
+    }
+
+    const result = await response.json();
+    return {
+      passed: result.passed ?? (result.confidence >= 0.8),
+      answer: result.answer || "",
+      confidence: result.confidence || 0,
+      reasoning: result.reasoning,
+      screenshotPath: result.screenshot_path,
+      error: result.error,
+    };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      passed: false,
+      answer: "",
+      confidence: 0,
+      error: `HTTP request failed: ${message}`,
+    };
   }
 }
 
@@ -114,14 +165,17 @@ export async function visualAssert(
   query: string,
   config: LayoutLensConfig = {}
 ): Promise<LayoutLensResult> {
-  const args = ["analyze", source, query, "--output", "json"];
-  const result = await runLayoutLensCommand(args, config);
-
-  if (result.error) {
-    return result;
+  if (config.httpEndpoint) {
+    return runLayoutLensHttp(
+      config.httpEndpoint,
+      "/analyze",
+      { source, query },
+      config.timeout
+    );
   }
 
-  return result;
+  const args = ["analyze", source, query, "--output", "json"];
+  return runLayoutLensCommand(args, config);
 }
 
 export async function accessibilityAudit(
@@ -130,6 +184,16 @@ export async function accessibilityAudit(
   config: LayoutLensConfig = {}
 ): Promise<LayoutLensResult> {
   const level = options.level || "AA";
+
+  if (config.httpEndpoint) {
+    return runLayoutLensHttp(
+      config.httpEndpoint,
+      "/accessibility-audit",
+      { source, level },
+      config.timeout
+    );
+  }
+
   const args = [
     "audit-accessibility",
     source,
@@ -149,6 +213,16 @@ export async function visualCompare(
   config: LayoutLensConfig = {}
 ): Promise<LayoutLensResult> {
   const threshold = options.threshold ?? 0.95;
+
+  if (config.httpEndpoint) {
+    return runLayoutLensHttp(
+      config.httpEndpoint,
+      "/compare",
+      { source, baseline: baselinePath, threshold },
+      config.timeout
+    );
+  }
+
   const args = [
     "compare",
     source,
@@ -209,6 +283,25 @@ export async function runVisualAssertions(
   };
 }
 
+export async function checkLayoutLensServer(
+  endpoint: string,
+  timeout: number = 5000
+): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(`${endpoint}/health`, {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export function createLayoutLensClient(config: LayoutLensConfig = {}) {
   return {
     visualAssert: (source: string, query: string) =>
@@ -222,5 +315,19 @@ export function createLayoutLensClient(config: LayoutLensConfig = {}) {
     ) => visualCompare(source, baselinePath, options, config),
     runVisualAssertions: (url: string, assertions: VisualAssertionConfig[]) =>
       runVisualAssertions(url, assertions, config),
+    checkServer: () =>
+      config.httpEndpoint
+        ? checkLayoutLensServer(config.httpEndpoint, config.timeout)
+        : Promise.resolve(false),
   };
+}
+
+export function createHttpLayoutLensClient(
+  endpoint: string = "http://localhost:8765",
+  timeout: number = 60000
+) {
+  return createLayoutLensClient({
+    httpEndpoint: endpoint,
+    timeout,
+  });
 }

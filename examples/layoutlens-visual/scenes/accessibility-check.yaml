@@ -1,0 +1,31 @@
+id: accessibility_evaluation
+description: >
+  Evaluate agent UI for accessibility compliance.
+  Uses LayoutLens for visual assertions and accessibility audits.
+
+starting_prompt: "Hello, can you help me?"
+conversation_plan: |
+  Goal: Simple interaction to test UI accessibility.
+  - Send a greeting message
+  - Wait for agent response
+  - The visual assertions will check UI elements
+
+persona: cooperative
+max_turns: 3
+
+expectations:
+  allowed_terminal_states:
+    - greeting_complete
+    - conversation_ended
+
+  visual_assertions:
+    - query: "Is there a chat input field visible on the page?"
+      min_confidence: 0.8
+    - query: "Is the send button visible and appears clickable?"
+      min_confidence: 0.8
+    - query: "Are the messages displayed in a readable format?"
+      min_confidence: 0.7
+
+  accessibility_audit:
+    level: AA
+    required_pass: false

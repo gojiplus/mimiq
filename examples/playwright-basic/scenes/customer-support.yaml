@@ -1,0 +1,40 @@
+id: customer_support_basic
+description: >
+  Customer asks about order status - basic support flow.
+  Demonstrates simple conversation simulation and evaluation.
+
+starting_prompt: "Hi, I need to check on my order status"
+conversation_plan: |
+  Goal: Get information about order ORD-10031.
+  - Provide order ID ORD-10031 when the agent asks.
+  - Confirm I understand the delivery status.
+  - Thank the agent when information is provided.
+
+persona: cooperative
+max_turns: 10
+
+context:
+  customer:
+    name: Alex Johnson
+    email: alex@example.com
+  orders:
+    ORD-10031:
+      items:
+        - name: Wireless Headphones
+          sku: WH-100
+          category: electronics
+          price: 79.99
+      date: "2025-03-01"
+      status: shipped
+      tracking_number: "1Z999AA10123456784"
+      estimated_delivery: "2025-03-05"
+
+expectations:
+  required_tools:
+    - lookup_order
+  forbidden_tools:
+    - create_return
+    - issue_refund
+  allowed_terminal_states:
+    - order_info_provided
+    - conversation_ended

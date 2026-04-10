@@ -7,11 +7,11 @@
 import type {
   AffordanceSnapshot,
   AwaitSettledOptions,
-  BrowserAdapter,
   BrowserSimAction,
   TranscriptTurn,
   UIActionTarget,
-} from "../types";
+} from "../../../types";
+import type { CypressBrowserAdapter } from "../../types";
 
 const VISION_EXTRACTION_PROMPT = `You are analyzing a screenshot of a chat/support interface.
 
@@ -80,7 +80,7 @@ function parseAnalysisResponse(text: string): VisionAnalysisResult {
   }
 }
 
-export function createVisionAdapter(config: VisionAdapterConfig = {}): BrowserAdapter {
+export function createVisionAdapter(config: VisionAdapterConfig = {}): CypressBrowserAdapter {
   const inputSelector = config.inputSelector || 'input[type="text"], textarea, [contenteditable="true"]';
   const sendSelector = config.sendSelector || 'button[type="submit"], button:contains("Send")';
   const waitForIdleMs = config.waitForIdleMs || 2000;
@@ -114,14 +114,11 @@ export function createVisionAdapter(config: VisionAdapterConfig = {}): BrowserAd
     executeAction(action: BrowserSimAction): Cypress.Chainable<void> {
       switch (action.kind) {
         case "message":
-          // Find the input field and type the message
           return cy.get(inputSelector).first().clear().type(action.text).then(() => {
-            // Find and click send button
             cy.get(sendSelector).first().click();
           }) as unknown as Cypress.Chainable<void>;
 
         case "click":
-          // Use vision-identified element - try to find by text content
           return cy.contains(action.targetId.replace(/-/g, " ")).click()
             .then(() => {}) as unknown as Cypress.Chainable<void>;
 
@@ -147,14 +144,11 @@ export function createVisionAdapter(config: VisionAdapterConfig = {}): BrowserAd
 
     awaitSettled(options?: AwaitSettledOptions): Cypress.Chainable<void> {
       const timeout = options?.timeoutMs ?? waitForIdleMs;
-      // Wait and then check if UI has stabilized
       return cy.wait(timeout).then(() => {}) as unknown as Cypress.Chainable<void>;
     },
 
     assertHealthy(): Cypress.Chainable<void> {
-      // Take a screenshot and verify we can analyze it
       return cy.screenshot({ capture: "viewport" }).then(() => {
-        // If screenshot succeeds, we're healthy
       }) as unknown as Cypress.Chainable<void>;
     },
   };

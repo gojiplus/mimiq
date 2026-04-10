@@ -1,14 +1,12 @@
 import type {
   AffordanceSnapshot,
   AwaitSettledOptions,
-  BrowserAdapter,
   BrowserSimAction,
   TranscriptTurn,
   UIActionTarget,
   UserToolAvailability,
-} from "../types";
-
-type Selector = string;
+} from "../../../types";
+import type { CypressBrowserAdapter, Selector } from "../../types";
 
 export interface DefaultChatAdapterConfig {
   transcript: Selector;
@@ -58,7 +56,7 @@ function toActionTargets(config: DefaultChatAdapterConfig): UIActionTarget[] {
 
 export function createDefaultChatAdapter(
   config: DefaultChatAdapterConfig,
-): BrowserAdapter {
+): CypressBrowserAdapter {
   return {
     captureSnapshot(): Cypress.Chainable<AffordanceSnapshot> {
       return cy.get(config.transcript).then(($transcript) => {
