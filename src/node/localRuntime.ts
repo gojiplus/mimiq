@@ -175,7 +175,10 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const traceDelta: TraceEntry[] = [];
 
       if (input.screenshotBuffer && run.recorder) {
-        await run.recorder.saveScreenshot(input.screenshotBuffer, "before");
+        const buffer = typeof input.screenshotBuffer === "string"
+          ? Buffer.from(input.screenshotBuffer, "base64")
+          : input.screenshotBuffer;
+        await run.recorder.saveScreenshot(buffer, "before");
       }
 
       const lastAssistantTurn = [...snapshot.transcript]

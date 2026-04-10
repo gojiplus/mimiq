@@ -1,0 +1,16 @@
+{
+  "name": "mimiq-cypress-basic-example",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:record": "MIMIQ_RECORDING=1 cypress run"
+  },
+  "devDependencies": {
+    "@gojiplus/mimiq": "file:../..",
+    "cypress": "^14.0.0",
+    "dotenv": "^17.0.0",
+    "typescript": "^5.4.0"
+  }
+}

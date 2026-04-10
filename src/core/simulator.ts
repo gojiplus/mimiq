@@ -9,6 +9,9 @@ import { personaToPrompt, resolvePersona } from "./models";
 import { complete } from "./llm";
 import type { AffordanceSnapshot, MessageAction } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "./simulatorInterface";
+import { createLogger } from "../utils/logger";
+
+const log = createLogger("Simulator");
 
 const SIMULATOR_SYSTEM_PROMPT = `\
 You are simulating a user in a customer interaction. You are NOT the agent.
@@ -70,6 +73,8 @@ export class Simulator implements SimulatorInterface {
         process.env.LLM_MODEL ||
         "google/gemini-2.0-flash",
     };
+
+    log.debug({ persona: persona.description, model: this.config.model, maxTurns: this.maxTurns }, "Simulator initialized");
   }
 
   /**
@@ -93,10 +98,15 @@ export class Simulator implements SimulatorInterface {
    * Kept for backward compatibility.
    */
   async nextTurnFromHistory(history: ConversationTurn[]): Promise<string | null> {
+    const turnNumber = history.length;
+
     if (history.length === 0 || this.isFirstTurn) {
       this.isFirstTurn = false;
+      log.debug({ turnNumber, startingPrompt: this.startingPrompt }, "Returning starting prompt");
       return this.startingPrompt;
     }
+
+    log.debug({ turnNumber, messageCount: history.length }, "Generating next turn");
 
     const prompt = this.buildPrompt(history);
     const text = await complete(prompt, {
@@ -104,7 +114,10 @@ export class Simulator implements SimulatorInterface {
       maxTokens: 256,
     });
 
+    log.debug({ turnNumber, responseLength: text.length }, "LLM response received");
+
     if (text.toLowerCase().includes(FINISHED_SIGNAL)) {
+      log.info({ turnNumber }, "Conversation finished signal received");
       return null;
     }
 

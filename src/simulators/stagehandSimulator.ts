@@ -1,11 +1,14 @@
 /**
  * Stagehand-based browser agent simulator.
- * Uses @browserbase/stagehand for dynamic browser automation.
+ * Uses @browserbasehq/stagehand for dynamic browser automation.
  */
 
 import type { Scene } from "../core/models";
 import type { AffordanceSnapshot, BrowserSimAction } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "../core/simulatorInterface";
+import { createLogger } from "../utils/logger";
+
+const log = createLogger("StagehandSimulator");
 
 export interface StagehandSimulatorOptions {
   model?: string;
@@ -49,6 +52,13 @@ export class StagehandSimulator implements SimulatorInterface {
     };
     this.maxTurns = scene.max_turns ?? 15;
     this.startingPrompt = scene.starting_prompt;
+
+    log.debug({
+      model: this.options.model,
+      headless: this.options.headless,
+      hasBrowserbaseApiKey: !!this.options.browserbaseApiKey,
+      maxTurns: this.maxTurns,
+    }, "StagehandSimulator initialized");
   }
 
   async nextTurn(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
@@ -75,19 +85,25 @@ What should the user do next? If the goal is complete, return "DONE".
 `;
 
     try {
+      log.debug({ turn: this.turnCount, url: snapshot.url, availableActions: snapshot.availableActions.length }, "Executing stagehand action");
+
       const result = await stagehand.act({
         action: context,
       });
 
+      log.debug({ turn: this.turnCount, resultType: typeof result }, "Stagehand action result");
+
       if (!result || (typeof result === "string" && result.toLowerCase().includes("done"))) {
+        log.info({ turn: this.turnCount }, "Goal completed");
         return { kind: "done", reason: "Goal completed" };
       }
 
       const action = this.parseStagehandResult(result, snapshot);
+      log.debug({ turn: this.turnCount, actionKind: action.kind }, "Parsed action");
       this.turnCount++;
       return action;
     } catch (error) {
-      console.error("Stagehand error:", error);
+      log.error({ turn: this.turnCount, error }, "Stagehand error");
       return { kind: "done", reason: `Stagehand error: ${error}` };
     }
   }
@@ -97,10 +113,14 @@ What should the user do next? If the goal is complete, return "DONE".
       return this.StagehandClass;
     }
 
+    log.debug("Loading @browserbasehq/stagehand module");
+
     // Dynamic import to handle optional dependency
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const stagehandModule = await (Function('return import("@browserbase/stagehand")')() as Promise<{ Stagehand: StagehandConstructor }>);
+    const stagehandModule = await (Function('return import("@browserbasehq/stagehand")')() as Promise<{ Stagehand: StagehandConstructor }>);
     this.StagehandClass = stagehandModule.Stagehand;
+
+    log.debug("Stagehand module loaded");
     return this.StagehandClass;
   }
 
@@ -123,9 +143,12 @@ What should the user do next? If the goal is complete, return "DONE".
       config.projectId = this.options.browserbaseProjectId;
     }
 
+    log.debug({ env: config.env, headless: config.headless, model: config.modelName }, "Initializing Stagehand instance");
+
     this.stagehand = new Stagehand(config);
     await this.stagehand.init();
 
+    log.info("Stagehand instance initialized");
     return this.stagehand;
   }
 

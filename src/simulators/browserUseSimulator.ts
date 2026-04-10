@@ -6,6 +6,9 @@
 import type { Scene } from "../core/models";
 import type { AffordanceSnapshot } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "../core/simulatorInterface";
+import { createLogger } from "../utils/logger";
+
+const log = createLogger("BrowserUseSimulator");
 
 export interface BrowserUseSimulatorOptions {
   apiUrl?: string;
@@ -34,6 +37,13 @@ export class BrowserUseSimulator implements SimulatorInterface {
     };
     this.maxTurns = scene.max_turns ?? 15;
     this.startingPrompt = scene.starting_prompt;
+
+    log.debug({
+      apiUrl: this.options.apiUrl,
+      model: this.options.model,
+      timeout: this.options.timeout,
+      maxTurns: this.maxTurns,
+    }, "BrowserUseSimulator initialized");
   }
 
   async nextTurn(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
@@ -44,16 +54,20 @@ export class BrowserUseSimulator implements SimulatorInterface {
     }
 
     try {
+      log.debug({ turn: this.turnCount, sessionId: this.sessionId }, "Getting next action");
       const action = await this.getNextAction(snapshot);
+      log.debug({ turn: this.turnCount, actionKind: action?.kind ?? "null" }, "Action received");
       this.turnCount++;
       return action;
     } catch (error) {
-      console.error("browser-use error:", error);
+      log.error({ turn: this.turnCount, sessionId: this.sessionId, error }, "browser-use error");
       return { kind: "done", reason: `browser-use error: ${error}` };
     }
   }
 
   private async initSession(snapshot: AffordanceSnapshot): Promise<void> {
+    log.debug({ url: snapshot.url, model: this.options.model }, "Initializing browser-use session");
+
     const response = await fetch(`${this.options.apiUrl}/session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,11 +81,13 @@ export class BrowserUseSimulator implements SimulatorInterface {
     });
 
     if (!response.ok) {
+      log.error({ status: response.status, statusText: response.statusText }, "Failed to init session");
       throw new Error(`Failed to init browser-use session: ${response.statusText}`);
     }
 
     const data = await response.json();
     this.sessionId = data.session_id;
+    log.info({ sessionId: this.sessionId }, "Session initialized");
   }
 
   private async getNextAction(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
@@ -82,6 +98,12 @@ export class BrowserUseSimulator implements SimulatorInterface {
     const lastAgentMessage = [...snapshot.transcript]
       .reverse()
       .find((t) => t.role === "assistant");
+
+    log.debug({
+      sessionId: this.sessionId,
+      url: snapshot.url,
+      availableActions: snapshot.availableActions.length,
+    }, "Requesting next action");
 
     const response = await fetch(`${this.options.apiUrl}/session/${this.sessionId}/step`, {
       method: "POST",
@@ -97,10 +119,12 @@ export class BrowserUseSimulator implements SimulatorInterface {
     });
 
     if (!response.ok) {
+      log.error({ status: response.status, statusText: response.statusText, sessionId: this.sessionId }, "Step request failed");
       throw new Error(`browser-use step failed: ${response.statusText}`);
     }
 
     const data = await response.json();
+    log.debug({ sessionId: this.sessionId, responseKeys: Object.keys(data) }, "Step response received");
     return this.parseResponse(data);
   }
 

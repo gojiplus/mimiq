@@ -9,6 +9,7 @@
 export type * from "./types";
 export * from "./core";
 export * from "./eval";
+export { createLogger, logger } from "./utils/logger";
 
 export {
   createDefaultChatAdapter,

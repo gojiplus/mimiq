@@ -151,5 +151,11 @@ export function createVisionAdapter(config: VisionAdapterConfig = {}): CypressBr
       return cy.screenshot({ capture: "viewport" }).then(() => {
       }) as unknown as Cypress.Chainable<void>;
     },
+
+    captureScreenshot(): Cypress.Chainable<string> {
+      return cy.screenshot({ capture: "viewport", overwrite: true }).then(() => {
+        return cy.task("mimiq:getLastScreenshot", {}, { log: false });
+      }) as unknown as Cypress.Chainable<string>;
+    },
   };
 }

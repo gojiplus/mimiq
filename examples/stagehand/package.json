@@ -1,0 +1,21 @@
+{
+  "name": "mimiq-stagehand-example",
+  "version": "1.0.0",
+  "description": "Stagehand autonomous browser agent example for mimiq",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:record": "MIMIQ_RECORDING=1 npx playwright test"
+  },
+  "dependencies": {
+    "@gojiplus/mimiq": "file:../..",
+    "@browserbasehq/stagehand": "^2.0.0",
+    "@playwright/test": "^1.52.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

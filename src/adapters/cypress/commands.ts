@@ -94,14 +94,28 @@ export function registerMimiqCommands(
     }
 
     return browserAdapter.captureSnapshot().then((snapshot) => {
+      // Capture screenshot if adapter supports it
+      if (browserAdapter.captureScreenshot) {
+        return browserAdapter.captureScreenshot().then((screenshotBuffer) => {
+          return advanceWithSnapshot(runId, snapshot, screenshotBuffer);
+        });
+      }
+      return advanceWithSnapshot(runId, snapshot, undefined);
+    }) as Cypress.Chainable<AdvanceRunResponse>;
+
+    function advanceWithSnapshot(
+      runId: string,
+      snapshot: AffordanceSnapshot,
+      screenshotBuffer: string | undefined
+    ): Cypress.Chainable<AdvanceRunResponse> {
       return cy
-        .task("mimiq:advanceRun", { runId, snapshot }, { log: false })
+        .task("mimiq:advanceRun", { runId, snapshot, screenshotBuffer }, { log: false })
         .then((response) => {
           const advance = response as AdvanceRunResponse;
           setTurnCount(advance.turn);
 
           if (advance.action.kind === "done") {
-            return cy.wrap(advance);
+            return advance;
           }
 
           return browserAdapter
@@ -112,8 +126,8 @@ export function registerMimiqCommands(
               }),
             )
             .then(() => advance);
-        });
-    }) as Cypress.Chainable<AdvanceRunResponse>;
+        }) as Cypress.Chainable<AdvanceRunResponse>;
+    }
   });
 
   Cypress.Commands.add(

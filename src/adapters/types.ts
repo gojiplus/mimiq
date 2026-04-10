@@ -17,6 +17,7 @@ export interface CypressBrowserAdapter {
   executeAction(action: BrowserSimAction): Cypress.Chainable<void>;
   awaitSettled(options?: AwaitSettledOptions): Cypress.Chainable<void>;
   assertHealthy?(): Cypress.Chainable<void>;
+  captureScreenshot?(): Cypress.Chainable<string>;
 }
 
 /**

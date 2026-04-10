@@ -12,11 +12,14 @@ import {
   type LLMConfig,
 } from "../core/llm";
 import * as path from "path";
+import * as fs from "fs";
 
 export interface SetupMimiqTasksOptionsExtended extends SetupMimiqTasksOptions {
   layoutLensConfig?: LayoutLensConfig;
   baselinesDir?: string;
 }
+
+let lastScreenshotPath: string | null = null;
 
 export function setupMimiqTasks(
   on: Cypress.PluginEvents,
@@ -24,7 +27,20 @@ export function setupMimiqTasks(
 ): void {
   const { runtime, layoutLensConfig = {}, baselinesDir = "./test/baselines" } = options;
 
+  on("after:screenshot", (details) => {
+    lastScreenshotPath = details.path;
+    return details;
+  });
+
   on("task", {
+    "mimiq:getLastScreenshot"() {
+      if (!lastScreenshotPath || !fs.existsSync(lastScreenshotPath)) {
+        return null;
+      }
+      const buffer = fs.readFileSync(lastScreenshotPath);
+      return buffer.toString("base64");
+    },
+
     async "mimiq:startRun"(input) {
       return runtime.startRun(input);
     },

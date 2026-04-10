@@ -173,7 +173,7 @@ export interface StartRunResponse {
 export interface AdvanceRunRequest {
   runId: string;
   snapshot: AffordanceSnapshot;
-  screenshotBuffer?: Buffer;
+  screenshotBuffer?: Buffer | string;
 }
 
 export interface AdvanceRunResponse {
@@ -255,6 +255,7 @@ export interface RecordingActionLogConfig {
 export interface RecordingConfig {
   enabled: boolean;
   outputDir: string;
+  framework?: "playwright" | "cypress" | "stagehand";
   screenshots: RecordingScreenshotConfig;
   transcript: RecordingTranscriptConfig;
   actionLog: RecordingActionLogConfig;

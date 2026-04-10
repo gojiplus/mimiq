@@ -77,12 +77,21 @@ export class RecordingCollector {
     };
   }
 
+  private getSceneBasePath(): string {
+    const parts = [this.config.outputDir];
+    if (this.config.framework) {
+      parts.push(this.config.framework);
+    }
+    parts.push(this.sceneId);
+    return join(...parts);
+  }
+
   private determineRunNumber(): number {
     if (this.config.runNaming === "timestamp") {
       return Date.now();
     }
 
-    const sceneDir = join(this.config.outputDir, this.sceneId);
+    const sceneDir = this.getSceneBasePath();
     if (!existsSync(sceneDir)) {
       return 1;
     }
@@ -110,7 +119,7 @@ export class RecordingCollector {
         ? `run-${String(this.runNumber).padStart(3, "0")}`
         : `run-${this.runNumber}`;
 
-    const dir = join(this.config.outputDir, this.sceneId, runFolder);
+    const dir = join(this.getSceneBasePath(), runFolder);
     if (this.config.enabled) {
       mkdirSync(dir, { recursive: true });
     }

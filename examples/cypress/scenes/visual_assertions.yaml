@@ -1,0 +1,26 @@
+id: visual_assertions
+description: >
+  Test scene with visual assertions for LayoutLens evaluation.
+  Validates UI elements are visible and accessible.
+
+starting_prompt: "Hello"
+conversation_plan: |
+  Goal: Simple greeting exchange.
+  - Say hello and wait for agent response.
+  - Verify the UI is properly rendered.
+
+persona: cooperative
+max_turns: 3
+
+expectations:
+  allowed_terminal_states:
+    - greeting_complete
+    - conversation_ended
+  visual_assertions:
+    - query: "Is there a chat input field visible?"
+      min_confidence: 0.8
+    - query: "Is the send button visible and appears clickable?"
+      min_confidence: 0.8
+  accessibility_audit:
+    level: AA
+    required_pass: false
