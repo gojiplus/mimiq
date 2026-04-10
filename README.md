@@ -1,81 +1,90 @@
-# mimiq: Cypress integration for end-to-end testing of agentic applications
+# mimiq
 
 [![npm version](https://img.shields.io/npm/v/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
 [![npm downloads](https://img.shields.io/npm/dm/@gojiplus/mimiq.svg)](https://www.npmjs.com/package/@gojiplus/mimiq)
 [![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+End-to-end testing framework for AI agents with simulated users.
 
-Testing AI agents is hard: manual testing is slow, real users are expensive,
-and LLM non-determinism makes assertions tricky. mimiq solves this with
-simulated users that follow scripts, plus deterministic checks on tool calls
-and terminal states.
+![mimiq demo](examples/outputs/gifs/track_order_via_button.gif)
 
-## Overview
+## Features
 
-`mimiq` is a complete TypeScript solution for testing AI agents with simulated users. It provides:
+- **Simulated users with LLM-powered personas** - Generate realistic user behavior from conversation plans
+- **Playwright & Cypress adapters** - First-class support for both testing frameworks
+- **Multi-provider LLM support** - Google Gemini, OpenAI, Anthropic via Vercel AI SDK
+- **Three simulator types** - LLM chat, Stagehand (autonomous browser), browser-use
+- **Recording pipeline** - Capture screenshots, transcripts, and action logs
+- **Deterministic checks** - Verify tool calls, terminal states, forbidden actions
+- **LLM-as-judge evaluation** - Qualitative assessment with majority voting
+- **Visual assertions & accessibility audits** - UI validation with confidence thresholds
 
-1. **Simulated users** - LLM-powered users that follow conversation plans
-2. **Deterministic checks** - Verify tool calls, terminal states, forbidden actions
-3. **LLM-as-judge** - Qualitative evaluation with majority voting
-4. **Cypress commands** - Drive simulations in real browsers
-5. **HTML reports** - View conversation traces and check results
-
-No Python required. Everything runs in Node.js.
-
-## Quick Start
+## Quick Start (Playwright)
 
 ### 1. Install
 
 ```bash
-npm install @gojiplus/mimiq --save-dev
+npm install @gojiplus/mimiq @playwright/test --save-dev
 ```
 
 ### 2. Configure API Key
 
 ```bash
+# Google (default)
+export GOOGLE_GENERATIVE_AI_API_KEY=your-key
+
+# Or OpenAI
 export OPENAI_API_KEY=your-key
 
-# Optional: use a different model
-export SIMULATOR_MODEL=gpt-4o  # default
+# Or Anthropic
+export ANTHROPIC_API_KEY=your-key
 ```
 
-### 3. Configure Cypress
+### 3. Create Fixtures
 
-**cypress.config.ts**
-```ts
-import { defineConfig } from "cypress";
-import { setupMimiqTasks, createLocalRuntime } from "@gojiplus/mimiq/node";
+**test/fixtures.ts**
+```typescript
+import { type Page } from "@playwright/test";
+import {
+  test as mimiqTest,
+  createDefaultChatAdapter,
+  type MimiqFixtures,
+  type MimiqWorkerFixtures,
+} from "@gojiplus/mimiq/playwright";
+import { createLocalRuntime } from "@gojiplus/mimiq/node";
 
-export default defineConfig({
-  e2e: {
-    baseUrl: "http://localhost:5173",
-    setupNodeEvents(on, config) {
-      const runtime = createLocalRuntime({
-        scenesDir: "./scenes",
-      });
-      setupMimiqTasks(on, { runtime });
-      return config;
+export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
+  mimiqRuntimeFactory: [
+    async ({}, use) => {
+      await use(() =>
+        createLocalRuntime({
+          scenesDir: "./scenes",
+        })
+      );
     },
-  },
-});
-```
+    { scope: "worker" },
+  ],
 
-**cypress/support/e2e.ts**
-```ts
-import { createDefaultChatAdapter, registerMimiqCommands } from "@gojiplus/mimiq";
-
-registerMimiqCommands({
-  browserAdapter: createDefaultChatAdapter({
-    transcript: '[data-test="transcript"]',
-    messageRow: '[data-test="message-row"]',
-    messageRoleAttr: "data-role",
-    messageText: '[data-test="message-text"]',
-    input: '[data-test="chat-input"]',
-    send: '[data-test="send-button"]',
-    idleMarker: '[data-test="agent-idle"]',
-  }),
+  mimiqAdapterFactory: [
+    async ({}, use) => {
+      await use((page: Page) =>
+        createDefaultChatAdapter(page, {
+          transcript: "[data-test=transcript]",
+          messageRow: "[data-test=message-row]",
+          messageRoleAttr: "data-role",
+          messageText: "[data-test=message-text]",
+          input: "[data-test=chat-input]",
+          send: "[data-test=send-button]",
+          idleMarker: "[data-test=agent-idle]",
+        })
+      );
+    },
+    { scope: "worker" },
+  ],
 });
+
+export { expect } from "@playwright/test";
 ```
 
 ### 4. Write a Scene
@@ -94,6 +103,18 @@ conversation_plan: |
 persona: cooperative
 max_turns: 15
 
+context:
+  customer:
+    name: Jordan Lee
+    email: jordan@example.com
+  orders:
+    ORD-10031:
+      items:
+        - name: Hiking Backpack
+          sku: HB-220
+          price: 129.99
+      status: delivered
+
 expectations:
   required_tools:
     - lookup_order
@@ -110,7 +131,69 @@ expectations:
 
 ### 5. Write the Test
 
-```ts
+**test/return.spec.ts**
+```typescript
+import { test, expect } from "./fixtures";
+
+test("processes valid return", async ({ page, mimiq }) => {
+  await page.goto("/");
+  await mimiq.startRun({ sceneId: "return_backpack" });
+  await mimiq.runToCompletion({ maxTurns: 15 });
+
+  const report = await mimiq.evaluate();
+  expect(report.passed).toBe(true);
+});
+```
+
+## Quick Start (Cypress)
+
+### 1. Install
+
+```bash
+npm install @gojiplus/mimiq cypress --save-dev
+```
+
+### 2. Configure Cypress
+
+**cypress.config.ts**
+```typescript
+import { defineConfig } from "cypress";
+import { setupMimiqTasks, createLocalRuntime } from "@gojiplus/mimiq/node";
+
+export default defineConfig({
+  e2e: {
+    baseUrl: "http://localhost:5173",
+    setupNodeEvents(on, config) {
+      const runtime = createLocalRuntime({
+        scenesDir: "./scenes",
+      });
+      setupMimiqTasks(on, { runtime });
+      return config;
+    },
+  },
+});
+```
+
+**cypress/support/e2e.ts**
+```typescript
+import { createDefaultChatAdapter, registerMimiqCommands } from "@gojiplus/mimiq";
+
+registerMimiqCommands({
+  browserAdapter: createDefaultChatAdapter({
+    transcript: '[data-test="transcript"]',
+    messageRow: '[data-test="message-row"]',
+    messageRoleAttr: "data-role",
+    messageText: '[data-test="message-text"]',
+    input: '[data-test="chat-input"]',
+    send: '[data-test="send-button"]',
+    idleMarker: '[data-test="agent-idle"]',
+  }),
+});
+```
+
+### 3. Write the Test
+
+```typescript
 describe("return flow", () => {
   afterEach(() => cy.mimiqCleanupRun());
 
@@ -126,7 +209,7 @@ describe("return flow", () => {
 });
 ```
 
-## Scene Schema
+## Scene File Format
 
 ```yaml
 id: string                    # Unique identifier
@@ -134,8 +217,13 @@ description: string           # Human-readable description
 
 starting_prompt: string       # First message from simulated user
 conversation_plan: string     # Instructions for user behavior
-persona: string               # Preset: cooperative, frustrated_but_cooperative, adversarial, vague, impatient
+persona: string               # cooperative, frustrated_but_cooperative, adversarial, vague, impatient
 max_turns: number             # Maximum turns (default: 15)
+
+simulator:                    # Optional simulator configuration
+  type: llm | stagehand | browser-use
+  model: "google/gemini-2.0-flash"  # or openai/gpt-4o, anthropic/claude-3-5-sonnet
+  options: { ... }
 
 context:                      # World state (optional)
   customer: { ... }
@@ -154,7 +242,81 @@ expectations:
     - name: string
       rubric: string
       samples: number              # Number of samples (default: 5)
-      model: string                # Model to use (default: gpt-4o)
+  visual_assertions:               # UI validation
+    - query: string
+      min_confidence: number
+  accessibility_audit:             # WCAG compliance
+    level: A | AA | AAA
+    required_pass: boolean
+```
+
+## Multiple LLM Providers
+
+Configure your preferred provider via environment variables:
+
+```bash
+# Google Gemini (default)
+export GOOGLE_GENERATIVE_AI_API_KEY=your-key
+
+# OpenAI
+export OPENAI_API_KEY=your-key
+
+# Anthropic
+export ANTHROPIC_API_KEY=your-key
+```
+
+Specify the model in your scene:
+
+```yaml
+simulator:
+  model: "google/gemini-2.0-flash"    # Google Gemini
+  # model: "openai/gpt-4o"            # OpenAI
+  # model: "anthropic/claude-3-5-sonnet"  # Anthropic
+```
+
+## Recording Demo Runs
+
+Capture screenshots, transcripts, and action logs for debugging or documentation:
+
+```bash
+MIMIQ_RECORDING=1 npx playwright test
+```
+
+Configure recording options in your runtime:
+
+```typescript
+createLocalRuntime({
+  scenesDir: "./scenes",
+  recording: {
+    enabled: true,
+    outputDir: "./recordings",
+    screenshots: {
+      enabled: true,
+      timing: "before",
+      format: "png",
+    },
+    transcript: {
+      format: "json",
+      includeUiState: true,
+    },
+    actionLog: {
+      enabled: true,
+      format: "markdown",
+    },
+  },
+});
+```
+
+Output structure:
+```
+recordings/
+└── scene-name/
+    └── run-001/
+        ├── screenshots/
+        │   ├── turn-001.png
+        │   └── turn-002.png
+        ├── transcript.json
+        └── action-log.md
 ```
 
 ## Persona Presets
@@ -166,6 +328,7 @@ expectations:
 | `adversarial` | Tries to push boundaries, social-engineer exceptions |
 | `vague` | Gives incomplete information, needs follow-up |
 | `impatient` | Wants fast resolution, short answers |
+| `curious` | Asks questions, explores options |
 
 ## LLM-as-Judge
 
@@ -185,10 +348,9 @@ Judges use majority voting across multiple samples for reliability.
 
 ### Built-in Rubrics
 
-```ts
+```typescript
 import { BUILTIN_RUBRICS } from "@gojiplus/mimiq";
 
-// Available rubrics:
 BUILTIN_RUBRICS.TASK_COMPLETION
 BUILTIN_RUBRICS.INSTRUCTION_FOLLOWING
 BUILTIN_RUBRICS.TONE_EMPATHY
@@ -197,6 +359,19 @@ BUILTIN_RUBRICS.FACTUAL_GROUNDING
 BUILTIN_RUBRICS.TOOL_USAGE_CORRECTNESS
 BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 ```
+
+## Playwright API
+
+| Method | Description |
+|--------|-------------|
+| `mimiq.startRun({ sceneId })` | Start a simulation |
+| `mimiq.runToCompletion({ maxTurns })` | Run until done or max turns |
+| `mimiq.runTurn()` | Execute one turn |
+| `mimiq.evaluate()` | Run all checks and judges |
+| `mimiq.getTrace()` | Get conversation trace |
+| `mimiq.cleanup()` | Clean up resources |
+| `mimiq.captureSnapshot()` | Capture current UI state |
+| `mimiq.runMultiple({ sceneId, count })` | Run multiple iterations |
 
 ## Cypress Commands
 
@@ -213,41 +388,12 @@ BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_API_KEY` | API key for simulation and judges |
-| `SIMULATOR_MODEL` | Model for simulation (default: `gpt-4o`) |
-| `JUDGE_MODEL` | Model for judges (default: `gpt-4o`) |
-| `OPENAI_BASE_URL` | Base URL for OpenAI-compatible API |
-
-## HTML Reports
-
-mimiq generates rich, interactive HTML reports. See examples:
-
-- [Aggregate Report](test/reports/index.html) - Stats dashboard with all runs
-- [Run Detail: Return Flow](test/reports/return_eligible_backpack.html) - Conversation timeline with tool calls
-
-Generate reports after tests:
-```bash
-npm run test:report  # Runs tests and opens report
-```
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│ mimiq                                                                   │
-│                                                                         │
-│ Browser Layer (Cypress):                                                │
-│   - Captures UI state via data-test selectors                          │
-│   - Executes actions (type, click, send)                               │
-│                                                                         │
-│ Node Layer (Cypress tasks):                                             │
-│   - Simulator: LLM generates user messages                              │
-│   - Trace: records conversation + tool calls                           │
-│   - Check: validates against expectations                               │
-│   - Judge: LLM-as-judge evaluation                                      │
-│   - Reports: generates HTML summaries                                   │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `MIMIQ_RECORDING` | Enable recording (`1` to enable) |
+| `SIMULATOR_MODEL` | Default model for simulation |
+| `JUDGE_MODEL` | Default model for judges |
 
 ## License
 
