@@ -13,7 +13,7 @@
   "dependencies": {
     "@gojiplus/mimiq": "file:../..",
     "@browserbasehq/stagehand": "^2.0.0",
-    "@playwright/test": "^1.52.0"
+    "@playwright/test": "^1.59.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

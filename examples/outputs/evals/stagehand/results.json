@@ -1,0 +1,202 @@
+{
+  "jobId": "stagehand",
+  "evaluatedAt": "2026-04-11T03:03:10.860Z",
+  "evaluators": [
+    "goal-achieved",
+    "terminal-state",
+    "required-tools"
+  ],
+  "runs": [
+    {
+      "runId": "customer_support_basic-run-1",
+      "sceneId": "customer_support_basic",
+      "runNumber": 1,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "customer_support_basic-run-2",
+      "sceneId": "customer_support_basic",
+      "runNumber": 2,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "customer_support_basic-run-3",
+      "sceneId": "customer_support_basic",
+      "runNumber": 3,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "frustrated_customer-run-1",
+      "sceneId": "frustrated_customer",
+      "runNumber": 1,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Cannot read properties of undefined (reading 'length')"
+        }
+      ]
+    },
+    {
+      "runId": "frustrated_customer-run-2",
+      "sceneId": "frustrated_customer",
+      "runNumber": 2,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Cannot read properties of undefined (reading 'length')"
+        }
+      ]
+    },
+    {
+      "runId": "frustrated_customer-run-3",
+      "sceneId": "frustrated_customer",
+      "runNumber": 3,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Cannot read properties of undefined (reading 'length')"
+        }
+      ]
+    },
+    {
+      "runId": "techshop_return_flow-run-1",
+      "sceneId": "techshop_return_flow",
+      "runNumber": 1,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "techshop_return_flow-run-2",
+      "sceneId": "techshop_return_flow",
+      "runNumber": 2,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "techshop_return_flow-run-3",
+      "sceneId": "techshop_return_flow",
+      "runNumber": 3,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "track_order_button-run-1",
+      "sceneId": "track_order_button",
+      "runNumber": 1,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "track_order_button-run-2",
+      "sceneId": "track_order_button",
+      "runNumber": 2,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    },
+    {
+      "runId": "track_order_button-run-3",
+      "sceneId": "track_order_button",
+      "runNumber": 3,
+      "passed": false,
+      "results": [
+        {
+          "name": "execution",
+          "passed": false,
+          "details": "Anthropic API key is missing. Pass it using the 'apiKey' parameter or the ANTHROPIC_API_KEY environment variable."
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalRuns": 12,
+    "passedRuns": 0,
+    "failedRuns": 12,
+    "passRate": 0,
+    "byScene": {
+      "customer_support_basic": {
+        "total": 3,
+        "passed": 0,
+        "passRate": 0
+      },
+      "frustrated_customer": {
+        "total": 3,
+        "passed": 0,
+        "passRate": 0
+      },
+      "techshop_return_flow": {
+        "total": 3,
+        "passed": 0,
+        "passRate": 0
+      },
+      "track_order_button": {
+        "total": 3,
+        "passed": 0,
+        "passRate": 0
+      }
+    },
+    "byEvaluator": {
+      "execution": {
+        "total": 12,
+        "passed": 0,
+        "passRate": 0
+      }
+    }
+  }
+}

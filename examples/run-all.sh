@@ -8,6 +8,7 @@
 #   ./run-all.sh --runs 3     # Run each test 3 times (default)
 #   ./run-all.sh --skip-gifs  # Skip GIF generation
 #   ./run-all.sh --only playwright  # Only run playwright tests
+#   ./run-all.sh --only agent        # Only run agent tests
 #
 
 set -e
@@ -144,7 +145,7 @@ run_stagehand() {
   # Install dependencies including stagehand if not present
   if [ ! -d "node_modules" ] || ! npm list @browserbasehq/stagehand 2>/dev/null | grep -q stagehand; then
     echo "Installing stagehand dependencies..."
-    npm install 2>&1 || {
+    npm install && npm link @gojiplus/mimiq 2>&1 || {
       echo "WARNING: Failed to install @browserbasehq/stagehand"
       echo "Skipping stagehand tests."
       return
@@ -157,6 +158,19 @@ run_stagehand() {
     echo "Stagehand tests may fail without proper credentials."
   fi
 
+  # Test for playwright conflict
+  TEST_OUTPUT=$(MIMIQ_RECORDING=1 npx playwright test --config=playwright.config.ts 2>&1 || true)
+  if echo "$TEST_OUTPUT" | grep -q "Requiring @playwright/test second time"; then
+    echo ""
+    echo "WARNING: Stagehand tests skipped due to playwright version conflict."
+    echo "This is a known issue when using @playwright/test with @browserbasehq/stagehand."
+    echo ""
+    echo "To run stagehand tests manually, use Browserbase cloud:"
+    echo "  BROWSERBASE_API_KEY=xxx npm test"
+    echo ""
+    return
+  fi
+
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Stagehand Run $run of $NUM_RUNS ---"
@@ -164,6 +178,46 @@ run_stagehand() {
   done
 
   echo "Stagehand tests complete."
+}
+
+# ============================================
+# Run Agent Tests
+# ============================================
+run_agent() {
+  echo ""
+  echo "============================================"
+  echo "Running Agent Evaluation ($NUM_RUNS runs each)"
+  echo "============================================"
+
+  cd "$SCRIPT_DIR"
+
+  local agent_scenes_dir="$SCRIPT_DIR/agent-scenes"
+
+  if [ ! -d "$agent_scenes_dir" ]; then
+    echo "WARNING: No agent-scenes directory found, skipping agent tests."
+    return
+  fi
+
+  local scene_count=$(ls -1 "$agent_scenes_dir"/*.yaml "$agent_scenes_dir"/*.yml 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$scene_count" -eq 0 ]; then
+    echo "WARNING: No agent scene files found, skipping agent tests."
+    return
+  fi
+
+  echo "Found $scene_count agent scene(s)"
+
+  mkdir -p "$OUTPUTS_DIR/recordings/stagehand"
+  mkdir -p "$OUTPUTS_DIR/evals/stagehand"
+  mkdir -p "$OUTPUTS_DIR/reports/stagehand"
+
+  npx mimiq agent \
+    --scenes "$agent_scenes_dir" \
+    --runs $NUM_RUNS \
+    --output "$OUTPUTS_DIR" \
+    --framework stagehand \
+    --headless || true
+
+  echo "Agent tests complete."
 }
 
 # ============================================
@@ -324,18 +378,22 @@ case "$ONLY" in
   stagehand)
     run_stagehand
     ;;
+  agent)
+    run_agent
+    ;;
   "")
     # Run all
     run_playwright
     run_cypress
     run_stagehand
+    run_agent
     generate_gifs
     run_layoutlens_evals
     generate_report
     ;;
   *)
     echo "Unknown test suite: $ONLY"
-    echo "Options: playwright, cypress, stagehand"
+    echo "Options: playwright, cypress, stagehand, agent"
     exit 1
     ;;
 esac

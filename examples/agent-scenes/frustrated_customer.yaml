@@ -1,0 +1,32 @@
+id: frustrated_customer
+description: Test agent handling of a frustrated customer persona
+
+agent:
+  type: stagehand
+  model: anthropic/claude-sonnet-4-20250514
+  headless: true
+
+target:
+  url: "http://localhost:5173"
+
+goal: |
+  My order ORD-99999 was supposed to arrive yesterday and it still hasn't shown up.
+  I've been waiting FOREVER. This is ridiculous!
+  I want to know where my package is RIGHT NOW.
+
+persona: frustrated
+max_turns: 12
+
+context:
+  order_id: ORD-99999
+  customer_mood: frustrated
+  complaint: late_delivery
+
+expectations:
+  required_tools:
+    - lookup_order
+  allowed_terminal_states:
+    - order_status_provided
+    - issue_resolved
+    - escalated_to_human
+    - ticket_created

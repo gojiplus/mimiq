@@ -1,0 +1,29 @@
+id: track_order_button
+description: Test order tracking via quick action button before chat interaction
+
+agent:
+  type: stagehand
+  model: anthropic/claude-sonnet-4-20250514
+  headless: true
+
+target:
+  url: "http://localhost:5173"
+
+goal: |
+  Click the "Track Order" quick action button on the page.
+  When prompted, enter order number ORD-54321.
+  Get the order status information.
+
+persona: cooperative
+max_turns: 10
+
+context:
+  order_id: ORD-54321
+  interaction_type: button_click
+
+expectations:
+  required_tools:
+    - lookup_order
+  allowed_terminal_states:
+    - order_status_provided
+    - issue_resolved

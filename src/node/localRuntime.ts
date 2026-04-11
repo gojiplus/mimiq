@@ -63,7 +63,22 @@ const completedRuns = new Map<string, { scene: Scene; trace: Trace; evaluation?:
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const templatesDir = join(__dirname, "..", "templates");
+
+function findTemplatesDir(): string {
+  const candidates = [
+    join(__dirname, "templates"),
+    join(__dirname, "..", "templates"),
+    join(__dirname, "..", "..", "templates"),
+  ];
+  for (const dir of candidates) {
+    if (existsSync(join(dir, "index.html"))) {
+      return dir;
+    }
+  }
+  return candidates[0];
+}
+
+const templatesDir = findTemplatesDir();
 const nunjucksEnv = nunjucks.configure(templatesDir, { autoescape: true });
 
 function generateRunId(): string {

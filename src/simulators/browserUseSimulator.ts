@@ -6,7 +6,7 @@
 import type { Scene } from "../core/models";
 import type { AffordanceSnapshot } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "../core/simulatorInterface";
-import { createLogger } from "../utils/logger";
+import { createLogger } from "../utils/nodeLogger";
 
 const log = createLogger("BrowserUseSimulator");
 

@@ -1,0 +1,27 @@
+id: customer_support_basic
+description: Basic customer support interaction test
+
+agent:
+  type: stagehand
+  model: anthropic/claude-sonnet-4-20250514
+  headless: true
+
+target:
+  url: "http://localhost:5173"
+
+goal: |
+  Ask about the status of order ORD-12345.
+  Get information about when it will arrive.
+
+persona: cooperative
+max_turns: 8
+
+context:
+  order_id: ORD-12345
+
+expectations:
+  allowed_terminal_states:
+    - order_status_provided
+    - issue_resolved
+    - escalated_to_human
+    - ticket_created

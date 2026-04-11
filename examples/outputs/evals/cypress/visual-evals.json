@@ -1,1 +1,2964 @@
-{"evaluations": []}
+{
+  "evaluations": [
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-001",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:03:22.900Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-001",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:03:30.372Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-001",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:03:37.188Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-001",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:03:44.920Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9375
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-001",
+      "screenshot": "turn-008-before.png",
+      "timestamp": "2026-04-11T03:03:51.979Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-002",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:03:58.025Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-002",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:04:07.644Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-002",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:04:15.325Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-002",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:04:36.929Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9374999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-003",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:04:43.410Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-003",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:04:49.333Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-004",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:04:56.905Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-004",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:05:02.800Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-005",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:05:08.370Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.925
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-005",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:05:15.285Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-005",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:05:21.478Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-005",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:05:28.745Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-006",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:05:34.096Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-006",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:05:39.345Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-006",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:05:46.582Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-006",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:05:53.218Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-007",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:05:58.855Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-007",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:06:05.714Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-008",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:06:19.639Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-008",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:06:32.540Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-009",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:06:46.465Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-009",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:07:02.016Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-009",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:07:08.996Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9624999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-009",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:07:16.173Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-009",
+      "screenshot": "turn-008-before.png",
+      "timestamp": "2026-04-11T03:07:23.537Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-010",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:07:31.535Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-010",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:07:38.386Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-010",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:07:55.384Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-010",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:08:03.658Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-011",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:08:10.007Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-011",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:08:16.228Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-012",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:08:22.012Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_eligible_backpack",
+      "run": "run-012",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:08:27.539Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-001",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:08:33.731Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-001",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:08:40.227Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-001",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:08:47.568Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-002",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:08:53.962Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9374999999999999
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-002",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:09:00.491Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-002",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:09:07.891Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": true,
+          "confidence": 0.85,
+          "response": "YES 85"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.925
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-003",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:09:17.001Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9374999999999999
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-003",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:09:23.283Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.975
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-003",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:09:37.685Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9624999999999999
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-004",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:09:43.226Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9125
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-004",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:09:49.396Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-004",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:09:56.012Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-004",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:10:02.875Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9375
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-005",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:10:09.637Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-005",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:10:16.982Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-005",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:10:26.430Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-006",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:10:36.975Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-006",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:10:43.025Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-006",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:10:50.128Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-006",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:11:00.732Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "return_needs_handoff",
+      "run": "run-006",
+      "screenshot": "turn-008-before.png",
+      "timestamp": "2026-04-11T03:11:08.209Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-001",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:11:13.737Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9375
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-001",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:11:19.729Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-001",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:11:26.619Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-002",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:11:32.788Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.925
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-002",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:11:39.340Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-002",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:11:45.799Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-003",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:11:52.419Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9375
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-003",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:11:58.594Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "track_order_via_button",
+      "run": "run-003",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:12:05.552Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-001",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:12:27.878Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.925
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-001",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:12:34.125Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-001",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:12:51.279Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-001",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:12:58.289Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.85,
+          "response": "YES 85"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9375
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-002",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:13:04.442Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9249999999999999
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-002",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:13:18.497Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9750000000000001
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-002",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:13:24.711Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-002",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:13:35.463Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.9,
+          "response": "NO 90"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "avgConfidence": 0.95
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-003",
+      "screenshot": "turn-001-before.png",
+      "timestamp": "2026-04-11T03:13:47.136Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": false,
+          "confidence": 0.95,
+          "response": "NO 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.9,
+          "response": "YES 90"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 1,
+        "avgConfidence": 0.9625
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-003",
+      "screenshot": "turn-002-before.png",
+      "timestamp": "2026-04-11T03:13:53.383Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-003",
+      "screenshot": "turn-004-before.png",
+      "timestamp": "2026-04-11T03:13:59.632Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 1,
+          "response": "YES 100"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9875
+      }
+    },
+    {
+      "scene": "visual_assertions",
+      "run": "run-003",
+      "screenshot": "turn-006-before.png",
+      "timestamp": "2026-04-11T03:14:08.952Z",
+      "results": [
+        {
+          "query": "Is there a chat interface visible?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Is there a message input field?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        },
+        {
+          "query": "Are there any error messages visible?",
+          "passed": false,
+          "confidence": 1,
+          "response": "NO 100"
+        },
+        {
+          "query": "Is the UI properly laid out?",
+          "passed": true,
+          "confidence": 0.95,
+          "response": "YES 95"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "avgConfidence": 0.9624999999999999
+      }
+    }
+  ]
+}

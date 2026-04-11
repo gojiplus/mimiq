@@ -33,6 +33,14 @@ export const DEFAULT_RECORDING_CONFIG: RecordingConfig = {
   defaultRunCount: 3,
 };
 
+export interface RecordingCollectorOptions {
+  sceneId: string;
+  runId: string;
+  config?: Partial<RecordingConfig>;
+  runDir?: string;
+  runNumber?: number;
+}
+
 export class RecordingCollector {
   private config: RecordingConfig;
   private sceneId: string;
@@ -44,16 +52,37 @@ export class RecordingCollector {
   private screenshotsDir: string;
   private turnCounter: number = 0;
 
+  constructor(options: RecordingCollectorOptions);
+  constructor(sceneId: string, runId: string, config?: Partial<RecordingConfig>);
   constructor(
-    sceneId: string,
-    runId: string,
-    config: Partial<RecordingConfig> = {}
+    optionsOrSceneId: RecordingCollectorOptions | string,
+    runId?: string,
+    config?: Partial<RecordingConfig>
   ) {
-    this.config = { ...DEFAULT_RECORDING_CONFIG, ...config };
-    this.sceneId = sceneId;
-    this.runId = runId;
-    this.runNumber = this.determineRunNumber();
-    this.runDir = this.createRunDirectory();
+    if (typeof optionsOrSceneId === "string") {
+      this.config = { ...DEFAULT_RECORDING_CONFIG, ...config };
+      this.sceneId = optionsOrSceneId;
+      this.runId = runId!;
+      this.runNumber = this.determineRunNumber();
+      this.runDir = this.createRunDirectory();
+    } else {
+      const opts = optionsOrSceneId;
+      this.config = { ...DEFAULT_RECORDING_CONFIG, ...opts.config };
+      this.sceneId = opts.sceneId;
+      this.runId = opts.runId;
+
+      if (opts.runDir && opts.runNumber !== undefined) {
+        this.runDir = opts.runDir;
+        this.runNumber = opts.runNumber;
+        if (this.config.enabled) {
+          mkdirSync(this.runDir, { recursive: true });
+        }
+      } else {
+        this.runNumber = this.determineRunNumber();
+        this.runDir = this.createRunDirectory();
+      }
+    }
+
     this.screenshotsDir = join(this.runDir, "screenshots");
 
     if (this.config.enabled && this.config.screenshots.enabled) {
@@ -61,15 +90,15 @@ export class RecordingCollector {
     }
 
     this.transcript = {
-      runId,
-      sceneId,
+      runId: this.runId,
+      sceneId: this.sceneId,
       startedAt: new Date().toISOString(),
       turns: [],
     };
 
     this.metadata = {
-      runId,
-      sceneId,
+      runId: this.runId,
+      sceneId: this.sceneId,
       runNumber: this.runNumber,
       startedAt: new Date().toISOString(),
       status: "running",

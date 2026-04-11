@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Job {{ job.jobId }} - Mimiq{% endblock %}
+
+{% block content %}
+<h1>Job Report: {{ job.jobId }}</h1>
+
+<div class="meta-info">
+  <p><strong>Created:</strong> {{ job.createdAt }}</p>
+  {% if job.finishedAt %}<p><strong>Finished:</strong> {{ job.finishedAt }}</p>{% endif %}
+  <p><strong>Framework:</strong> {{ job.config.framework }}</p>
+  <p><strong>Status:</strong> <span class="badge {% if job.status == 'completed' %}badge-success{% else %}badge-error{% endif %}">{{ job.status }}</span></p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ summary.totalRuns }}</div>
+    <div class="stat-label">Total Runs</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color: var(--success-color);">{{ summary.passedRuns }}</div>
+    <div class="stat-label">Passed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color: var(--error-color);">{{ summary.failedRuns }}</div>
+    <div class="stat-label">Failed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ summary.passRate }}%</div>
+    <div class="stat-label">Pass Rate</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Results by Scene</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Scene</th>
+        <th>Total</th>
+        <th>Passed</th>
+        <th>Pass Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sceneId, stats in summary.byScene %}
+      <tr>
+        <td class="scene-link">{{ sceneId }}</td>
+        <td>{{ stats.total }}</td>
+        <td>{{ stats.passed }}</td>
+        <td>
+          <span class="badge {% if stats.passRate >= 80 %}badge-success{% elif stats.passRate >= 50 %}{% else %}badge-error{% endif %}">
+            {{ stats.passRate }}%
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Results by Evaluator</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Evaluator</th>
+        <th>Total</th>
+        <th>Passed</th>
+        <th>Pass Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for evalName, stats in summary.byEvaluator %}
+      <tr>
+        <td>{{ evalName }}</td>
+        <td>{{ stats.total }}</td>
+        <td>{{ stats.passed }}</td>
+        <td>
+          <span class="badge {% if stats.passRate >= 80 %}badge-success{% elif stats.passRate >= 50 %}{% else %}badge-error{% endif %}">
+            {{ stats.passRate }}%
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if runs and runs.length > 0 %}
+<div class="card">
+  <h2 class="collapsible">All Runs ({{ runs.length }})</h2>
+  <div class="collapsible-content">
+    <table>
+      <thead>
+        <tr>
+          <th>Scene</th>
+          <th>Run</th>
+          <th>Status</th>
+          <th>Terminal State</th>
+          <th>Checks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for run in runs %}
+        <tr>
+          <td class="scene-link">{{ run.sceneId }}</td>
+          <td>{{ run.runNumber }}</td>
+          <td>
+            <span class="badge {% if run.passed %}badge-success{% else %}badge-error{% endif %}">
+              {% if run.passed %}PASS{% else %}FAIL{% endif %}
+            </span>
+          </td>
+          <td>{{ run.terminalState or '-' }}</td>
+          <td>{{ run.results | length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

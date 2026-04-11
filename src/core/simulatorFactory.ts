@@ -24,17 +24,10 @@ export function createSimulator(
     return new Simulator(scene, options.defaultSimulatorConfig);
   }
 
-  if (sceneSimConfig.type === "stagehand") {
-    // Dynamic import to handle optional dependency
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { StagehandSimulator } = require("../simulators/stagehandSimulator");
-    return new StagehandSimulator(scene, sceneSimConfig.options);
-  }
-
   if (sceneSimConfig.type === "browser-use") {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { BrowserUseSimulator } = require("../simulators/browserUseSimulator");
-    return new BrowserUseSimulator(scene, sceneSimConfig.options);
+    throw new Error(
+      "browser-use simulator requires async initialization. Use createSimulatorAsync() instead."
+    );
   }
 
   throw new Error(`Unknown simulator type: ${sceneSimConfig.type}`);

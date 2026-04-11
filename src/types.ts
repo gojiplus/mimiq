@@ -326,3 +326,138 @@ export interface RunMultipleResult {
   runs: EvaluationReport[];
   summary: AggregateSummary;
 }
+
+// Job management types
+
+export type Framework = "playwright" | "cypress";
+
+export interface JobConfig {
+  jobId?: string;
+  scenesDir: string;
+  outputDir: string;
+  framework: Framework;
+  runs: number;
+  evaluators?: string[];
+}
+
+export interface JobManifest {
+  jobId: string;
+  createdAt: string;
+  finishedAt?: string;
+  config: JobConfig;
+  status: "running" | "completed" | "failed";
+  scenesRun: string[];
+  runsPerScene: number;
+  totalRuns: number;
+  completedRuns: number;
+}
+
+export interface EvaluatorResult {
+  name: string;
+  passed: boolean;
+  score?: number;
+  details?: string;
+  metadata?: JsonObject;
+}
+
+export interface RunEvalResult {
+  runId: string;
+  sceneId: string;
+  runNumber: number;
+  passed: boolean;
+  terminalState?: string;
+  results: EvaluatorResult[];
+}
+
+export interface JobEvalResults {
+  jobId: string;
+  evaluatedAt: string;
+  evaluators: string[];
+  runs: RunEvalResult[];
+  summary: {
+    totalRuns: number;
+    passedRuns: number;
+    failedRuns: number;
+    passRate: number;
+    byScene: Record<string, { total: number; passed: number; passRate: number }>;
+    byEvaluator: Record<string, { total: number; passed: number; passRate: number }>;
+  };
+}
+
+// Browser agent types
+
+export type BrowserAgentType = "stagehand" | "playwright-mcp";
+
+export interface BrowserAgentConfig {
+  type: BrowserAgentType;
+  model?: string;
+  headless?: boolean;
+  timeout?: number;
+}
+
+export interface BrowserTargetConfig {
+  url: string;
+  selector?: string;
+}
+
+export interface BrowserActionResult {
+  success: boolean;
+  text?: string;
+  error?: string;
+  screenshot?: string;
+}
+
+export interface BrowserObservation {
+  url: string;
+  title?: string;
+  visibleText?: string;
+  chatMessages?: Array<{ role: string; content: string }>;
+  stateMarkers?: string[];
+}
+
+export interface BrowserStepAction {
+  type: "act" | "extract" | "observe" | "message" | "navigate";
+  instruction?: string;
+  result?: string;
+  error?: string;
+}
+
+export interface BrowserStepResponse {
+  text: string;
+  toolCalls?: Array<{
+    tool: string;
+    args: JsonObject;
+    result?: JsonValue;
+  }>;
+}
+
+export interface BrowserStep {
+  turn: number;
+  timestamp: string;
+  action: BrowserStepAction;
+  response?: BrowserStepResponse;
+  screenshot?: string;
+  domSnapshot?: string;
+  url: string;
+}
+
+export interface BrowserTrace {
+  sceneId: string;
+  targetUrl: string;
+  startedAt: string;
+  finishedAt?: string;
+  steps: BrowserStep[];
+  terminalState?: string;
+  goalAchieved: boolean;
+}
+
+export interface AgentRunConfig {
+  scene: string | JsonObject;
+  url?: string;
+  agent?: BrowserAgentType;
+  model?: string;
+  headless?: boolean;
+  runs?: number;
+  jobId?: string;
+  outputDir?: string;
+}

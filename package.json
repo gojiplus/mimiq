@@ -27,6 +27,9 @@
       "default": "./dist/simulators/index.js"
     }
   },
+  "bin": {
+    "mimiq": "./dist/cli/index.js"
+  },
   "files": [
     "dist",
     "README.md",
@@ -41,10 +44,12 @@
     "test:cypress": "npm test --prefix examples/cypress-basic",
     "test:playwright": "npm test --prefix examples/playwright-basic",
     "test": "npm run test:playwright",
+    "test:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --headless",
+    "demo:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --no-headless",
     "docs": "typedoc"
   },
   "peerDependencies": {
-    "@browserbasehq/stagehand": "^2.0.0",
+    "@browserbasehq/stagehand": "^3.0.0",
     "@playwright/test": "^1.40.0",
     "cypress": "^14.0.0"
   },
@@ -60,6 +65,7 @@
     }
   },
   "devDependencies": {
+    "@browserbasehq/stagehand": "^3.2.1",
     "@playwright/test": "^1.59.1",
     "@types/node": "^22.19.15",
     "@types/nunjucks": "^3.2.6",
@@ -85,8 +91,7 @@
     "mimiq",
     "llm",
     "chatbot",
-    "browser-agent",
-    "stagehand"
+    "browser-agent"
   ],
   "author": "Gaurav Sood",
   "license": "MIT",
@@ -103,7 +108,11 @@
     "@ai-sdk/google": "^3.0.43",
     "@ai-sdk/openai": "^3.0.41",
     "ai": "^6.0.116",
+    "commander": "^14.0.3",
     "nunjucks": "^3.2.4",
     "pino": "^10.3.1"
+  },
+  "overrides": {
+    "playwright": "$@playwright/test"
   }
 }

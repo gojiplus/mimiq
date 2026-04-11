@@ -112,12 +112,38 @@ export interface JudgeConfig {
   model?: string;
 }
 
+import type { BrowserAgentType } from "../types";
+
+export interface AgentConfig {
+  type: BrowserAgentType;
+  model?: string;
+  headless?: boolean;
+  timeout?: number;
+}
+
+export interface TargetConfig {
+  url: string;
+  selector?: string;
+}
+
 export interface Scene {
   id: string;
   description?: string;
   starting_prompt: string;
   conversation_plan: string;
   persona: Persona | PersonaPreset;
+  max_turns?: number;
+  context?: Record<string, unknown>;
+  expectations?: Expectations;
+}
+
+export interface AgentScene {
+  id: string;
+  description?: string;
+  agent: AgentConfig;
+  target: TargetConfig;
+  goal: string;
+  persona?: Persona | PersonaPreset;
   max_turns?: number;
   context?: Record<string, unknown>;
   expectations?: Expectations;

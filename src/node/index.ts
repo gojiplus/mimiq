@@ -4,3 +4,8 @@ export type { LocalRuntimeOptions } from "./localRuntime";
 export type * from "./runtime";
 export * from "../eval";
 export { RecordingCollector, DEFAULT_RECORDING_CONFIG } from "./recordingCollector";
+export type { RecordingCollectorOptions } from "./recordingCollector";
+export { JobManager } from "./jobManager";
+export { ReportGenerator, generateJobReport } from "./reportGenerator";
+export { AgentRunner, runAgentScene } from "./agentRunner";
+export type { AgentRunnerOptions, AgentRunResult } from "./agentRunner";

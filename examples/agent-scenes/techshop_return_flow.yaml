@@ -1,0 +1,31 @@
+id: techshop_return_flow
+description: Test return request handling via chat widget
+
+agent:
+  type: stagehand
+  model: anthropic/claude-sonnet-4-20250514
+  headless: true
+
+target:
+  url: "http://localhost:5173"
+
+goal: |
+  I want to return my order ORD-19680 (a hiking backpack).
+  It's within the return window and unused.
+  Complete the return request process.
+
+persona: cooperative
+max_turns: 12
+
+context:
+  order_id: ORD-19680
+  item: hiking backpack
+  purchase_date: "2025-03-01"
+
+expectations:
+  required_tools:
+    - lookup_order
+    - create_return
+  allowed_terminal_states:
+    - return_initiated
+    - return_label_sent

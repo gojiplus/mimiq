@@ -8,7 +8,7 @@ export default defineConfig({
   workers: 1,
   reporter: [
     ["list"],
-    ["html", { outputFolder: "../outputs/reports/stagehand-autonomous" }],
+    ["html", { outputFolder: "../outputs/reports/stagehand" }],
   ],
   timeout: 120000,
   use: {
