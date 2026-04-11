@@ -12,9 +12,5 @@
   },
   "dependencies": {
     "@gojiplus/mimiq": "file:../.."
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.59.0",
-    "typescript": "^5.4.0"
   }
 }

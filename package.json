@@ -3,6 +3,11 @@
   "version": "0.3.0",
   "description": "Simulate users and evaluate AI agents in Cypress and Playwright e2e tests",
   "type": "module",
+  "workspaces": [
+    "examples/playwright",
+    "examples/cypress",
+    "examples/stagehand"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

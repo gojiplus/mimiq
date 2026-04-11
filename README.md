@@ -5,43 +5,111 @@
 [![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-End-to-end testing framework for AI agents with simulated users.
+**Test your AI agents like real users would.**
 
-![mimiq demo](examples/outputs/gifs/track_order_via_button.gif)
+![mimiq demo](assets/demo-track-order.gif)
 
-## Features
+## What is mimiq?
 
-- **Simulated users with LLM-powered personas** - Generate realistic user behavior from conversation plans
-- **Playwright & Cypress adapters** - First-class support for both testing frameworks
-- **Multi-provider LLM support** - Google Gemini, OpenAI, Anthropic via Vercel AI SDK
-- **Three simulator types** - LLM chat, Stagehand (autonomous browser), browser-use
-- **Recording pipeline** - Capture screenshots, transcripts, and action logs
-- **Deterministic checks** - Verify tool calls, terminal states, forbidden actions
-- **LLM-as-judge evaluation** - Qualitative assessment with majority voting
-- **Visual assertions & accessibility audits** - UI validation with confidence thresholds
+mimiq simulates realistic users to test AI chatbots and agents. Instead of scripted test cases, define user personas and goals—mimiq handles the conversation naturally.
 
-## Quick Start (Playwright)
+- **Realistic user simulation** — LLM-powered personas that behave like real customers
+- **Works with your stack** — Playwright, Cypress, and Stagehand adapters
+- **Automated evaluation** — Verify tool calls, terminal states, and qualitative behavior
 
-### 1. Install
+## Quick Demo
+
+A frustrated customer trying to return a backpack:
+
+![return flow demo](assets/demo-return-flow.gif)
+
+## 30-Second Setup
 
 ```bash
 npm install @gojiplus/mimiq @playwright/test --save-dev
+export GOOGLE_GENERATIVE_AI_API_KEY=your-key  # or OPENAI_API_KEY
 ```
 
-### 2. Configure API Key
+Define a scene (`scenes/return_backpack.yaml`):
 
-```bash
-# Google (default)
-export GOOGLE_GENERATIVE_AI_API_KEY=your-key
+```yaml
+id: return_backpack
+starting_prompt: "I'd like to return an item please."
+conversation_plan: |
+  Goal: Return the hiking backpack from order ORD-10031.
+persona: cooperative
+max_turns: 15
 
-# Or OpenAI
-export OPENAI_API_KEY=your-key
-
-# Or Anthropic
-export ANTHROPIC_API_KEY=your-key
+expectations:
+  required_tools: [lookup_order, create_return]
+  forbidden_tools: [issue_refund]
 ```
 
-### 3. Create Fixtures
+Run the test:
+
+```typescript
+import { test, expect } from "./fixtures";
+
+test("processes valid return", async ({ page, mimiq }) => {
+  await page.goto("/");
+  await mimiq.startRun({ sceneId: "return_backpack" });
+  await mimiq.runToCompletion({ maxTurns: 15 });
+
+  const report = await mimiq.evaluate();
+  expect(report.passed).toBe(true);
+});
+```
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| **LLM-powered personas** | cooperative, frustrated, adversarial, vague, impatient |
+| **Multi-provider** | Google Gemini, OpenAI, Anthropic via Vercel AI SDK |
+| **Deterministic checks** | required/forbidden tools, terminal states |
+| **LLM-as-judge** | Qualitative evaluation with majority voting |
+| **Recording pipeline** | Screenshots, transcripts, action logs |
+| **Visual assertions** | UI validation with confidence thresholds |
+
+## Persona Presets
+
+| Preset | Behavior |
+|--------|----------|
+| `cooperative` | Helpful, provides information directly |
+| `frustrated_but_cooperative` | Mildly frustrated but ultimately cooperative |
+| `adversarial` | Tries to push boundaries, social-engineer exceptions |
+| `vague` | Gives incomplete information, needs follow-up |
+| `impatient` | Wants fast resolution, short answers |
+
+## Scene File Format
+
+```yaml
+id: string                    # Unique identifier
+description: string           # Human-readable description
+starting_prompt: string       # First message from simulated user
+conversation_plan: string     # Instructions for user behavior
+persona: string               # cooperative, frustrated_but_cooperative, adversarial, vague, impatient
+max_turns: number             # Maximum turns (default: 15)
+
+simulator:
+  type: llm | stagehand | browser-use
+  model: "google/gemini-2.0-flash"
+
+context:                      # World state
+  customer: { ... }
+  orders: { ... }
+
+expectations:
+  required_tools: [string]
+  forbidden_tools: [string]
+  allowed_terminal_states: [string]
+  judges:
+    - name: string
+      rubric: string
+      samples: number
+```
+
+## Playwright Setup
 
 **test/fixtures.ts**
 ```typescript
@@ -87,73 +155,17 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
 export { expect } from "@playwright/test";
 ```
 
-### 4. Write a Scene
+**Playwright API**
 
-**scenes/return_backpack.yaml**
-```yaml
-id: return_backpack
-description: Customer returns a backpack
+| Method | Description |
+|--------|-------------|
+| `mimiq.startRun({ sceneId })` | Start a simulation |
+| `mimiq.runToCompletion({ maxTurns })` | Run until done or max turns |
+| `mimiq.runTurn()` | Execute one turn |
+| `mimiq.evaluate()` | Run all checks and judges |
+| `mimiq.getTrace()` | Get conversation trace |
 
-starting_prompt: "I'd like to return an item please."
-conversation_plan: |
-  Goal: Return the hiking backpack from order ORD-10031.
-  - Provide order ID when asked.
-  - Cooperate with all steps.
-
-persona: cooperative
-max_turns: 15
-
-context:
-  customer:
-    name: Jordan Lee
-    email: jordan@example.com
-  orders:
-    ORD-10031:
-      items:
-        - name: Hiking Backpack
-          sku: HB-220
-          price: 129.99
-      status: delivered
-
-expectations:
-  required_tools:
-    - lookup_order
-    - create_return
-  forbidden_tools:
-    - issue_refund
-  allowed_terminal_states:
-    - return_created
-  judges:
-    - name: empathy
-      rubric: "The agent maintained a professional and empathetic tone."
-      samples: 3
-```
-
-### 5. Write the Test
-
-**test/return.spec.ts**
-```typescript
-import { test, expect } from "./fixtures";
-
-test("processes valid return", async ({ page, mimiq }) => {
-  await page.goto("/");
-  await mimiq.startRun({ sceneId: "return_backpack" });
-  await mimiq.runToCompletion({ maxTurns: 15 });
-
-  const report = await mimiq.evaluate();
-  expect(report.passed).toBe(true);
-});
-```
-
-## Quick Start (Cypress)
-
-### 1. Install
-
-```bash
-npm install @gojiplus/mimiq cypress --save-dev
-```
-
-### 2. Configure Cypress
+## Cypress Setup
 
 **cypress.config.ts**
 ```typescript
@@ -191,148 +203,18 @@ registerMimiqCommands({
 });
 ```
 
-### 3. Write the Test
+**Cypress Commands**
 
-```typescript
-describe("return flow", () => {
-  afterEach(() => cy.mimiqCleanupRun());
-
-  it("processes valid return", () => {
-    cy.visit("/");
-    cy.mimiqStartRun({ sceneId: "return_backpack" });
-    cy.mimiqRunToCompletion();
-
-    cy.mimiqEvaluate().then((report) => {
-      expect(report.passed).to.eq(true);
-    });
-  });
-});
-```
-
-## Scene File Format
-
-```yaml
-id: string                    # Unique identifier
-description: string           # Human-readable description
-
-starting_prompt: string       # First message from simulated user
-conversation_plan: string     # Instructions for user behavior
-persona: string               # cooperative, frustrated_but_cooperative, adversarial, vague, impatient
-max_turns: number             # Maximum turns (default: 15)
-
-simulator:                    # Optional simulator configuration
-  type: llm | stagehand | browser-use
-  model: "google/gemini-2.0-flash"  # or openai/gpt-4o, anthropic/claude-3-5-sonnet
-  options: { ... }
-
-context:                      # World state (optional)
-  customer: { ... }
-  orders: { ... }
-
-expectations:
-  required_tools: [string]           # Must be called
-  forbidden_tools: [string]          # Must NOT be called
-  allowed_terminal_states: [string]  # Valid end states
-  forbidden_terminal_states: [string]
-  required_agents: [string]          # For multi-agent systems
-  forbidden_agents: [string]
-  required_agent_tools:              # Agent-specific tool requirements
-    agent_name: [tool1, tool2]
-  judges:                            # LLM-as-judge evaluations
-    - name: string
-      rubric: string
-      samples: number              # Number of samples (default: 5)
-  visual_assertions:               # UI validation
-    - query: string
-      min_confidence: number
-  accessibility_audit:             # WCAG compliance
-    level: A | AA | AAA
-    required_pass: boolean
-```
-
-## Multiple LLM Providers
-
-Configure your preferred provider via environment variables:
-
-```bash
-# Google Gemini (default)
-export GOOGLE_GENERATIVE_AI_API_KEY=your-key
-
-# OpenAI
-export OPENAI_API_KEY=your-key
-
-# Anthropic
-export ANTHROPIC_API_KEY=your-key
-```
-
-Specify the model in your scene:
-
-```yaml
-simulator:
-  model: "google/gemini-2.0-flash"    # Google Gemini
-  # model: "openai/gpt-4o"            # OpenAI
-  # model: "anthropic/claude-3-5-sonnet"  # Anthropic
-```
-
-## Recording Demo Runs
-
-Capture screenshots, transcripts, and action logs for debugging or documentation:
-
-```bash
-MIMIQ_RECORDING=1 npx playwright test
-```
-
-Configure recording options in your runtime:
-
-```typescript
-createLocalRuntime({
-  scenesDir: "./scenes",
-  recording: {
-    enabled: true,
-    outputDir: "./recordings",
-    screenshots: {
-      enabled: true,
-      timing: "before",
-      format: "png",
-    },
-    transcript: {
-      format: "json",
-      includeUiState: true,
-    },
-    actionLog: {
-      enabled: true,
-      format: "markdown",
-    },
-  },
-});
-```
-
-Output structure:
-```
-recordings/
-└── scene-name/
-    └── run-001/
-        ├── screenshots/
-        │   ├── turn-001.png
-        │   └── turn-002.png
-        ├── transcript.json
-        └── action-log.md
-```
-
-## Persona Presets
-
-| Preset | Description |
-|--------|-------------|
-| `cooperative` | Helpful, provides information directly |
-| `frustrated_but_cooperative` | Mildly frustrated but ultimately cooperative |
-| `adversarial` | Tries to push boundaries, social-engineer exceptions |
-| `vague` | Gives incomplete information, needs follow-up |
-| `impatient` | Wants fast resolution, short answers |
-| `curious` | Asks questions, explores options |
+| Command | Description |
+|---------|-------------|
+| `cy.mimiqStartRun({ sceneId })` | Start a simulation |
+| `cy.mimiqRunToCompletion()` | Run until done or max turns |
+| `cy.mimiqRunTurn()` | Execute one turn |
+| `cy.mimiqEvaluate()` | Run all checks and judges |
 
 ## LLM-as-Judge
 
-Add qualitative evaluation with LLM judges:
+Add qualitative evaluation:
 
 ```yaml
 expectations:
@@ -344,9 +226,7 @@ expectations:
       rubric: "All factual claims were grounded in tool results."
 ```
 
-Judges use majority voting across multiple samples for reliability.
-
-### Built-in Rubrics
+**Built-in Rubrics**
 
 ```typescript
 import { BUILTIN_RUBRICS } from "@gojiplus/mimiq";
@@ -356,33 +236,28 @@ BUILTIN_RUBRICS.INSTRUCTION_FOLLOWING
 BUILTIN_RUBRICS.TONE_EMPATHY
 BUILTIN_RUBRICS.POLICY_COMPLIANCE
 BUILTIN_RUBRICS.FACTUAL_GROUNDING
-BUILTIN_RUBRICS.TOOL_USAGE_CORRECTNESS
-BUILTIN_RUBRICS.ADVERSARIAL_ROBUSTNESS
 ```
 
-## Playwright API
+## Recording
 
-| Method | Description |
-|--------|-------------|
-| `mimiq.startRun({ sceneId })` | Start a simulation |
-| `mimiq.runToCompletion({ maxTurns })` | Run until done or max turns |
-| `mimiq.runTurn()` | Execute one turn |
-| `mimiq.evaluate()` | Run all checks and judges |
-| `mimiq.getTrace()` | Get conversation trace |
-| `mimiq.cleanup()` | Clean up resources |
-| `mimiq.captureSnapshot()` | Capture current UI state |
-| `mimiq.runMultiple({ sceneId, count })` | Run multiple iterations |
+Capture screenshots, transcripts, and action logs:
 
-## Cypress Commands
+```bash
+MIMIQ_RECORDING=1 npx playwright test
+```
 
-| Command | Description |
-|---------|-------------|
-| `cy.mimiqStartRun({ sceneId })` | Start a simulation |
-| `cy.mimiqRunToCompletion()` | Run until done or max turns |
-| `cy.mimiqRunTurn()` | Execute one turn |
-| `cy.mimiqEvaluate()` | Run all checks and judges |
-| `cy.mimiqGetTrace()` | Get conversation trace |
-| `cy.mimiqCleanupRun()` | Clean up |
+```typescript
+createLocalRuntime({
+  scenesDir: "./scenes",
+  recording: {
+    enabled: true,
+    outputDir: "./recordings",
+    screenshots: { enabled: true, timing: "before" },
+    transcript: { format: "json" },
+    actionLog: { enabled: true },
+  },
+});
+```
 
 ## Environment Variables
 

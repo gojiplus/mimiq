@@ -158,19 +158,6 @@ run_stagehand() {
     echo "Stagehand tests may fail without proper credentials."
   fi
 
-  # Test for playwright conflict
-  TEST_OUTPUT=$(MIMIQ_RECORDING=1 npx playwright test --config=playwright.config.ts 2>&1 || true)
-  if echo "$TEST_OUTPUT" | grep -q "Requiring @playwright/test second time"; then
-    echo ""
-    echo "WARNING: Stagehand tests skipped due to playwright version conflict."
-    echo "This is a known issue when using @playwright/test with @browserbasehq/stagehand."
-    echo ""
-    echo "To run stagehand tests manually, use Browserbase cloud:"
-    echo "  BROWSERBASE_API_KEY=xxx npm test"
-    echo ""
-    return
-  fi
-
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Stagehand Run $run of $NUM_RUNS ---"
