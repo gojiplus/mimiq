@@ -1,0 +1,81 @@
+{
+  "runId": "xs1zji1np9",
+  "sceneId": "return_eligible_backpack",
+  "startedAt": "2026-04-11T02:59:26.865Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:59:27.182Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return an item please.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:59:29.245Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that. What is the order ID and the SKU of the item you would like to return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:59:30.056Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order ID is ORD-10031. I don't have the SKU handy, but it's a hiking backpack.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:59:35.307Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Great! I see that the hiking backpack (SKU: HB-220) from order ORD-10031 is eligible for return. The return policy for outdoor gear allows returns within 30 days, provided the item is in its original packaging and unused.\n\nCould you please confirm that the backpack meets these conditions and let me know the reason for the return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:59:36.152Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, the backpack is in its original packaging and hasn't been used. I'm returning it because it's too small and doesn't fit all my gear.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:59:40.136Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Your return for the hiking backpack from order ORD-10031 has been successfully created!\n\nYour return ID is RET-6C1909. You can find your shipping label at https://shipping.example.com/labels/RET-6C1909. Please pack the item securely and drop it off at any shipping location.\nTERMINAL_STATE: return_created",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "terminalState": "return_created",
+  "finishedAt": "2026-04-11T02:59:40.138Z"
+}

@@ -1,0 +1,28 @@
+{
+  "runId": "8lzagzff4p7",
+  "sceneId": "return_needs_handoff",
+  "runNumber": 5,
+  "startedAt": "2026-04-11T03:01:08.095Z",
+  "status": "completed",
+  "config": {
+    "enabled": true,
+    "outputDir": "../outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "cypress"
+  },
+  "finishedAt": "2026-04-11T03:01:15.690Z"
+}

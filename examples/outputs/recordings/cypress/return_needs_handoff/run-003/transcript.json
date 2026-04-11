@@ -1,0 +1,57 @@
+{
+  "runId": "l5cq4erhdp",
+  "sceneId": "return_needs_handoff",
+  "startedAt": "2026-04-11T02:59:40.193Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:59:40.483Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I need to return my wireless earbuds.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:59:42.640Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help you with that. Do you have the order ID for your wireless earbuds?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:59:43.531Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Sure, the order ID is ORD-10027.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:59:47.747Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm sorry, but according to our policy, personal audio items like wireless earbuds are non-returnable due to hygiene and safety reasons. We cannot process a return for this item.\nTERMINAL_STATE: return_denied_policy",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    }
+  ],
+  "terminalState": "return_denied_policy",
+  "finishedAt": "2026-04-11T02:59:47.750Z"
+}

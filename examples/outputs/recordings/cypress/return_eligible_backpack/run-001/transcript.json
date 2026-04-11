@@ -1,0 +1,105 @@
+{
+  "runId": "r0bpg8xzx1",
+  "sceneId": "return_eligible_backpack",
+  "startedAt": "2026-04-11T02:58:06.508Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:58:06.833Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return an item please.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:58:09.066Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem, I can help you with that. To start the return process, could you please provide me with the order ID and the SKU of the item you wish to return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:58:09.729Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order ID is ORD-10031.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:58:11.533Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Thanks! And what is the SKU of the item you would like to return from order ORD-10031?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:58:12.410Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I don't have the SKU on hand, but it's the hiking backpack I'm looking to return.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:58:17.758Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Great, I see that the hiking backpack (SKU: HB-220) from order ORD-10031 is eligible for return. The return policy for outdoor gear states that items must be in original packaging and unused, and returns are accepted within 30 days.\n\nCould you please tell me the reason for the return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 7,
+      "timestamp": "2026-04-11T02:58:18.556Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The backpack is too small and doesn't fit my gear.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 8,
+      "timestamp": "2026-04-11T02:58:22.677Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Alright, your return for the hiking backpack (SKU: HB-220) from order ORD-10031 has been successfully created! Your return ID is RET-FAB74A.\n\nYou can find your shipping label here: https://shipping.example.com/labels/RET-FAB74A. Please pack the item securely and drop it off at any shipping location.\n\nIs there anything else I can assist you with today?\nTERMINAL_STATE: return_created",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    }
+  ],
+  "terminalState": "return_created",
+  "finishedAt": "2026-04-11T02:58:22.679Z"
+}

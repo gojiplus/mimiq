@@ -1,0 +1,80 @@
+{
+  "runId": "ni9pmoojk6r",
+  "sceneId": "visual_assertions",
+  "startedAt": "2026-04-11T03:02:08.846Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:02:09.111Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hello",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:02:10.375Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Hello! Welcome to TechShop customer service. How may I help you today?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:02:11.315Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hi there! I'm just checking if the user interface is displaying correctly.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:02:13.965Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm a customer service agent for TechShop, and I can help you with order inquiries and return requests. How can I assist you with those today?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T03:02:14.689Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Thanks for the offer! I'm currently just verifying that the user interface is displayed correctly. ",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T03:02:17.886Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "It sounds like you're having a technical issue with how the interface is displaying. While I can help with order inquiries and return requests, I'm not equipped to troubleshoot display problems. Would you like me to escalate this to a human agent who can better assist you with that, or do you have any questions about an order or a return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T03:02:17.889Z"
+}

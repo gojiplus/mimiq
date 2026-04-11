@@ -1,0 +1,28 @@
+{
+  "runId": "q5wkdlx4j6",
+  "sceneId": "inline-greeting",
+  "runNumber": 2,
+  "startedAt": "2026-04-11T02:57:21.283Z",
+  "status": "failed",
+  "config": {
+    "enabled": true,
+    "outputDir": "/Users/soodoku/Documents/GitHub/mimiq/examples/outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "playwright"
+  },
+  "finishedAt": "2026-04-11T02:57:25.935Z"
+}

@@ -1,0 +1,80 @@
+{
+  "runId": "sc9r2i51odr",
+  "sceneId": "visual_assertions",
+  "startedAt": "2026-04-11T03:00:37.130Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:00:37.416Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hello",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:00:38.710Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Hello! Welcome to TechShop customer service. How may I help you today?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:00:39.467Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Just wanted to say hello and confirm if the UI is displaying correctly on your end.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:00:42.638Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Hello there! I'm an AI assistant, so I don't have a \"UI\" in the traditional sense, but I'm here and ready to help you with any order inquiries or return requests you might have. How can I assist you today?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T03:00:43.498Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I appreciate it, but I'm just checking to make sure everything is functioning properly. Is there anything you need from me?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T03:00:46.795Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "It sounds like you're doing a system check! From my end, everything appears to be functioning correctly, and I'm ready to assist.\n\nDo you have any specific order inquiries or return requests I can help you with today? Or were you just checking in?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fvisual-evaluation.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T03:00:46.797Z"
+}

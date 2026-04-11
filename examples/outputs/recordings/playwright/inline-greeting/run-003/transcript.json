@@ -1,0 +1,80 @@
+{
+  "runId": "xnx6a0g64rs",
+  "sceneId": "inline-greeting",
+  "startedAt": "2026-04-11T02:57:38.587Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:57:38.631Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hello! Can you help me?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:57:39.499Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Hello! Yes, I can help you. What can I help you with today?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:57:41.432Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "What are your business hours?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:57:42.801Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I am an AI assistant and available 24/7. For human assistance, our business hours are Monday to Friday, 9 AM to 5 PM EST.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:57:44.165Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Thank you for the information!",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:57:45.035Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "You're welcome! Is there anything else I can assist you with?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T02:57:45.743Z"
+}

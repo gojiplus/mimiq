@@ -17,7 +17,7 @@ import {
 import { createLocalRuntime } from "@gojiplus/mimiq/node";
 
 const recordingEnabled = process.env.MIMIQ_RECORDING === "1";
-const recordingsDir = join(process.cwd(), "..", "outputs", "recordings");
+const recordingsDir = join(process.cwd(), "..", "outputs", "recordings", "stagehand");
 const scenesDir = join(process.cwd(), "scenes");
 
 export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({

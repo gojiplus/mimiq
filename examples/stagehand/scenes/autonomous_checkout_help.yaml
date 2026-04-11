@@ -1,0 +1,33 @@
+id: autonomous_checkout_help
+description: >
+  Customer needs help completing checkout.
+  Stagehand autonomously navigates and interacts with the page.
+
+starting_prompt: "I'm trying to check out but I'm stuck"
+conversation_plan: |
+  Goal: Get help completing a purchase.
+  - Explain the issue with checkout
+  - Follow agent's instructions
+  - Ask clarifying questions if needed
+
+persona: vague
+max_turns: 12
+
+simulator:
+  type: llm
+  model: "openai/gpt-4o"
+
+context:
+  customer:
+    name: Morgan Lee
+    email: morgan@example.com
+  cart:
+    items:
+      - name: Bluetooth Speaker
+        price: 49.99
+    total: 49.99
+
+expectations:
+  allowed_terminal_states:
+    - checkout_assisted
+    - conversation_ended

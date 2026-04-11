@@ -1,0 +1,28 @@
+{
+  "runId": "lpnx20x02sd",
+  "sceneId": "return_eligible_backpack",
+  "runNumber": 10,
+  "startedAt": "2026-04-11T03:01:16.603Z",
+  "status": "completed",
+  "config": {
+    "enabled": true,
+    "outputDir": "../outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "cypress"
+  },
+  "finishedAt": "2026-04-11T03:01:30.347Z"
+}

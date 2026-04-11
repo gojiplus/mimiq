@@ -1,0 +1,80 @@
+{
+  "runId": "pkefqodthue",
+  "sceneId": "test-greeting",
+  "startedAt": "2026-04-11T02:56:47.163Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:56:47.285Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hello, I need help with my order",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:56:48.751Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that! Do you have your order ID or the email address associated with your order?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:56:50.520Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, the order number is #12345.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:56:52.899Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I apologize, but I couldn't find an order with the ID \"12345\". Could you please double-check the order number?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:56:54.229Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm sure it's #12345, but I can double-check and get back to you.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:56:55.636Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Okay, please take your time. I'll be here to help when you have the correct order number.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T02:56:57.430Z"
+}

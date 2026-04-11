@@ -1,0 +1,32 @@
+{
+  "runId": "z217ypig6dl",
+  "sceneId": "inline-stagehand-demo",
+  "startedAt": "2026-04-11T05:08:46.612Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T05:08:46.673Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "What products do you have?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T05:08:48.093Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can only help with order inquiries and return requests for existing orders. I do not have access to product listings.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T05:08:48.095Z"
+}

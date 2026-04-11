@@ -1,0 +1,81 @@
+{
+  "runId": "wh0yhx4mb3",
+  "sceneId": "return_eligible_backpack",
+  "startedAt": "2026-04-11T02:57:31.107Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:57:31.227Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return an item please.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:57:32.667Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help you with that. What is the order ID and the SKU of the item you would like to return?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:57:33.564Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order ID is ORD-10031. I don't have the SKU on hand right now.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:57:35.933Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem! Your order ORD-10031 contains a \"Hiking Backpack\" with SKU HB-220. Is this the item you would like to return? If not, please let me know the correct SKU.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:57:36.661Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, that's the item I'd like to return.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:57:41.055Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I've successfully created a return for the Hiking Backpack (SKU: HB-220) from order ORD-10031.\n\nYour return ID is RET-7DAA0E. You can find your shipping label here: https://shipping.example.com/labels/RET-7DAA0E.\n\nPlease pack the item securely and drop it off at any shipping location.\n\nTERMINAL_STATE: return_created",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "terminalState": "return_created",
+  "finishedAt": "2026-04-11T02:57:41.056Z"
+}

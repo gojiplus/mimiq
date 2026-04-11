@@ -1,0 +1,27 @@
+{
+  "runId": "hvn4563hzur",
+  "sceneId": "autonomous_navigation",
+  "runNumber": 1,
+  "startedAt": "2026-04-11T04:43:00.550Z",
+  "status": "failed",
+  "config": {
+    "enabled": true,
+    "outputDir": "/Users/soodoku/Documents/GitHub/mimiq/examples/outputs/recordings/stagehand",
+    "screenshots": {
+      "enabled": true,
+      "timing": "both",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 1
+  },
+  "finishedAt": "2026-04-11T04:43:02.312Z"
+}

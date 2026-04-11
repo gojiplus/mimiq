@@ -1,0 +1,81 @@
+{
+  "runId": "jwxdx79yg7q",
+  "sceneId": "return_needs_handoff",
+  "startedAt": "2026-04-11T03:00:01.481Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:00:01.762Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I need to return my wireless earbuds.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:00:03.779Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Okay, I can help with that. What is your order ID?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:00:04.460Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "ORD-10027.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:00:09.050Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm sorry, but according to our policy, personal audio items like wireless earbuds are non-returnable due to hygiene and safety reasons.\n\nWould you like me to escalate this to a human agent for further review?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T03:00:09.903Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "This is really unacceptable. I'd like to speak to a human agent, please.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T03:00:13.253Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I understand this is frustrating. I've escalated your case to a human agent (Ticket ID: TKT-6B49D6). They will review your request and contact you within 24 hours.\nTERMINAL_STATE: escalated_to_human",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "terminalState": "escalated_to_human",
+  "finishedAt": "2026-04-11T03:00:13.255Z"
+}

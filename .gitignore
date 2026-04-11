@@ -6,15 +6,17 @@ test/videos/
 examples/outputs/downloads/
 !examples/outputs/downloads/.gitkeep
 
-examples/outputs/gifs/*.gif
-!examples/outputs/gifs/track_order_via_button.gif
 examples/outputs/videos/*.webm
 examples/outputs/videos/*.mp4
 examples/outputs/screenshots/
-examples/outputs/recordings/
 examples/outputs/reports/
 examples/outputs/test-results/
 !examples/outputs/**/.gitkeep
+
+# Playwright test artifacts
+test-results/
+**/test-results/
+!examples/stagehand/test-results/.last-run.json
 
 .DS_Store
 *.log

@@ -1,0 +1,32 @@
+{
+  "runId": "ct0uhvi16k7",
+  "sceneId": "autonomous_checkout_help",
+  "startedAt": "2026-04-11T04:57:56.472Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T04:57:56.520Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm trying to check out but I'm stuck",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T04:57:58.021Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with order inquiries, but I can't directly assist with checkout issues. It sounds like you might be having a technical problem with the website. Have you tried refreshing the page or clearing your browser's cache and cookies?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T04:57:58.023Z"
+}

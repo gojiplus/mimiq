@@ -1,0 +1,57 @@
+{
+  "runId": "1w4eewrm8j",
+  "sceneId": "return_eligible_backpack",
+  "startedAt": "2026-04-11T02:56:47.175Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:56:47.312Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return an item please.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:56:48.817Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that. Do you have the order ID and the SKU of the item you'd like to return? I'll also need to know the reason for the return.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:56:50.772Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order ID is ORD-10031. The reason for the return is that the backpack is too small and doesn't fit my gear.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:56:55.671Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Your return for the Hiking Backpack from order ORD-10031 has been created. Your return ID is RET-2350AC.\n\nYou can find your shipping label here: https://shipping.example.com/labels/RET-2350AC\n\nPlease pack the item securely and drop it off at any shipping location.\nTERMINAL_STATE: return_created",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    }
+  ],
+  "terminalState": "return_created",
+  "finishedAt": "2026-04-11T02:56:55.672Z"
+}

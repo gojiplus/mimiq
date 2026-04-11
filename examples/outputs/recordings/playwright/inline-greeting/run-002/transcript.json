@@ -1,0 +1,81 @@
+{
+  "runId": "q5wkdlx4j6",
+  "sceneId": "inline-greeting",
+  "startedAt": "2026-04-11T02:57:21.283Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:57:21.352Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hello! Can you help me?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:57:22.215Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Hello! Yes, I can help you. What can I do for you today?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:57:23.055Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Could you tell me your business hours, please?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:57:24.417Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm a digital assistant, so I don't have business hours! I'm available 24/7 to help you with your TechShop orders and returns.\n\nHow can I assist you with an order or return today?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:57:25.074Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Thank you for the information! That was all I needed.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:57:25.934Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Happy to help!\nTERMINAL_STATE: order_info_provided",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    }
+  ],
+  "terminalState": "order_info_provided",
+  "finishedAt": "2026-04-11T02:57:25.935Z"
+}

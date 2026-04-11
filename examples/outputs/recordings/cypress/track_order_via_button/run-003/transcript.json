@@ -1,0 +1,57 @@
+{
+  "runId": "xanfcmwqxb",
+  "sceneId": "track_order_via_button",
+  "startedAt": "2026-04-11T03:01:45.544Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:01:45.831Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to track my order please.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:01:47.779Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem! Can I get your order ID or email address please?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:01:48.522Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Sure, the order ID is ORD-10031.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:01:51.424Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Your order ORD-10031 for a Hiking Backpack was delivered on March 2nd, 2025.\nTERMINAL_STATE: order_info_provided",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    }
+  ],
+  "terminalState": "order_info_provided",
+  "finishedAt": "2026-04-11T03:01:51.427Z"
+}

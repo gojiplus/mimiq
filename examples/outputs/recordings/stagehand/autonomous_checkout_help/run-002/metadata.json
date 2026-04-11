@@ -1,0 +1,27 @@
+{
+  "runId": "fgmtq6oxcbg",
+  "sceneId": "autonomous_checkout_help",
+  "runNumber": 2,
+  "startedAt": "2026-04-11T04:57:43.922Z",
+  "status": "failed",
+  "config": {
+    "enabled": true,
+    "outputDir": "/Users/soodoku/Documents/GitHub/mimiq/examples/outputs/recordings/stagehand",
+    "screenshots": {
+      "enabled": true,
+      "timing": "both",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 1
+  },
+  "finishedAt": "2026-04-11T04:57:45.889Z"
+}

@@ -1,13 +1,16 @@
 /**
- * Stagehand autonomous browser automation tests.
+ * Stagehand User Simulation Tests (Text-Based)
  *
- * These tests demonstrate Stagehand's ability to perform autonomous
- * browser actions - not just typing in a chat, but clicking, navigating,
- * and interacting with the page dynamically.
+ * These tests simulate USER TEXT INPUT in chat conversations.
+ * They use the LLM simulator to generate what a user would TYPE,
+ * NOT to click or navigate the browser.
+ *
+ * For browser automation with clicking/navigation, see:
+ *   - agent-click.spec.ts (uses AgentRunner with StagehandAgent)
+ *   - CLI: npx mimiq agent --scene ./agent-scenes/track_order_button.yaml
  *
  * Requirements:
- * - OPENAI_API_KEY or STAGEHAND_MODEL set
- * - @browserbase/stagehand installed
+ * - OPENAI_API_KEY or LLM_MODEL set (for user simulation)
  *
  * Run:
  *   OPENAI_API_KEY=... npm test
@@ -71,7 +74,7 @@ test.describe("Stagehand Autonomous Browser Agent", () => {
           - Ask about product categories
           - Get details on one product
         `,
-        persona: "curious",
+        persona: "cooperative",
         max_turns: 8,
         simulator: {
           type: "stagehand",
@@ -90,6 +93,10 @@ test.describe("Stagehand Autonomous Browser Agent", () => {
     } catch {
       // Expected to complete or timeout
     }
+
+    const report = await mimiq.evaluate();
+    console.log("Inline Scene Results:");
+    console.log(`  Passed: ${report.passed}`);
 
     const snapshot = await mimiq.captureSnapshot();
     expect(snapshot.transcript.length).toBeGreaterThan(0);

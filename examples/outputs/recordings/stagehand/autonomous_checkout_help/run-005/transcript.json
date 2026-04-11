@@ -1,0 +1,32 @@
+{
+  "runId": "xbd0gfwexw",
+  "sceneId": "autonomous_checkout_help",
+  "startedAt": "2026-04-11T05:08:34.723Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T05:08:34.792Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm trying to check out but I'm stuck",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T05:08:36.225Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with order inquiries, but I can't directly assist with checkout issues. Would you like me to escalate this to a human agent?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T05:08:36.226Z"
+}

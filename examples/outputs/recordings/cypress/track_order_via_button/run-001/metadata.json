@@ -1,0 +1,28 @@
+{
+  "runId": "9unv8rk8nxt",
+  "sceneId": "track_order_via_button",
+  "runNumber": 1,
+  "startedAt": "2026-04-11T02:58:53.817Z",
+  "status": "completed",
+  "config": {
+    "enabled": true,
+    "outputDir": "../outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "cypress"
+  },
+  "finishedAt": "2026-04-11T02:58:59.576Z"
+}

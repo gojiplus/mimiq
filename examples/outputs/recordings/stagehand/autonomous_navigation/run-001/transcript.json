@@ -1,0 +1,32 @@
+{
+  "runId": "hvn4563hzur",
+  "sceneId": "autonomous_navigation",
+  "startedAt": "2026-04-11T04:43:00.550Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T04:43:00.678Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I need to find the return policy",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T04:43:02.224Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "What item category is this for?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T04:43:02.312Z"
+}

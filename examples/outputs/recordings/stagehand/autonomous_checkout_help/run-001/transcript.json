@@ -1,0 +1,32 @@
+{
+  "runId": "5hwn37re19r",
+  "sceneId": "autonomous_checkout_help",
+  "startedAt": "2026-04-11T04:43:02.621Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T04:43:02.707Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm trying to check out but I'm stuck",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T04:43:04.193Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that. Can you tell me what seems to be the problem? Are you having trouble with a specific step, or seeing an error message?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "finishedAt": "2026-04-11T04:43:04.196Z"
+}

@@ -1,0 +1,105 @@
+{
+  "runId": "e465g1krlsd",
+  "sceneId": "return_request",
+  "startedAt": "2026-04-11T02:57:19.047Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:57:19.082Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return something I bought last week",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:57:20.465Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that. Do you have the order ID?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:57:21.161Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, the order ID is ORD-20042.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:57:23.533Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can't find an order with that ID. Could you please double-check it for me?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:57:24.232Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm sure it's ORD-20042. Could you please try again?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:57:26.118Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm sorry, but I've tried looking up ORD-20042 again, and I'm still getting the same error that the order was not found. Would you like me to escalate this to a human agent who might be able to help you further?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 7,
+      "timestamp": "2026-04-11T02:57:26.776Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, please escalate this to a human agent. Thank you for your help.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 8,
+      "timestamp": "2026-04-11T02:57:29.170Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I've escalated your request to a human agent. They will review your case and contact you within 24 hours. Your ticket ID is TKT-E614AC.\n\nTERMINAL_STATE: escalated_to_human",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    }
+  ],
+  "terminalState": "escalated_to_human",
+  "finishedAt": "2026-04-11T02:57:29.171Z"
+}

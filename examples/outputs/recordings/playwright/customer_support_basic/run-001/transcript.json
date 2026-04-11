@@ -1,0 +1,57 @@
+{
+  "runId": "1vcnycdxfh1",
+  "sceneId": "customer_support_basic",
+  "startedAt": "2026-04-11T02:56:52.879Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:56:52.932Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Hi, I need to check on my order status",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:56:54.354Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem, I can help with that! Do you have your order ID or the email address associated with your order?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:56:55.879Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, the order ID is ORD-10031.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:56:58.269Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Thanks! I found your order, ORD-10031. It looks like your Hiking Backpack was delivered on March 2nd, 2025.\nTERMINAL_STATE: order_info_provided",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    }
+  ],
+  "terminalState": "order_info_provided",
+  "finishedAt": "2026-04-11T02:56:58.270Z"
+}

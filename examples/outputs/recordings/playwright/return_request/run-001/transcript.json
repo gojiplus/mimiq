@@ -1,0 +1,153 @@
+{
+  "runId": "obx69ptt7e8",
+  "sceneId": "return_request",
+  "startedAt": "2026-04-11T02:56:53.839Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:56:53.881Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return something I bought last week",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:56:55.250Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem, I can help you with that. First, I'll need your order number and the SKU of the item you'd like to return.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:56:56.611Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "It's order ID ORD-20042. I don't have the SKU handy, but the item doesn't fit my needs.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:56:58.987Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can't find an order with the ID `ORD-20042`. Could you please double-check the order number?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T02:56:59.650Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I’m sure it’s ORD-20042. Could you please check again?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T02:57:00.520Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I apologize, but I'm still unable to find an order with the ID ORD-20042. Is it possible the order was placed under a different name or email address?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 7,
+      "timestamp": "2026-04-11T02:57:01.549Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "It should be under the email john.doe@example.com. Could you check again with that information, please?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 8,
+      "timestamp": "2026-04-11T02:57:03.955Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I've checked for orders associated with `john.doe@example.com`, but I couldn't find any. Are you sure that's the correct email address? Perhaps the order was placed with a different email or under a different name?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    },
+    {
+      "turn": 9,
+      "timestamp": "2026-04-11T02:57:04.928Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm sure it's the correct email. Could there be any other way to verify the order?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    },
+    {
+      "turn": 10,
+      "timestamp": "2026-04-11T02:57:07.336Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I understand your frustration. Since I'm unable to locate the order with the information provided, I'll need to escalate this to a human agent who can further investigate. They may have access to additional tools or methods to find your order.\n\nWould you like me to escalate this for you?",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 10
+      }
+    },
+    {
+      "turn": 11,
+      "timestamp": "2026-04-11T02:57:08.102Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, please escalate this to a human agent. Thank you for your help.",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 10
+      }
+    },
+    {
+      "turn": 12,
+      "timestamp": "2026-04-11T02:57:10.502Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I've successfully escalated your case to a human agent. Your ticket ID is TKT-992988. A human agent will review this and contact you within 24 hours.\n\nTERMINAL_STATE: escalated_to_human",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 12
+      }
+    }
+  ],
+  "terminalState": "escalated_to_human",
+  "finishedAt": "2026-04-11T02:57:10.503Z"
+}

@@ -1,0 +1,57 @@
+{
+  "runId": "315h2zl2nbl",
+  "sceneId": "return_needs_handoff",
+  "startedAt": "2026-04-11T02:58:44.764Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T02:58:45.045Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I need to return my wireless earbuds.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T02:58:47.749Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem, I can help you with that. Do you have your order number handy? What is the reason for the return?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T02:58:48.487Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order number is ORD-10027. I'm returning them because I'm not satisfied with the sound quality.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T02:58:53.767Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm sorry, but I'm unable to process a return for your wireless earbuds. Our policy states that personal audio items are non-returnable due to hygiene and safety reasons.\n\nI understand this might be disappointing. Would you like me to escalate this to a human agent who can provide further assistance?\nTERMINAL_STATE: return_denied_policy",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    }
+  ],
+  "terminalState": "return_denied_policy",
+  "finishedAt": "2026-04-11T02:58:53.770Z"
+}

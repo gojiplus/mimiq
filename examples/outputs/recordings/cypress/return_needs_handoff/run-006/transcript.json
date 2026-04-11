@@ -1,0 +1,105 @@
+{
+  "runId": "h982tai9t8",
+  "sceneId": "return_needs_handoff",
+  "startedAt": "2026-04-11T03:01:30.401Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:01:30.658Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I need to return my wireless earbuds.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:01:32.728Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can help with that. Do you have your order number handy?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:01:33.632Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yeah, it's ORD-10027.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:01:37.829Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I'm sorry, but wireless earbuds are not eligible for return due to our hygiene and safety policy for personal audio items.\n\nWould you like me to escalate this to a human agent?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T03:01:38.832Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm not happy with that. I need this resolved. Can you make an exception or connect me with someone who can?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T03:01:41.643Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I understand your frustration, but I'm unable to make exceptions to this policy. It's in place for hygiene and safety reasons.\n\nI can, however, escalate your request to a human agent who can discuss this further with you. Would you like me to do that?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 7,
+      "timestamp": "2026-04-11T03:01:42.272Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, please escalate this to a human agent.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 8,
+      "timestamp": "2026-04-11T03:01:45.494Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I've escalated your request to a human agent. They will review your case and contact you within 24 hours. Your ticket ID is TKT-4CBCB9.\n\nTERMINAL_STATE: escalated_to_human",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Freturn-flow.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    }
+  ],
+  "terminalState": "escalated_to_human",
+  "finishedAt": "2026-04-11T03:01:45.497Z"
+}

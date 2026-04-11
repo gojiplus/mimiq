@@ -1,0 +1,105 @@
+{
+  "runId": "0ax7ofkcifn",
+  "sceneId": "return_eligible_backpack",
+  "startedAt": "2026-04-11T03:00:50.408Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T03:00:50.738Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'd like to return an item please.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T03:00:52.881Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "No problem, I can help you with that. To process your return, I'll need your order ID and the SKU of the item you'd like to return, along with the reason for the return. Can you please provide me with these details?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-04-11T03:00:53.809Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "The order ID is ORD-10031. The reason for the return is that the backpack is too small and doesn't fit my gear.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-04-11T03:00:56.797Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Thanks for providing the order ID and reason. To proceed, I'll also need the SKU of the backpack you'd like to return. You can usually find this on the product page or your order confirmation.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-04-11T03:00:57.687Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm not sure about the SKU. Could you help me find it?",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 4
+      }
+    },
+    {
+      "turn": 6,
+      "timestamp": "2026-04-11T03:01:03.020Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "It looks like the item you want to return is a \"Hiking Backpack\" (SKU: HB-220). The return policy for outdoor gear allows returns within 30 days, provided the item is in its original packaging and unused.\n\nI can go ahead and create the return for you. Please confirm that the backpack is in its original packaging and has not been used.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 7,
+      "timestamp": "2026-04-11T03:01:03.718Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "Yes, the backpack is in its original packaging and hasn't been used.",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 6
+      }
+    },
+    {
+      "turn": 8,
+      "timestamp": "2026-04-11T03:01:08.041Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "Great! Your return for the Hiking Backpack (SKU: HB-220) from order ORD-10031 has been successfully created.\n\nYour return ID is RET-0826CB. You can find your shipping label at https://shipping.example.com/labels/RET-0826CB. Please pack the item securely and drop it off at any shipping location.\n\nTERMINAL_STATE: return_created",
+      "uiState": {
+        "url": "http://localhost:5173/__cypress/iframes/tests%2Fhtml-adapter.cy.ts?browserFamily=chromium",
+        "agentStatus": "idle",
+        "visibleMessages": 8
+      }
+    }
+  ],
+  "terminalState": "return_created",
+  "finishedAt": "2026-04-11T03:01:08.044Z"
+}

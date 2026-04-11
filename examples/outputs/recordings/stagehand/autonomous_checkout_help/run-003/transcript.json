@@ -1,0 +1,33 @@
+{
+  "runId": "qod3kqpfum",
+  "sceneId": "autonomous_checkout_help",
+  "startedAt": "2026-04-11T04:57:50.172Z",
+  "turns": [
+    {
+      "turn": 1,
+      "timestamp": "2026-04-11T04:57:50.236Z",
+      "actor": "customer",
+      "type": "message",
+      "content": "I'm trying to check out but I'm stuck",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 0
+      }
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-04-11T04:57:52.622Z",
+      "actor": "agent",
+      "type": "message",
+      "content": "I can only help with order inquiries and returns. I'll connect you with a human agent who can help you with your checkout issue.\nA human agent will review your case and contact you within 24 hours. Your ticket ID is TKT-E3B939.\nTERMINAL_STATE: escalated_to_human",
+      "uiState": {
+        "url": "http://localhost:5173/",
+        "agentStatus": "idle",
+        "visibleMessages": 2
+      }
+    }
+  ],
+  "terminalState": "escalated_to_human",
+  "finishedAt": "2026-04-11T04:57:52.622Z"
+}

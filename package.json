@@ -1,6 +1,6 @@
 {
   "name": "@gojiplus/mimiq",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "Simulate users and evaluate AI agents in Cypress and Playwright e2e tests",
   "type": "module",
   "workspaces": [

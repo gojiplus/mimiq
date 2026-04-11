@@ -24,6 +24,13 @@ export function createSimulator(
     return new Simulator(scene, options.defaultSimulatorConfig);
   }
 
+  if (sceneSimConfig.type === "stagehand") {
+    const config: SimulatorConfig = {
+      model: (sceneSimConfig.options?.model as string) || options.defaultSimulatorConfig?.model,
+    };
+    return new Simulator(scene, config);
+  }
+
   if (sceneSimConfig.type === "browser-use") {
     throw new Error(
       "browser-use simulator requires async initialization. Use createSimulatorAsync() instead."

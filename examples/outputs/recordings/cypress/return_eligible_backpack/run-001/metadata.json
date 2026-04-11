@@ -1,0 +1,28 @@
+{
+  "runId": "r0bpg8xzx1",
+  "sceneId": "return_eligible_backpack",
+  "runNumber": 1,
+  "startedAt": "2026-04-11T02:58:06.508Z",
+  "status": "completed",
+  "config": {
+    "enabled": true,
+    "outputDir": "../outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "cypress"
+  },
+  "finishedAt": "2026-04-11T02:58:22.679Z"
+}

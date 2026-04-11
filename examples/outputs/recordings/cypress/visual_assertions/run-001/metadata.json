@@ -1,0 +1,28 @@
+{
+  "runId": "4jcvhpd8dbb",
+  "sceneId": "visual_assertions",
+  "runNumber": 1,
+  "startedAt": "2026-04-11T02:59:15.140Z",
+  "status": "failed",
+  "config": {
+    "enabled": true,
+    "outputDir": "../outputs/recordings",
+    "screenshots": {
+      "enabled": true,
+      "timing": "before",
+      "format": "png"
+    },
+    "transcript": {
+      "format": "json",
+      "includeUiState": true
+    },
+    "actionLog": {
+      "enabled": true,
+      "format": "markdown"
+    },
+    "runNaming": "sequential",
+    "defaultRunCount": 3,
+    "framework": "cypress"
+  },
+  "finishedAt": "2026-04-11T02:59:23.097Z"
+}
