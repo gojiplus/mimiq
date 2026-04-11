@@ -11,9 +11,11 @@
     "test:record": "MIMIQ_RECORDING=1 npx playwright test"
   },
   "dependencies": {
-    "@gojiplus/mimiq": "file:../..",
-    "@browserbasehq/stagehand": "^2.0.0",
-    "@playwright/test": "^1.59.0"
+    "@gojiplus/mimiq": "file:../.."
+  },
+  "peerDependencies": {
+    "@browserbasehq/stagehand": "^3.0.0",
+    "@playwright/test": "^1.40.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0"
