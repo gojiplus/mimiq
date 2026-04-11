@@ -17,12 +17,6 @@ mimiq simulates realistic users to test AI chatbots and agents. Instead of scrip
 - **Works with your stack** — Playwright, Cypress, and Stagehand adapters
 - **Automated evaluation** — Verify tool calls, terminal states, and qualitative behavior
 
-## Quick Demo
-
-A frustrated customer trying to return a backpack:
-
-![return flow demo](assets/demo-return-flow.gif)
-
 ## 30-Second Setup
 
 ```bash
