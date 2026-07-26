@@ -6,15 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-typescript:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
           cache: "npm"
@@ -25,14 +33,18 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  test-typescript:
+  # Named `build` rather than `test-typescript`: it runs tsup, not tests.
+  # There is no unit-test suite in this repo, and a check named test-* that
+  # runs none reads as coverage that does not exist.
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
           cache: "npm"
@@ -40,3 +52,62 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+
+  # The two jobs below exist so that `gate` covers every lockfile Dependabot
+  # touches. Without them, roughly half of its PRs change files no workflow
+  # ever exercises, and auto-merging those behind `gate` would be merging
+  # behind a check with no bearing on the change.
+  test-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: test/app/package-lock.json
+      - name: Install test/app dependencies
+        working-directory: test/app
+        run: npm ci
+      - name: Build test/app
+        working-directory: test/app
+        run: npm run build
+
+  agent-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: test/agent-server/uv.lock
+      # `--locked` fails if uv.lock and pyproject.toml disagree, which is
+      # exactly what Dependabot's uv PRs change.
+      - name: Sync locked dependencies
+        working-directory: test/agent-server
+        run: uv sync --locked
+
+  # Single aggregate context for the branch ruleset to require. Requiring
+  # individual job names means renaming or adding one silently orphans a
+  # required check and blocks every PR with no visible failure.
+  gate:
+    if: always()
+    needs: [lint-typescript, build, test-app, agent-server]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check that every job succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "job results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::a required job did not succeed"
+              exit 1
+            fi
+          done
