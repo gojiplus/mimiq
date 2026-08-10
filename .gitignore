@@ -28,6 +28,6 @@ test-results/
 *.tgz
 
 /docs
-/test/agent-server/src/__pycache__
-/test/agent-server/src
-/test/agent-server/src/__pycache__
+
+__pycache__/
+*.pyc
