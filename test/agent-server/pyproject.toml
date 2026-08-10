@@ -7,7 +7,7 @@ license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
-    "uvicorn[standard]>=0.51.0",
+    "uvicorn[standard]>=0.52.1",
     "google-adk>=1.28.1,<2",
     "google-genai>=2.16.0",
     "python-dotenv>=1.0.0",
