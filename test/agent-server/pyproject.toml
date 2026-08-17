@@ -9,13 +9,13 @@ dependencies = [
     "fastapi>=0.141.1",
     "uvicorn[standard]>=0.52.1",
     "google-adk>=1.28.1,<2",
-    "google-genai>=2.16.0",
+    "google-genai>=2.17.0",
     "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.16.1",
+    "ruff>=0.16.2",
 ]
 
 [project.scripts]
