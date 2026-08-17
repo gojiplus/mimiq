@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
     "uvicorn[standard]>=0.52.1",
-    "google-adk>=1.28.1,<2",
+    "google-adk>=2.6.3,<3",
     "google-genai>=2.17.0",
     "python-dotenv>=1.0.0",
 ]
