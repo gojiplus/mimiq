@@ -218,6 +218,7 @@ When an agent calls tools that are not visible in the UI, emit the normalized ev
 ```typescript
 window.dispatchEvent(new CustomEvent("mimiq:agent-tool-call", {
   detail: {
+    id: "lookup-order-attempt-1",
     name: "lookup_order",
     args: { order_id: "ORD-10031" },
     result: { found: true },

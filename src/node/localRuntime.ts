@@ -65,7 +65,6 @@ interface ActiveRun {
   recorder?: RecordingCollector;
   recordedAssistantTurnKeys: Set<string>;
   recordedToolCallKeys: Set<string>;
-  recordedTelemetryKeys: Set<string>;
   applicationTelemetry: ApplicationTelemetryEvent[];
   pendingAction?: {
     action: BrowserSimAction;
@@ -133,6 +132,7 @@ function isToolCallList(value: unknown): value is AgentToolCall[] {
   return Array.isArray(value) && value.every((toolCall) => (
     typeof toolCall === "object" &&
     toolCall !== null &&
+    (toolCall.id === undefined || typeof toolCall.id === "string") &&
     typeof toolCall.name === "string" &&
     typeof toolCall.args === "object" &&
     toolCall.args !== null &&
@@ -230,7 +230,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         recorder,
         recordedAssistantTurnKeys: new Set(),
         recordedToolCallKeys: new Set(),
-        recordedTelemetryKeys: new Set(),
         applicationTelemetry: [],
       });
 
@@ -326,7 +325,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         }
         const lastAgentTurn = run.trace.turns.findLast((t: Turn) => t.role === "agent");
         for (const [index, tc] of toolCalls.entries()) {
-          const toolCallKey = `${index}:${tc.name}:${JSON.stringify(tc.args)}:${JSON.stringify(tc.result)}`;
+          const toolCallKey = tc.id
+            ? `id:${tc.id}`
+            : `${index}:${tc.name}:${JSON.stringify(tc.args)}:${JSON.stringify(tc.result)}`;
           if (!run.recordedToolCallKeys.has(toolCallKey) && lastAgentTurn) {
             run.recordedToolCallKeys.add(toolCallKey);
             lastAgentTurn.tool_calls.push({
@@ -365,9 +366,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
           );
         }
         for (const event of applicationTelemetry) {
-          const eventKey = `${event.name}:${JSON.stringify(event.data)}:${event.timestamp ?? ""}`;
-          if (run.recordedTelemetryKeys.has(eventKey)) continue;
-          run.recordedTelemetryKeys.add(eventKey);
           run.applicationTelemetry.push(event);
           traceDelta.push({
             id: Math.random().toString(36).substring(2, 10),

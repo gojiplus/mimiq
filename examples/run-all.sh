@@ -8,7 +8,7 @@
 #   ./run-all.sh --runs 3     # Run each test 3 times (default)
 #   ./run-all.sh --skip-gifs  # Skip GIF generation
 #   ./run-all.sh --only playwright  # Only run playwright tests
-#   ./run-all.sh --only agent        # Only run agent tests
+#   ./run-all.sh --only cypress      # Only run Cypress tests
 #
 
 set -e
@@ -70,24 +70,58 @@ echo "Building mimiq package..."
 cd "$ROOT_DIR"
 npm run build
 
-# Start test app
-echo "Starting test application..."
-cd "$ROOT_DIR/test/app"
-npm run dev &
-APP_PID=$!
-sleep 3
+# Start test services
+echo "Starting test services..."
+APP_PID=""
+AGENT_PID=""
 
-# Verify app is running
-if ! curl -s http://localhost:5173 > /dev/null; then
-  echo "ERROR: Test app failed to start"
-  kill $APP_PID 2>/dev/null || true
+if ! curl -fsS http://localhost:5173 > /dev/null; then
+  cd "$ROOT_DIR/test/app"
+  npm run dev &
+  APP_PID=$!
+fi
+
+if ! curl -fsS http://localhost:8001/health > /dev/null; then
+  cd "$ROOT_DIR/test/agent-server"
+  uv run uvicorn agent_server:app --app-dir src --port 8001 &
+  AGENT_PID=$!
+fi
+
+stop_services() {
+  if [[ -n "$APP_PID" ]]; then
+    kill "$APP_PID" 2>/dev/null || true
+  fi
+  if [[ -n "$AGENT_PID" ]]; then
+    kill "$AGENT_PID" 2>/dev/null || true
+  fi
+}
+
+wait_for_service() {
+  local url="$1"
+  local name="$2"
+  for _ in $(seq 1 30); do
+    if curl -fsS "$url" > /dev/null; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "ERROR: $name failed to start"
+  return 1
+}
+
+if ! wait_for_service http://localhost:5173 "Test app"; then
+  stop_services
   exit 1
 fi
-echo "Test app running on http://localhost:5173"
+if ! wait_for_service http://localhost:8001/health "Demo agent"; then
+  stop_services
+  exit 1
+fi
+echo "Test services running on http://localhost:5173 and http://localhost:8001"
 
 cleanup() {
-  echo "Stopping test app..."
-  kill $APP_PID 2>/dev/null || true
+  echo "Stopping test services..."
+  stop_services
 }
 trap cleanup EXIT
 

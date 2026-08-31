@@ -72,6 +72,7 @@ function parseToolCalls(text: string): AgentToolCall[] {
       throw new Error(`Tool call at index ${index} must provide a name and object args.`);
     }
     return {
+      ...(typeof toolCall.id === "string" ? { id: toolCall.id } : {}),
       name: toolCall.name,
       args: toolCall.args,
       result: toolCall.result as JsonValue | undefined,

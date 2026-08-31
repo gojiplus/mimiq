@@ -180,6 +180,47 @@ test("local runtime preserves repeated messages and tool calls", async () => {
   assert.equal(trace.entries.filter((entry) => entry.name === "lookup_order").length, 2);
 });
 
+test("local runtime preserves repeated instrumented events", async () => {
+  const runtime = createLocalRuntime();
+  const { runId } = await runtime.startRun({ scene: scene("repeated-events") });
+  const repeatedTelemetry = { name: "order.lookup.started", data: { orderId: "ORD-1" } };
+
+  await runtime.advanceRun({
+    runId,
+    snapshot: snapshot({
+      transcript: [{ id: "1", role: "assistant", text: "Checking now." }],
+      metadata: {
+        toolCalls: [{
+          id: "lookup-order-attempt-1",
+          name: "lookup_order",
+          args: { id: "ORD-1" },
+          result: { found: true },
+        }],
+        applicationTelemetry: [repeatedTelemetry],
+      },
+    }),
+  });
+  await runtime.advanceRun({
+    runId,
+    snapshot: snapshot({
+      transcript: [{ id: "1", role: "assistant", text: "Checking now." }],
+      metadata: {
+        toolCalls: [{
+          id: "lookup-order-attempt-2",
+          name: "lookup_order",
+          args: { id: "ORD-1" },
+          result: { found: true },
+        }],
+        applicationTelemetry: [repeatedTelemetry],
+      },
+    }),
+  });
+
+  const trace = await runtime.getTrace({ runId });
+  assert.equal(trace.entries.filter((entry) => entry.name === "lookup_order").length, 2);
+  assert.equal(trace.entries.filter((entry) => entry.name === "order.lookup.started").length, 2);
+});
+
 test("recordings preserve an append-only evidence bundle", async (t) => {
   const outputDir = mkdtempSync(join(tmpdir(), "mimiq-evidence-"));
   t.after(() => rmSync(outputDir, { recursive: true, force: true }));

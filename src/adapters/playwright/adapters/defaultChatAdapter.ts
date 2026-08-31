@@ -107,6 +107,7 @@ function parseToolCalls(text: string): AgentToolCall[] {
       throw new Error(`Tool call at index ${index} must provide a name and object args.`);
     }
     return {
+      ...(typeof toolCall.id === "string" ? { id: toolCall.id } : {}),
       name: toolCall.name,
       args: toolCall.args,
       result: toolCall.result as JsonValue | undefined,
@@ -119,6 +120,7 @@ async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]
     const eventName = "mimiq:agent-tool-call";
     const queueKey = "__mimiqAgentToolCalls";
     const listenerKey = "__mimiqAgentToolCallListener";
+    const sequenceKey = "__mimiqAgentToolCallSequence";
     const target = window as typeof window & Record<string, unknown>;
 
     if (!Array.isArray(target[queueKey])) {
@@ -126,7 +128,12 @@ async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]
     }
     if (!target[listenerKey]) {
       window.addEventListener(eventName, (event) => {
-        (target[queueKey] as unknown[]).push((event as CustomEvent<unknown>).detail);
+        const sequence = Number(target[sequenceKey] ?? 0) + 1;
+        target[sequenceKey] = sequence;
+        (target[queueKey] as unknown[]).push({
+          id: `mimiq-agent-tool-call-${sequence}`,
+          detail: (event as CustomEvent<unknown>).detail,
+        });
       });
       target[listenerKey] = true;
     }
@@ -138,11 +145,16 @@ async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]
   if (!Array.isArray(events)) {
     throw new Error("Instrumented agent tool calls must be an array.");
   }
-  return events.map((toolCall, index) => {
-    if (!isJsonObject(toolCall) || typeof toolCall.name !== "string" || !isJsonObject(toolCall.args)) {
+  return events.map((event, index) => {
+    if (!isJsonObject(event) || typeof event.id !== "string" || !isJsonObject(event.detail)) {
+      throw new Error(`Instrumented tool call at index ${index} is invalid.`);
+    }
+    const toolCall = event.detail;
+    if (typeof toolCall.name !== "string" || !isJsonObject(toolCall.args)) {
       throw new Error(`Instrumented tool call at index ${index} must provide a name and object args.`);
     }
     return {
+      id: typeof toolCall.id === "string" ? toolCall.id : event.id,
       name: toolCall.name,
       args: toolCall.args,
       result: toolCall.result as JsonValue | undefined,

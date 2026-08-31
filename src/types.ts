@@ -55,6 +55,7 @@ export interface UserToolAvailability {
 }
 
 export interface AgentToolCall {
+  id?: string;
   name: string;
   args: JsonObject;
   result?: JsonValue;
