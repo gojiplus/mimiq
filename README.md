@@ -194,7 +194,7 @@ import { createBrowserAdapter } from "@gojiplus/mimiq/playwright";
 const adapter = createBrowserAdapter(page);
 ```
 
-The generic adapter cannot send chat messages because it has no configured message control. Use `createDefaultChatAdapter` for a chat UI, or provide a dedicated adapter for an application-specific interaction.
+The generic adapter treats a scene's initial chat message as intent only: it records that turn but does not send it to the page because no message control is configured. Subsequent policy turns operate the discovered controls. Use `createDefaultChatAdapter` for a chat UI, or provide a dedicated adapter for an application-specific interaction.
 
 ## Optional Application Telemetry
 

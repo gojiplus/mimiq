@@ -188,7 +188,7 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
     recording: {
       enabled: true,
       outputDir,
-      screenshots: { enabled: false, timing: "before", format: "png" },
+      screenshots: { enabled: true, timing: "both", format: "png" },
     },
   });
   const { runId } = await runtime.startRun({ scene: scene("evidence") });
@@ -199,6 +199,7 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
     runId,
     action: advance.action,
     succeeded: true,
+    screenshotBuffer: Buffer.from("after-action"),
   });
   await runtime.advanceRun({
     runId,
@@ -231,6 +232,11 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
   ]);
   assert.equal(events[3].payload.observationSequence, 2);
   assert.equal(events[3].payload.decisionSequence, 3);
+  assert.match(events[3].payload.screenshot, /^screenshots\/action-4-after\.png$/);
+  assert.deepEqual(
+    readFileSync(join(runDir, events[3].payload.screenshot)),
+    Buffer.from("after-action"),
+  );
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.status, "completed");
   assert.deepEqual(transcript.turns.at(-1).toolCalls, [{ tool: "lookup_order", args: { id: "ORD-1" } }]);

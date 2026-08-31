@@ -5,11 +5,14 @@ import type {
   RunTrace,
   StartRunRequest,
   VisualAssertionResult,
+  BrowserSimAction,
 } from "../../types";
 import type { CypressBrowserAdapter } from "../types";
 
 let currentRunId: string | undefined;
 let currentTurnCount = 0;
+let pendingAction: BrowserSimAction | undefined;
+let failureHookRegistered = false;
 
 function getRunId(): string {
   if (!currentRunId) {
@@ -26,6 +29,15 @@ function getTurnCount(): number {
 
 function setTurnCount(turn: number): void {
   currentTurnCount = turn;
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  return String(error);
 }
 
 export interface AccessibilityAuditOptions {
@@ -72,11 +84,32 @@ export function registerMimiqCommands(
 ): void {
   const { browserAdapter, defaults } = options;
 
+  if (!failureHookRegistered) {
+    afterEach(function () {
+      const failedTest = this.currentTest;
+      const action = pendingAction;
+      const runId = currentRunId;
+      pendingAction = undefined;
+
+      if (!action || !runId || failedTest?.state !== "failed") return;
+
+      const failure = failedTest.err;
+      return cy.task("mimiq:recordActionResult", {
+        runId,
+        action,
+        succeeded: false,
+        error: errorMessage(failure),
+      }, { log: false });
+    });
+    failureHookRegistered = true;
+  }
+
   Cypress.Commands.add("mimiqStartRun", (input: StartRunRequest) => {
     return cy.task("mimiq:startRun", input, { log: false }).then((result) => {
       const { runId } = result as { runId: string };
       currentRunId = runId;
       setTurnCount(0);
+      pendingAction = undefined;
       return { runId };
     });
   });
@@ -116,6 +149,7 @@ export function registerMimiqCommands(
           if (advance.action.kind === "done") {
             return advance;
           }
+          pendingAction = advance.action;
 
           return browserAdapter
             .executeAction(advance.action)
@@ -124,11 +158,19 @@ export function registerMimiqCommands(
                 timeoutMs: defaults?.settleTimeoutMs,
               }),
             )
-            .then(() => cy.task("mimiq:recordActionResult", {
-                runId,
-                action: advance.action,
-                succeeded: true,
-              }, { log: false }).then(() => advance));
+            .then(() => browserAdapter.captureScreenshot
+              ? browserAdapter.captureScreenshot()
+              : undefined)
+            .then((screenshotBuffer) => cy.task("mimiq:recordActionResult", {
+              runId,
+              action: advance.action,
+              succeeded: true,
+              ...(screenshotBuffer ? { screenshotBuffer } : {}),
+            }, { log: false }))
+            .then(() => {
+              pendingAction = undefined;
+              return advance;
+            });
         }) as Cypress.Chainable<AdvanceRunResponse>;
     }
   });
@@ -176,6 +218,7 @@ export function registerMimiqCommands(
     return cy.task("mimiq:cleanupRun", { runId }, { log: false }).then(() => {
       currentRunId = undefined;
       setTurnCount(0);
+      pendingAction = undefined;
     }) as Cypress.Chainable<void>;
   });
 

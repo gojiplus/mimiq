@@ -150,7 +150,7 @@ async function executeObservedAction(
 ): Promise<void> {
   switch (action.kind) {
     case "message":
-      throw new Error("The generic browser adapter cannot send messages; use a chat adapter for message actions.");
+      return;
     case "click":
       await requireObservedLocator(locators, action.targetId).click();
       return;

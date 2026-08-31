@@ -26,6 +26,7 @@ test.describe("Customer Support Flows", () => {
       kind: "click",
       label: "Track Order",
     }));
+    await expect(adapter.executeAction({ kind: "message", text: "Track an order" })).resolves.toBeUndefined();
 
     await page.evaluate(() => {
       window.dispatchEvent(new CustomEvent("mimiq:telemetry", {
