@@ -536,11 +536,11 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       if (!run) {
         throw new Error(`Run not found: ${input.runId}`);
       }
-      if (run.evaluation) {
-        return structuredClone(run.evaluation);
-      }
       if (run.evaluationPromise) {
         return structuredClone(await run.evaluationPromise);
+      }
+      if (run.evaluation) {
+        return structuredClone(run.evaluation);
       }
       if (run.pendingAction) {
         throw new Error(`Run ${input.runId} has a pending browser action.`);
