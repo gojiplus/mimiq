@@ -3,15 +3,8 @@ dist/
 .venv/
 
 test/videos/
-examples/outputs/downloads/
-!examples/outputs/downloads/.gitkeep
-
-examples/outputs/videos/*.webm
-examples/outputs/videos/*.mp4
-examples/outputs/screenshots/
-examples/outputs/reports/
-examples/outputs/test-results/
-!examples/outputs/**/.gitkeep
+examples/outputs/*
+!examples/outputs/.gitkeep
 
 # Playwright test artifacts
 test-results/

@@ -16,7 +16,9 @@ import type {
   JsonObject,
   EvaluatorResult,
 } from "../types";
-import { type AgentScene, resolvePersona, type Persona } from "../core/models";
+import { type AgentScene, resolvePersona, type Persona, type Trace } from "../core/models";
+import { check } from "../core/check";
+import { Judge } from "../core/judge";
 import { complete } from "../core/llm";
 
 const log = createLogger("AgentRunner");
@@ -397,41 +399,55 @@ export class AgentRunner {
   }> {
     const results: EvaluatorResult[] = [];
     const expectations = this.scene.expectations || {};
+    const trace: Trace = {
+      scene_id: this.trace.sceneId,
+      turns: this.trace.steps.map((step) => ({
+        role: "agent" as const,
+        content: step.response?.text || step.action.result || "",
+        tool_calls: (step.response?.toolCalls || []).map((call) => ({
+          tool_name: call.tool,
+          arguments: call.args,
+          result: call.result,
+        })),
+        timestamp: step.timestamp,
+      })),
+      terminal_state: this.trace.terminalState,
+      started_at: this.trace.startedAt,
+      finished_at: this.trace.finishedAt,
+    };
+    const checkResult = check(trace, expectations);
+    results.push(...checkResult.checks.map((item) => ({
+      name: item.label,
+      passed: item.passed,
+      details: item.detail,
+    })));
 
-    if (expectations.required_tools && expectations.required_tools.length > 0) {
-      const usedTools = new Set<string>();
-      for (const step of this.trace.steps) {
-        if (step.response?.toolCalls) {
-          for (const tc of step.response.toolCalls) {
-            usedTools.add(tc.tool);
-          }
-        }
-      }
-
-      const missing = expectations.required_tools.filter(
-        (t) => !usedTools.has(t)
-      );
-
+    for (const judgeConfig of expectations.judges || []) {
+      const judge = new Judge(judgeConfig.rubric, {
+        samples: judgeConfig.samples,
+        model: judgeConfig.model,
+      });
+      const result = await judge.evaluate(trace);
       results.push({
-        name: "required-tools",
-        passed: missing.length === 0,
-        details: missing.length === 0
-          ? "All required tools used"
-          : `Missing tools: ${missing.join(", ")}`,
+        name: `judge:${judgeConfig.name}`,
+        passed: result.score === 1,
+        details: `${result.score === 1 ? "YES" : "NO"} (agreement: ${(result.agreementRate * 100).toFixed(0)}%)`,
       });
     }
 
-    if (expectations.allowed_terminal_states && expectations.allowed_terminal_states.length > 0) {
-      const passed = expectations.allowed_terminal_states.includes(
-        this.trace.terminalState || ""
-      );
-
+    if (expectations.visual_assertions?.length) {
       results.push({
-        name: "terminal-state",
-        passed,
-        details: passed
-          ? `Reached allowed state: ${this.trace.terminalState}`
-          : `State "${this.trace.terminalState || "none"}" not allowed`,
+        name: "visual",
+        passed: false,
+        details: "Visual assertions are not supported by AgentRunner. Use the Playwright or Cypress runtime.",
+      });
+    }
+
+    if (expectations.accessibility_audit) {
+      results.push({
+        name: "accessibility",
+        passed: false,
+        details: "Accessibility audits are not supported by AgentRunner. Use the Playwright or Cypress runtime.",
       });
     }
 

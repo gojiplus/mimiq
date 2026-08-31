@@ -53,9 +53,10 @@ stagehand-autonomous/
     └── autonomous-browse.spec.ts
 ```
 
-## Scene Configuration with Stagehand
+## Two execution modes
 
-Scenes can specify Stagehand as the simulator:
+The Playwright fixtures simulate a user who sends chat messages. They use the
+LLM simulator, so the scene describes a customer and a conversation plan:
 
 ```yaml
 id: autonomous_navigation
@@ -67,33 +68,26 @@ conversation_plan: |
   - Look for navigation or help sections
   - Ask the support agent about returns
 
-persona: curious
+persona: cooperative
 max_turns: 10
-
-simulator:
-  type: stagehand
-  options:
-    model: gpt-4o
-    headless: false  # Show browser for demo
-    verbose: true
 ```
 
-## How It Works
-
-1. **Stagehand Simulator**: Instead of following a scripted conversation, Stagehand uses an LLM to decide what browser actions to take.
-
-2. **Autonomous Actions**: The simulator can click buttons, fill forms, navigate pages - not just type in chat.
-
-3. **Goal-Oriented**: The conversation plan provides high-level goals, and Stagehand figures out how to achieve them.
-
-## Local vs Cloud
-
-By default, Stagehand runs a local browser. For cloud execution:
+Stagehand browser automation is a separate mode. Use `AgentRunner` or the
+`mimiq agent` command with an agent scene:
 
 ```yaml
-simulator:
+id: find_return_policy
+agent:
   type: stagehand
-  options:
-    browserbaseApiKey: ${BROWSERBASE_API_KEY}
-    browserbaseProjectId: ${BROWSERBASE_PROJECT_ID}
+  model: openai/gpt-4o
+target:
+  url: http://localhost:5173
+goal: Find and report the return policy.
+max_turns: 10
+```
+
+Run it with:
+
+```bash
+npx mimiq agent --scene ../agent-scenes/track_order_button.yaml
 ```

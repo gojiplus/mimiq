@@ -6,6 +6,6 @@ export * from "../eval";
 export { RecordingCollector, DEFAULT_RECORDING_CONFIG } from "./recordingCollector";
 export type { RecordingCollectorOptions } from "./recordingCollector";
 export { JobManager } from "./jobManager";
-export { ReportGenerator, generateJobReport } from "./reportGenerator";
+export { ReportGenerator, generateJobReport, type ReportGeneratorOptions } from "./reportGenerator";
 export { AgentRunner, runAgentScene } from "./agentRunner";
 export type { AgentRunnerOptions, AgentRunResult } from "./agentRunner";

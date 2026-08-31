@@ -105,7 +105,7 @@ run_playwright() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Playwright Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts 2>&1 || true
+    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts
   done
 
   echo "Playwright tests complete."
@@ -125,7 +125,7 @@ run_cypress() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Cypress Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx cypress run 2>&1 || true
+    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx cypress run
   done
 
   echo "Cypress tests complete."
@@ -154,14 +154,14 @@ run_stagehand() {
 
   # Check for required API key
   if [ -z "$OPENAI_API_KEY" ] && [ -z "$BROWSERBASE_API_KEY" ]; then
-    echo "WARNING: No API key found (OPENAI_API_KEY or BROWSERBASE_API_KEY)"
-    echo "Stagehand tests may fail without proper credentials."
+    echo "Skipping Stagehand tests: OPENAI_API_KEY or BROWSERBASE_API_KEY is required."
+    return
   fi
 
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Stagehand Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts 2>&1 || true
+    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts
   done
 
   echo "Stagehand tests complete."
@@ -202,7 +202,7 @@ run_agent() {
     --runs $NUM_RUNS \
     --output "$OUTPUTS_DIR" \
     --framework stagehand \
-    --headless || true
+    --headless
 
   echo "Agent tests complete."
 }

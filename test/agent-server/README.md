@@ -1,28 +1,18 @@
 # Demo Agent Server
 
-This is a **demo** customer service agent using Google ADK (Agent Development Kit). It shows one possible way to implement an agent backend that works with understudy-cypress.
-
-**Important**: This is just an example. You bring your own agent backend - it can use any LLM, any framework, any architecture. The only requirement is that your chat UI exposes the terminal state and tool calls in a way the browser adapter can capture.
+This deterministic customer-service backend makes the browser examples runnable without a cloud API key. It returns tool calls and terminal states so the adapter and evaluator have a stable target. It is not an example of a production agent.
 
 ## Setup
 
 ```bash
-cd examples/agent-server
+cd test/agent-server
 uv sync
-```
-
-## Configuration
-
-Create a `.env` file with your Google API key:
-
-```bash
-echo "GOOGLE_API_KEY=your-key-here" > .env
 ```
 
 ## Running
 
 ```bash
-uv run uvicorn src.agent_server:app --port 8001
+uv run uvicorn agent_server:app --app-dir src --port 8001
 ```
 
 Or use the script entry point:

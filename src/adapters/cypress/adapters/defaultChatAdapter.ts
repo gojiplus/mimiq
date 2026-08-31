@@ -1,7 +1,10 @@
 import type {
+  AgentToolCall,
   AffordanceSnapshot,
   AwaitSettledOptions,
   BrowserSimAction,
+  JsonObject,
+  JsonValue,
   TranscriptTurn,
   UIActionTarget,
   UserToolAvailability,
@@ -54,6 +57,28 @@ function toActionTargets(config: DefaultChatAdapterConfig): UIActionTarget[] {
   });
 }
 
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseToolCalls(text: string): AgentToolCall[] {
+  const value: unknown = JSON.parse(text);
+  if (!Array.isArray(value)) {
+    throw new Error("Tool-call payload must be a JSON array.");
+  }
+
+  return value.map((toolCall, index) => {
+    if (!isJsonObject(toolCall) || typeof toolCall.name !== "string" || !isJsonObject(toolCall.args)) {
+      throw new Error(`Tool call at index ${index} must provide a name and object args.`);
+    }
+    return {
+      name: toolCall.name,
+      args: toolCall.args,
+      result: toolCall.result as JsonValue | undefined,
+    };
+  });
+}
+
 export function createDefaultChatAdapter(
   config: DefaultChatAdapterConfig,
 ): CypressBrowserAdapter {
@@ -72,15 +97,11 @@ export function createDefaultChatAdapter(
           ...toActionTargets(config),
         ];
 
-        let toolCalls: Array<{ name: string; args: Record<string, unknown>; result?: unknown }> = [];
+        let toolCalls: AgentToolCall[] = [];
         if (config.toolCallsSelector) {
           const $toolCalls = Cypress.$(config.toolCallsSelector);
           if ($toolCalls.length > 0) {
-            try {
-              toolCalls = JSON.parse($toolCalls.text() || "[]");
-            } catch {
-              toolCalls = [];
-            }
+            toolCalls = parseToolCalls($toolCalls.text() || "[]");
           }
         }
 
@@ -94,7 +115,7 @@ export function createDefaultChatAdapter(
           ],
           metadata: {
             ...config.snapshotMetadata?.(),
-            toolCalls: toolCalls as unknown as string,
+            toolCalls,
           },
         };
 

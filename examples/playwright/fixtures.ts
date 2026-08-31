@@ -29,7 +29,7 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
             framework: "playwright",
             screenshots: {
               enabled: true,
-              timing: "before",
+              timing: "both",
               format: "png",
             },
             transcript: {

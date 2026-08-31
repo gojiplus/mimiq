@@ -3,7 +3,7 @@
  * Produces transcript.json, action-log.md, and screenshots.
  */
 
-import { existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
 import { join } from "path";
 import type {
   RecordingConfig,
@@ -11,6 +11,10 @@ import type {
   RecordingTranscript,
   RecordingTurn,
   RecordingUiState,
+  EvidenceBundleManifest,
+  EvidenceEvent,
+  EvidenceEventType,
+  JsonObject,
 } from "../types";
 
 export const DEFAULT_RECORDING_CONFIG: RecordingConfig = {
@@ -18,7 +22,7 @@ export const DEFAULT_RECORDING_CONFIG: RecordingConfig = {
   outputDir: "./test/recordings",
   screenshots: {
     enabled: true,
-    timing: "before",
+    timing: "both",
     format: "png",
   },
   transcript: {
@@ -51,6 +55,8 @@ export class RecordingCollector {
   private runDir: string;
   private screenshotsDir: string;
   private turnCounter: number = 0;
+  private eventCounter: number = 0;
+  private evidenceManifest: EvidenceBundleManifest;
 
   constructor(options: RecordingCollectorOptions);
   constructor(sceneId: string, runId: string, config?: Partial<RecordingConfig>);
@@ -104,6 +110,20 @@ export class RecordingCollector {
       status: "running",
       config: this.config,
     };
+
+    this.evidenceManifest = {
+      schemaVersion: 1,
+      runId: this.runId,
+      sceneId: this.sceneId,
+      startedAt: this.transcript.startedAt,
+      status: "running",
+      events: "events.jsonl",
+    };
+
+    if (this.config.enabled) {
+      this.writeEvidenceManifest();
+      this.recordEvent("run.started", {});
+    }
   }
 
   private getSceneBasePath(): string {
@@ -167,13 +187,23 @@ export class RecordingCollector {
     return this.runNumber;
   }
 
-  getScreenshotPath(timing: "before" | "after"): string {
+  getNextEventSequence(): number {
+    return this.eventCounter + 1;
+  }
+
+  getScreenshotPath(timing: "before" | "after", artifactId?: string): string {
+    if (artifactId) {
+      return join(this.screenshotsDir, `${artifactId}-${timing}.${this.config.screenshots.format}`);
+    }
     const turnStr = String(this.turnCounter + 1).padStart(3, "0");
     const ext = this.config.screenshots.format;
     return join(this.screenshotsDir, `turn-${turnStr}-${timing}.${ext}`);
   }
 
-  getRelativeScreenshotPath(timing: "before" | "after"): string {
+  getRelativeScreenshotPath(timing: "before" | "after", artifactId?: string): string {
+    if (artifactId) {
+      return `screenshots/${artifactId}-${timing}.${this.config.screenshots.format}`;
+    }
     const turnStr = String(this.turnCounter + 1).padStart(3, "0");
     const ext = this.config.screenshots.format;
     return `screenshots/turn-${turnStr}-${timing}.${ext}`;
@@ -209,13 +239,37 @@ export class RecordingCollector {
     this.transcript.turns.push(turn);
   }
 
+  appendToolCalls(toolCalls: RecordingTurn["toolCalls"]): void {
+    if (!this.config.enabled || !toolCalls?.length) return;
+
+    const agentTurn = this.transcript.turns.findLast((turn) => turn.actor === "agent");
+    if (!agentTurn) {
+      throw new Error("Cannot attach tool calls before recording an agent turn.");
+    }
+    agentTurn.toolCalls = [...(agentTurn.toolCalls ?? []), ...toolCalls];
+  }
+
+  recordEvent(type: EvidenceEventType, payload: JsonObject): EvidenceEvent | undefined {
+    if (!this.config.enabled) return undefined;
+
+    const event: EvidenceEvent = {
+      sequence: ++this.eventCounter,
+      timestamp: new Date().toISOString(),
+      type,
+      payload,
+    };
+    appendFileSync(join(this.runDir, this.evidenceManifest.events), `${JSON.stringify(event)}\n`);
+    return event;
+  }
+
   setTerminalState(state: string): void {
     this.transcript.terminalState = state;
   }
 
   async saveScreenshot(
     screenshotBuffer: Buffer,
-    timing: "before" | "after"
+    timing: "before" | "after",
+    artifactId?: string,
   ): Promise<string> {
     if (!this.config.enabled || !this.config.screenshots.enabled) {
       return "";
@@ -229,9 +283,9 @@ export class RecordingCollector {
       return "";
     }
 
-    const path = this.getScreenshotPath(timing);
+    const path = this.getScreenshotPath(timing, artifactId);
     writeFileSync(path, screenshotBuffer);
-    return this.getRelativeScreenshotPath(timing);
+    return this.getRelativeScreenshotPath(timing, artifactId);
   }
 
   finalize(): void {
@@ -240,6 +294,8 @@ export class RecordingCollector {
     this.transcript.finishedAt = new Date().toISOString();
     this.metadata.finishedAt = new Date().toISOString();
     this.metadata.status = "completed";
+
+    this.finishEvidence("completed");
 
     this.writeTranscript();
     if (this.config.actionLog.enabled) {
@@ -255,6 +311,8 @@ export class RecordingCollector {
     this.metadata.finishedAt = new Date().toISOString();
     this.metadata.status = "failed";
 
+    this.finishEvidence("failed");
+
     this.writeTranscript();
     if (this.config.actionLog.enabled) {
       this.writeActionLog();
@@ -265,6 +323,21 @@ export class RecordingCollector {
   private writeTranscript(): void {
     const path = join(this.runDir, "transcript.json");
     writeFileSync(path, JSON.stringify(this.transcript, null, 2));
+  }
+
+  private finishEvidence(status: "completed" | "failed"): void {
+    if (!this.config.enabled) return;
+
+    const finishedAt = new Date().toISOString();
+    this.evidenceManifest.finishedAt = finishedAt;
+    this.evidenceManifest.status = status;
+    this.recordEvent("run.finished", { status });
+    this.writeEvidenceManifest();
+  }
+
+  private writeEvidenceManifest(): void {
+    const path = join(this.runDir, "manifest.json");
+    writeFileSync(path, JSON.stringify(this.evidenceManifest, null, 2));
   }
 
   private writeMetadata(): void {

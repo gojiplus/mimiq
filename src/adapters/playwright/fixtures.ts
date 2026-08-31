@@ -4,6 +4,8 @@
  */
 
 import { test as base, expect, type Page } from "@playwright/test";
+import { readFileSync } from "fs";
+import { join } from "path";
 import type {
   AdvanceRunResponse,
   AffordanceSnapshot,
@@ -14,6 +16,11 @@ import type {
   RunMultipleOptions,
   RunMultipleResult,
   AggregateSummary,
+  BrowserSimAction,
+  EvidenceEvent,
+  EvidenceReplayResult,
+  JsonObject,
+  UIActionTarget,
 } from "../../types";
 import type { PlaywrightBrowserAdapter } from "../types";
 
@@ -78,8 +85,27 @@ export class MimiqTestHelper {
       return advance;
     }
 
-    await this.adapter.executeAction(advance.action);
-    await this.adapter.awaitSettled({ timeoutMs: this.options.settleTimeoutMs });
+    try {
+      await this.adapter.executeAction(advance.action);
+      await this.adapter.awaitSettled({ timeoutMs: this.options.settleTimeoutMs });
+      const screenshotBuffer = this.adapter.captureScreenshot
+        ? await this.adapter.captureScreenshot()
+        : undefined;
+      await this.runtime.recordActionResult?.({
+        runId: this.runId,
+        action: advance.action,
+        succeeded: true,
+        screenshotBuffer,
+      });
+    } catch (error) {
+      await this.runtime.recordActionResult?.({
+        runId: this.runId,
+        action: advance.action,
+        succeeded: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
 
     return advance;
   }
@@ -109,6 +135,68 @@ export class MimiqTestHelper {
       throw new Error("No active mimiq run. Call startRun() first.");
     }
     return this.runtime.getTrace({ runId: this.runId });
+  }
+
+  async replayEvidenceBundle(runDir: string): Promise<EvidenceReplayResult> {
+    const eventsPath = join(runDir, "events.jsonl");
+    const events = readFileSync(eventsPath, "utf8")
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as EvidenceEvent);
+    const observations = new Map<number, AffordanceSnapshot>();
+    const replayedActions: BrowserSimAction[] = [];
+    const skippedActions: EvidenceReplayResult["skippedActions"] = [];
+
+    for (const event of events) {
+      if (event.type === "observation.captured") {
+        const snapshot = event.payload.snapshot;
+        if (isAffordanceSnapshot(snapshot)) {
+          observations.set(event.sequence, snapshot);
+        }
+        continue;
+      }
+      if (event.type !== "browser.action_executed") continue;
+
+      const action = parseBrowserAction(event.payload.action);
+      if (event.payload.succeeded !== true) {
+        skippedActions.push({ action, reason: "The recorded action did not succeed." });
+        continue;
+      }
+
+      const observationSequence = event.payload.observationSequence;
+      const recordedSnapshot = typeof observationSequence === "number"
+        ? observations.get(observationSequence)
+        : undefined;
+      const resolvedAction = await this.resolveReplayAction(action, recordedSnapshot);
+      await this.adapter.executeAction(resolvedAction);
+      await this.adapter.awaitSettled({ timeoutMs: this.options.settleTimeoutMs });
+      replayedActions.push(resolvedAction);
+    }
+
+    return { replayedActions, skippedActions };
+  }
+
+  private async resolveReplayAction(
+    action: BrowserSimAction,
+    recordedSnapshot?: AffordanceSnapshot,
+  ): Promise<BrowserSimAction> {
+    if (!("targetId" in action) || !action.targetId) return action;
+
+    const recordedTarget = recordedSnapshot?.availableActions.find(
+      (target) => target.id === action.targetId,
+    );
+    if (!recordedTarget) {
+      throw new Error(`Replay bundle has no recorded target for "${action.targetId}".`);
+    }
+
+    const currentSnapshot = await this.adapter.captureSnapshot();
+    const currentTarget = findReplayTarget(recordedTarget, currentSnapshot.availableActions);
+    if (!currentTarget) {
+      throw new Error(`Replay could not resolve recorded target "${action.targetId}" on the current page.`);
+    }
+
+    return { ...action, targetId: currentTarget.id } as BrowserSimAction;
   }
 
   async cleanup(): Promise<void> {
@@ -185,6 +273,66 @@ export class MimiqTestHelper {
 
     return { runs, summary };
   }
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isAffordanceSnapshot(value: unknown): value is AffordanceSnapshot {
+  return isJsonObject(value)
+    && Array.isArray(value.transcript)
+    && Array.isArray(value.availableActions)
+    && Array.isArray(value.availableUserTools);
+}
+
+function parseBrowserAction(value: unknown): BrowserSimAction {
+  if (!isJsonObject(value) || typeof value.kind !== "string") {
+    throw new Error("Replay bundle contains an invalid browser action.");
+  }
+  if (value.kind === "message" && typeof value.text === "string") {
+    return { kind: "message", text: value.text };
+  }
+  if (value.kind === "click" && typeof value.targetId === "string") {
+    return { kind: "click", targetId: value.targetId };
+  }
+  if (value.kind === "type" && typeof value.targetId === "string" && typeof value.text === "string") {
+    return {
+      kind: "type",
+      targetId: value.targetId,
+      text: value.text,
+      ...(typeof value.clearFirst === "boolean" ? { clearFirst: value.clearFirst } : {}),
+    };
+  }
+  if (value.kind === "select" && typeof value.targetId === "string" && typeof value.value === "string") {
+    return { kind: "select", targetId: value.targetId, value: value.value };
+  }
+  if (value.kind === "upload" && typeof value.targetId === "string" && typeof value.fileRef === "string") {
+    return { kind: "upload", targetId: value.targetId, fileRef: value.fileRef };
+  }
+  if (value.kind === "navigate" && (typeof value.targetId === "string" || typeof value.url === "string")) {
+    return {
+      kind: "navigate",
+      ...(typeof value.targetId === "string" ? { targetId: value.targetId } : {}),
+      ...(typeof value.url === "string" ? { url: value.url } : {}),
+    };
+  }
+  throw new Error(`Replay bundle contains an unsupported ${value.kind} action.`);
+}
+
+function findReplayTarget(
+  recorded: UIActionTarget,
+  current: UIActionTarget[],
+): UIActionTarget | undefined {
+  const selector = recorded.metadata?.selector;
+  if (typeof selector === "string") {
+    const selectorMatch = current.find((target) => target.metadata?.selector === selector);
+    if (selectorMatch) return selectorMatch;
+  }
+  return current.find((target) => (
+    target.id === recorded.id
+    || (target.kind === recorded.kind && target.label === recorded.label)
+  ));
 }
 
 export interface MimiqFixtures {

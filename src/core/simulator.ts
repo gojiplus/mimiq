@@ -19,6 +19,9 @@ You are the customer. Stay in character.
 
 {persona}
 
+CONTEXT:
+{context}
+
 CONVERSATION PLAN:
 {conversation_plan}
 
@@ -38,6 +41,8 @@ const FINISHED_SIGNAL = "<finished>";
 
 export interface SimulatorConfig {
   model?: string;
+  baseURL?: string;
+  apiKey?: string;
 }
 
 export interface ConversationTurn {
@@ -61,6 +66,7 @@ export class Simulator implements SimulatorInterface {
 
     this.systemPrompt = SIMULATOR_SYSTEM_PROMPT
       .replace("{persona}", personaToPrompt(persona))
+      .replace("{context}", JSON.stringify(scene.context ?? {}, null, 2))
       .replace("{conversation_plan}", scene.conversation_plan);
 
     this.startingPrompt = scene.starting_prompt;
@@ -72,6 +78,8 @@ export class Simulator implements SimulatorInterface {
         process.env.SIMULATOR_MODEL ||
         process.env.LLM_MODEL ||
         "google/gemini-2.0-flash",
+      baseURL: config.baseURL ?? process.env.LLM_BASE_URL ?? "",
+      apiKey: config.apiKey ?? process.env.LLM_API_KEY ?? "",
     };
 
     log.debug({ persona: persona.description, model: this.config.model, maxTurns: this.maxTurns }, "Simulator initialized");
@@ -112,6 +120,8 @@ export class Simulator implements SimulatorInterface {
     const text = await complete(prompt, {
       model: this.config.model,
       maxTokens: 256,
+      baseURL: this.config.baseURL || undefined,
+      apiKey: this.config.apiKey || undefined,
     });
 
     log.debug({ turnNumber, responseLength: text.length }, "LLM response received");

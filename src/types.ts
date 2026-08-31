@@ -54,6 +54,14 @@ export interface UserToolAvailability {
   reasonDisabled?: string;
 }
 
+export interface AgentToolCall {
+  name: string;
+  args: JsonObject;
+  result?: JsonValue;
+}
+
+export type SnapshotMetadata = Record<string, JsonValue | AgentToolCall[]>;
+
 export interface AffordanceSnapshot {
   screenId?: string;
   url?: string;
@@ -61,7 +69,7 @@ export interface AffordanceSnapshot {
   availableActions: UIActionTarget[];
   availableUserTools: UserToolAvailability[];
   stateMarkers?: string[];
-  metadata?: JsonObject;
+  metadata?: SnapshotMetadata;
 }
 
 export interface MessageAction {
@@ -183,6 +191,15 @@ export interface AdvanceRunResponse {
   traceDelta?: TraceEntry[];
 }
 
+export interface ActionExecutionResult {
+  runId: string;
+  action: BrowserSimAction;
+  succeeded: boolean;
+  error?: string;
+  metadata?: JsonObject;
+  screenshotBuffer?: Buffer | string;
+}
+
 export interface EvaluateRunRequest {
   runId: string;
 }
@@ -209,6 +226,7 @@ export interface GenerateReportsResult {
 export interface MimiqRuntimeClient {
   startRun(input: StartRunRequest): Promise<StartRunResponse>;
   advanceRun(input: AdvanceRunRequest): Promise<AdvanceRunResponse>;
+  recordActionResult?(input: ActionExecutionResult): Promise<void>;
   evaluateRun(input: EvaluateRunRequest): Promise<EvaluationReport>;
   getTrace(input: GetTraceRequest): Promise<RunTrace>;
   cleanupRun(input: CleanupRunRequest): Promise<void>;
@@ -304,6 +322,37 @@ export interface RecordingMetadata {
   finishedAt?: string;
   status: "running" | "completed" | "failed";
   config: RecordingConfig;
+}
+
+export type EvidenceEventType =
+  | "run.started"
+  | "observation.captured"
+  | "agent.message"
+  | "agent.tool_called"
+  | "simulator.action_chosen"
+  | "browser.action_executed"
+  | "run.finished";
+
+export interface EvidenceEvent {
+  sequence: number;
+  timestamp: string;
+  type: EvidenceEventType;
+  payload: JsonObject;
+}
+
+export interface EvidenceBundleManifest {
+  schemaVersion: 1;
+  runId: string;
+  sceneId: string;
+  startedAt: string;
+  finishedAt?: string;
+  status: "running" | "completed" | "failed";
+  events: "events.jsonl";
+}
+
+export interface EvidenceReplayResult {
+  replayedActions: BrowserSimAction[];
+  skippedActions: Array<{ action: BrowserSimAction; reason: string }>;
 }
 
 export interface RunMultipleOptions {

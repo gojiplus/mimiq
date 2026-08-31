@@ -62,7 +62,7 @@ test.describe("Stagehand Autonomous Browser Agent", () => {
     console.log(`  Checks: ${report.checks.length}`);
   });
 
-  test("inline stagehand scene", async ({ page, mimiq }) => {
+  test("inline LLM scene", async ({ page, mimiq }) => {
     await page.goto("/");
 
     await mimiq.startRun({
@@ -76,14 +76,6 @@ test.describe("Stagehand Autonomous Browser Agent", () => {
         `,
         persona: "cooperative",
         max_turns: 8,
-        simulator: {
-          type: "stagehand",
-          options: {
-            model: "gpt-4o",
-            headless: true,
-            verbose: false,
-          },
-        },
         expectations: {},
       },
     });

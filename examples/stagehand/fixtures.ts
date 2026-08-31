@@ -1,9 +1,7 @@
 /**
- * Mimiq Playwright fixtures for Stagehand autonomous browser automation.
+ * Mimiq Playwright fixtures for text-based user simulation.
  *
- * This example uses Stagehand simulator which can perform autonomous
- * browser actions beyond just typing in chat - it can click, navigate,
- * and interact with the page dynamically.
+ * Browser automation with Stagehand uses AgentRunner in agent-click.spec.ts.
  */
 
 import { type Page } from "@playwright/test";

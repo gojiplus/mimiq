@@ -1,8 +1,11 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type {
+  AgentToolCall,
   AffordanceSnapshot,
   AwaitSettledOptions,
   BrowserSimAction,
+  JsonObject,
+  JsonValue,
   TranscriptTurn,
   UIActionTarget,
   UserToolAvailability,
@@ -19,7 +22,10 @@ export interface DefaultChatAdapterConfig {
   idleMarker: Selector;
   workingMarker?: Selector;
   toolCallsSelector?: Selector;
+  instrumentToolCalls?: boolean;
   actionTargets?: Record<string, Selector>;
+  discoverActions?: boolean;
+  maxDiscoveredActions?: number;
   availableUserTools?: () => UserToolAvailability[];
   snapshotMetadata?: () => Record<string, string | number | boolean | null>;
 }
@@ -55,6 +61,7 @@ async function toTranscript(
 async function toActionTargets(
   page: Page,
   actionTargets: Record<string, Selector> | undefined,
+  locators: Map<string, Locator>,
 ): Promise<UIActionTarget[]> {
   if (!actionTargets) return [];
 
@@ -73,16 +80,149 @@ async function toActionTargets(
       kind: "click" as const,
       label: text.trim() || id,
       enabled: isVisible && !isDisabled,
+      metadata: { selector },
     });
+    locators.set(id, el);
   }
 
   return targets;
+}
+
+async function discoverActionTargets(
+  page: Page,
+  locators: Map<string, Locator>,
+  maxActions: number,
+): Promise<UIActionTarget[]> {
+  const interactive = page.locator(
+    'button, [role="button"], a[href], select, textarea, input:not([type="hidden"]), [contenteditable="true"]',
+  );
+  const count = Math.min(await interactive.count(), maxActions);
+  const targets: UIActionTarget[] = [];
+
+  for (let index = 0; index < count; index++) {
+    const locator = interactive.nth(index);
+    if (!await locator.isVisible().catch(() => false)) continue;
+
+    const details = await locator.evaluate((element) => {
+      const htmlElement = element as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+      const tag = element.tagName.toLowerCase();
+      const inputType = tag === "input" ? htmlElement.type : "";
+      const kind = tag === "select"
+        ? "select"
+        : inputType === "file"
+          ? "upload"
+          : tag === "input" || tag === "textarea" || element.getAttribute("contenteditable") === "true"
+            ? "type"
+            : "click";
+      const label = element.getAttribute("aria-label")
+        || element.getAttribute("title")
+        || element.getAttribute("placeholder")
+        || element.textContent?.trim()
+        || element.getAttribute("name")
+        || element.id
+        || `${tag}-${inputType || "control"}`;
+      const options = tag === "select"
+        ? Array.from((element as HTMLSelectElement).options).map((option) => ({
+            value: option.value,
+            label: option.textContent?.trim() || option.value,
+          }))
+        : undefined;
+      const selector = element.id
+        ? `#${CSS.escape(element.id)}`
+        : (() => {
+            const path: string[] = [];
+            let current: Element | null = element;
+            while (current && current.parentElement) {
+              const tagName = current.tagName.toLowerCase();
+              const siblings = Array.from(current.parentElement.children)
+                .filter((sibling) => sibling.tagName === current!.tagName);
+              path.unshift(`${tagName}:nth-of-type(${siblings.indexOf(current) + 1})`);
+              current = current.parentElement;
+            }
+            return path.join(" > ");
+          })();
+      return { tag, inputType, kind, label, options, selector };
+    });
+    const id = `mimiq-${details.tag}-${index + 1}`;
+
+    targets.push({
+      id,
+      kind: details.kind as UIActionTarget["kind"],
+      label: details.label,
+      enabled: !await locator.isDisabled().catch(() => false),
+      ...(details.options ? { options: details.options } : {}),
+      metadata: { selector: details.selector },
+    });
+    locators.set(id, locator);
+  }
+
+  return targets;
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseToolCalls(text: string): AgentToolCall[] {
+  const value: unknown = JSON.parse(text);
+  if (!Array.isArray(value)) {
+    throw new Error("Tool-call payload must be a JSON array.");
+  }
+
+  return value.map((toolCall, index) => {
+    if (!isJsonObject(toolCall) || typeof toolCall.name !== "string" || !isJsonObject(toolCall.args)) {
+      throw new Error(`Tool call at index ${index} must provide a name and object args.`);
+    }
+    return {
+      name: toolCall.name,
+      args: toolCall.args,
+      result: toolCall.result as JsonValue | undefined,
+    };
+  });
+}
+
+async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]> {
+  const events: unknown = await page.evaluate(() => {
+    const eventName = "mimiq:agent-tool-call";
+    const queueKey = "__mimiqAgentToolCalls";
+    const listenerKey = "__mimiqAgentToolCallListener";
+    const target = window as typeof window & Record<string, unknown>;
+
+    if (!Array.isArray(target[queueKey])) {
+      target[queueKey] = [];
+    }
+    if (!target[listenerKey]) {
+      window.addEventListener(eventName, (event) => {
+        (target[queueKey] as unknown[]).push((event as CustomEvent<unknown>).detail);
+      });
+      target[listenerKey] = true;
+    }
+
+    const queue = target[queueKey] as unknown[];
+    return queue.splice(0, queue.length);
+  });
+
+  if (!Array.isArray(events)) {
+    throw new Error("Instrumented agent tool calls must be an array.");
+  }
+  return events.map((toolCall, index) => {
+    if (!isJsonObject(toolCall) || typeof toolCall.name !== "string" || !isJsonObject(toolCall.args)) {
+      throw new Error(`Instrumented tool call at index ${index} must provide a name and object args.`);
+    }
+    return {
+      name: toolCall.name,
+      args: toolCall.args,
+      result: toolCall.result as JsonValue | undefined,
+    };
+  });
 }
 
 export function createDefaultChatAdapter(
   page: Page,
   config: DefaultChatAdapterConfig,
 ): PlaywrightBrowserAdapter {
+  const actionLocators = new Map<string, Locator>();
+
   return {
     async captureSnapshot(): Promise<AffordanceSnapshot> {
       const transcript = await toTranscript(
@@ -94,28 +234,32 @@ export function createDefaultChatAdapter(
       );
 
       const inputCount = await page.locator(config.input).count();
+      actionLocators.clear();
       const availableActions: UIActionTarget[] = [
         {
           id: "chat-input",
           kind: "message",
           label: "Chat input",
           enabled: inputCount > 0,
+          metadata: { selector: config.input },
         },
-        ...(await toActionTargets(page, config.actionTargets)),
+        ...(await toActionTargets(page, config.actionTargets, actionLocators)),
+        ...(config.discoverActions === false
+          ? []
+          : await discoverActionTargets(page, actionLocators, config.maxDiscoveredActions ?? 40)),
       ];
 
-      let toolCalls: Array<{ name: string; args: Record<string, unknown>; result?: unknown }> = [];
+      let toolCalls: AgentToolCall[] = [];
       if (config.toolCallsSelector) {
         const toolCallsEl = page.locator(config.toolCallsSelector);
         const count = await toolCallsEl.count();
         if (count > 0) {
-          try {
-            const text = (await toolCallsEl.textContent()) || "[]";
-            toolCalls = JSON.parse(text);
-          } catch {
-            toolCalls = [];
-          }
+          const text = (await toolCallsEl.textContent()) || "[]";
+          toolCalls = parseToolCalls(text);
         }
+      }
+      if (config.instrumentToolCalls !== false) {
+        toolCalls.push(...await collectInstrumentedToolCalls(page));
       }
 
       const idleMarkerCount = await page.locator(config.idleMarker).count();
@@ -128,7 +272,7 @@ export function createDefaultChatAdapter(
         stateMarkers: [idleMarkerCount > 0 ? "agent-idle" : "agent-busy"],
         metadata: {
           ...config.snapshotMetadata?.(),
-          toolCalls: toolCalls as unknown as string,
+          toolCalls,
         },
       };
 
@@ -146,19 +290,20 @@ export function createDefaultChatAdapter(
         }
 
         case "click": {
+          const locator = actionLocators.get(action.targetId);
           const selector = config.actionTargets?.[action.targetId];
-          if (!selector) {
+          if (!locator && !selector) {
             throw new Error(
-              `No selector mapping found for semantic target "${action.targetId}"`,
+              `No observed or configured target found for "${action.targetId}"`,
             );
           }
-          await page.locator(selector).click();
+          await (locator ?? page.locator(selector!)).click();
           break;
         }
 
         case "type": {
-          const selector = config.actionTargets?.[action.targetId] ?? config.input;
-          const locator = page.locator(selector);
+          const locator = actionLocators.get(action.targetId)
+            ?? page.locator(config.actionTargets?.[action.targetId] ?? config.input);
           if (action.clearFirst) {
             await locator.clear();
           }
@@ -167,24 +312,26 @@ export function createDefaultChatAdapter(
         }
 
         case "select": {
+          const locator = actionLocators.get(action.targetId);
           const selector = config.actionTargets?.[action.targetId];
-          if (!selector) {
+          if (!locator && !selector) {
             throw new Error(
-              `No selector mapping found for semantic target "${action.targetId}"`,
+              `No observed or configured target found for "${action.targetId}"`,
             );
           }
-          await page.locator(selector).selectOption(action.value);
+          await (locator ?? page.locator(selector!)).selectOption(action.value);
           break;
         }
 
         case "upload": {
+          const locator = actionLocators.get(action.targetId);
           const selector = config.actionTargets?.[action.targetId];
-          if (!selector) {
+          if (!locator && !selector) {
             throw new Error(
-              `No selector mapping found for semantic target "${action.targetId}"`,
+              `No observed or configured target found for "${action.targetId}"`,
             );
           }
-          await page.locator(selector).setInputFiles(action.fileRef);
+          await (locator ?? page.locator(selector!)).setInputFiles(action.fileRef);
           break;
         }
 
@@ -194,13 +341,14 @@ export function createDefaultChatAdapter(
             break;
           }
           if (action.targetId) {
+            const locator = actionLocators.get(action.targetId);
             const selector = config.actionTargets?.[action.targetId];
-            if (!selector) {
+            if (!locator && !selector) {
               throw new Error(
-                `No selector mapping found for semantic target "${action.targetId}"`,
+                `No observed or configured target found for "${action.targetId}"`,
               );
             }
-            await page.locator(selector).click();
+            await (locator ?? page.locator(selector!)).click();
             break;
           }
           throw new Error("Navigate action requires either url or targetId.");

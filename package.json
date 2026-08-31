@@ -1,7 +1,7 @@
 {
   "name": "@gojiplus/mimiq",
-  "version": "0.5.0",
-  "description": "Simulate users and evaluate AI agents in Cypress and Playwright e2e tests",
+  "version": "0.6.0",
+  "description": "Application-layer user simulation with replayable browser evidence",
   "type": "module",
   "workspaces": [
     "examples/playwright",
@@ -48,7 +48,8 @@
     "dev:app": "npm run dev --prefix test/app",
     "test:cypress": "npm test --prefix examples/cypress",
     "test:playwright": "npm test --prefix examples/playwright",
-    "test": "npm run test:playwright",
+    "test:unit": "npm run build && node --test test/*.test.mjs",
+    "test": "npm run test:unit",
     "test:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --headless",
     "demo:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --no-headless",
     "docs": "typedoc"

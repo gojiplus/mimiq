@@ -49,6 +49,14 @@ export function setupMimiqTasks(
       return runtime.advanceRun(input);
     },
 
+    async "mimiq:recordActionResult"(input) {
+      if (!runtime.recordActionResult) {
+        throw new Error("The configured runtime does not support action-result recording.");
+      }
+      await runtime.recordActionResult(input);
+      return null;
+    },
+
     async "mimiq:evaluateRun"(input) {
       return runtime.evaluateRun(input);
     },

@@ -125,7 +125,11 @@ export function registerMimiqCommands(
                 timeoutMs: defaults?.settleTimeoutMs,
               }),
             )
-            .then(() => advance);
+            .then(() => cy.task("mimiq:recordActionResult", {
+                runId,
+                action: advance.action,
+                succeeded: true,
+              }, { log: false }).then(() => advance));
         }) as Cypress.Chainable<AdvanceRunResponse>;
     }
   });

@@ -113,6 +113,7 @@ export interface JudgeConfig {
 }
 
 import type { BrowserAgentType } from "../types";
+import type { SimulatorConfig as SceneSimulatorConfig } from "./simulatorInterface";
 
 export interface AgentConfig {
   type: BrowserAgentType;
@@ -135,6 +136,7 @@ export interface Scene {
   max_turns?: number;
   context?: Record<string, unknown>;
   expectations?: Expectations;
+  simulator?: SceneSimulatorConfig;
 }
 
 export interface AgentScene {
@@ -151,9 +153,164 @@ export interface AgentScene {
 
 export function resolvePersona(persona: Persona | PersonaPreset | string): Persona {
   if (typeof persona === "string") {
+    if (!(persona in PERSONA_PRESETS)) {
+      throw new Error(
+        `Unknown persona preset "${persona}". Expected one of: ${Object.keys(PERSONA_PRESETS).join(", ")}`,
+      );
+    }
     return personaFromPreset(persona as PersonaPreset);
   }
+
+  if (
+    typeof persona.description !== "string" ||
+    !Array.isArray(persona.behaviors) ||
+    !persona.behaviors.every((behavior) => typeof behavior === "string")
+  ) {
+    throw new Error("Persona must provide a string description and an array of string behaviors.");
+  }
+
   return persona;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function validateStringList(
+  errors: string[],
+  value: unknown,
+  name: string,
+): void {
+  if (value !== undefined && (!Array.isArray(value) || !value.every((item) => typeof item === "string"))) {
+    errors.push(`${name} must be an array of strings.`);
+  }
+}
+
+export function validateScene(scene: unknown): asserts scene is Scene {
+  if (!isRecord(scene)) {
+    throw new Error("Scene must be an object.");
+  }
+
+  const errors: string[] = [];
+  if (typeof scene.id !== "string" || scene.id.trim() === "") {
+    errors.push("id must be a non-empty string.");
+  }
+  if (typeof scene.starting_prompt !== "string" || scene.starting_prompt.trim() === "") {
+    errors.push("starting_prompt must be a non-empty string.");
+  }
+  if (typeof scene.conversation_plan !== "string" || scene.conversation_plan.trim() === "") {
+    errors.push("conversation_plan must be a non-empty string.");
+  }
+  if (scene.persona === undefined) {
+    errors.push("persona is required.");
+  } else {
+    try {
+      resolvePersona(scene.persona as Persona | PersonaPreset | string);
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+  if (
+    scene.max_turns !== undefined &&
+    (!Number.isInteger(scene.max_turns) || (scene.max_turns as number) < 1)
+  ) {
+    errors.push("max_turns must be a positive integer.");
+  }
+  if (scene.context !== undefined && !isRecord(scene.context)) {
+    errors.push("context must be an object.");
+  }
+
+  if (scene.simulator !== undefined) {
+    if (!isRecord(scene.simulator)) {
+      errors.push("simulator must be an object.");
+    } else {
+      if (scene.simulator.type !== "llm" && scene.simulator.type !== "browser-use") {
+        errors.push("simulator.type must be \"llm\" or \"browser-use\".");
+      }
+      if (scene.simulator.model !== undefined && typeof scene.simulator.model !== "string") {
+        errors.push("simulator.model must be a string.");
+      }
+      if (scene.simulator.options !== undefined && !isRecord(scene.simulator.options)) {
+        errors.push("simulator.options must be an object.");
+      }
+    }
+  }
+
+  if (scene.expectations !== undefined) {
+    if (!isRecord(scene.expectations)) {
+      errors.push("expectations must be an object.");
+    } else {
+      const expectations = scene.expectations;
+      for (const name of [
+        "required_tools",
+        "forbidden_tools",
+        "allowed_terminal_states",
+        "forbidden_terminal_states",
+        "required_agents",
+        "forbidden_agents",
+      ]) {
+        validateStringList(errors, expectations[name], `expectations.${name}`);
+      }
+      if (expectations.required_agent_tools !== undefined) {
+        if (!isRecord(expectations.required_agent_tools)) {
+          errors.push("expectations.required_agent_tools must be an object.");
+        } else {
+          for (const [agent, tools] of Object.entries(expectations.required_agent_tools)) {
+            validateStringList(errors, tools, `expectations.required_agent_tools.${agent}`);
+          }
+        }
+      }
+      if (expectations.judges !== undefined) {
+        if (!Array.isArray(expectations.judges)) {
+          errors.push("expectations.judges must be an array.");
+        } else {
+          for (const [index, judge] of expectations.judges.entries()) {
+            if (!isRecord(judge) || typeof judge.name !== "string" || typeof judge.rubric !== "string") {
+              errors.push(`expectations.judges.${index} must provide string name and rubric fields.`);
+            } else if (
+              judge.samples !== undefined &&
+              (!Number.isInteger(judge.samples) || (judge.samples as number) < 1)
+            ) {
+              errors.push(`expectations.judges.${index}.samples must be a positive integer.`);
+            }
+          }
+        }
+      }
+      if (expectations.visual_assertions !== undefined) {
+        if (!Array.isArray(expectations.visual_assertions)) {
+          errors.push("expectations.visual_assertions must be an array.");
+        } else {
+          for (const [index, assertion] of expectations.visual_assertions.entries()) {
+            if (!isRecord(assertion) || typeof assertion.query !== "string" || assertion.query.trim() === "") {
+              errors.push(`expectations.visual_assertions.${index}.query must be a non-empty string.`);
+            } else if (
+              assertion.min_confidence !== undefined &&
+              (typeof assertion.min_confidence !== "number" ||
+                !Number.isFinite(assertion.min_confidence) ||
+                assertion.min_confidence < 0 ||
+                assertion.min_confidence > 1)
+            ) {
+              errors.push(`expectations.visual_assertions.${index}.min_confidence must be between 0 and 1.`);
+            }
+          }
+        }
+      }
+      if (expectations.accessibility_audit !== undefined) {
+        if (!isRecord(expectations.accessibility_audit)) {
+          errors.push("expectations.accessibility_audit must be an object.");
+        } else if (
+          expectations.accessibility_audit.level !== undefined &&
+          !["A", "AA", "AAA"].includes(expectations.accessibility_audit.level as string)
+        ) {
+          errors.push("expectations.accessibility_audit.level must be \"A\", \"AA\", or \"AAA\".");
+        }
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Invalid scene:\n- ${errors.join("\n- ")}`);
+  }
 }
 
 export interface ToolCall {

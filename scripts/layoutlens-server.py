@@ -19,8 +19,6 @@ API Endpoints:
     GET /health - Health check
 """
 
-import asyncio
-import json
 import os
 import sys
 from typing import Optional
@@ -102,6 +100,21 @@ def mock_response(query: str) -> dict:
     }
 
 
+def result_response(result) -> LayoutLensResponse:
+    answer = result.answer
+    return LayoutLensResponse(
+        passed=answer.lstrip().lower().startswith(("yes", "pass", "true")),
+        answer=answer,
+        confidence=result.confidence,
+        reasoning=result.reasoning,
+        screenshot_path=(
+            result.screenshot_path
+            if hasattr(result, "screenshot_path")
+            else None
+        ),
+    )
+
+
 @app.get("/health")
 async def health_check():
     return {
@@ -118,17 +131,8 @@ async def analyze(request: AnalyzeRequest):
 
     try:
         lens_instance = get_lens()
-        result = await asyncio.to_thread(
-            lens_instance.analyze, request.source, request.query
-        )
-
-        return LayoutLensResponse(
-            passed=result.get("passed", result.get("confidence", 0) >= 0.8),
-            answer=result.get("answer", ""),
-            confidence=result.get("confidence", 0),
-            reasoning=result.get("reasoning"),
-            screenshot_path=result.get("screenshot_path"),
-        )
+        result = await lens_instance.analyze(request.source, request.query)
+        return result_response(result)
     except Exception as e:
         return LayoutLensResponse(
             passed=False,
@@ -150,17 +154,12 @@ async def accessibility_audit(request: AccessibilityAuditRequest):
 
     try:
         lens_instance = get_lens()
-        audit_query = f"Perform a WCAG {request.level} accessibility audit on this page."
-        result = await asyncio.to_thread(
-            lens_instance.analyze, request.source, audit_query
+        result = await lens_instance.check_accessibility(
+            request.source,
+            compliance_level=request.level,
+            mode="axe",
         )
-
-        return LayoutLensResponse(
-            passed=result.get("passed", True),
-            answer=result.get("answer", ""),
-            confidence=result.get("confidence", 0),
-            reasoning=result.get("reasoning"),
-        )
+        return result_response(result)
     except Exception as e:
         return LayoutLensResponse(
             passed=False,
@@ -182,17 +181,14 @@ async def visual_compare(request: CompareRequest):
 
     try:
         lens_instance = get_lens()
-        compare_query = f"Compare these two images. Are they visually similar (threshold: {request.threshold})?"
-        result = await asyncio.to_thread(
-            lens_instance.compare, request.source, request.baseline, compare_query
+        result = await lens_instance.compare(
+            [request.source, request.baseline],
+            query=(
+                "Are these interfaces visually equivalent? Answer YES only if "
+                f"they meet a similarity threshold of {request.threshold}."
+            ),
         )
-
-        return LayoutLensResponse(
-            passed=result.get("similarity", 0) >= request.threshold,
-            answer=result.get("answer", ""),
-            confidence=result.get("similarity", 0),
-            reasoning=result.get("reasoning"),
-        )
+        return result_response(result)
     except Exception as e:
         return LayoutLensResponse(
             passed=False,
