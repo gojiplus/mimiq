@@ -70,7 +70,7 @@ async function recordDemo(config: RecordingConfig) {
       scenesDir: join(process.cwd(), "test", "scenes"),
     });
 
-    const adapter = createDefaultChatAdapter(page, {
+    const adapter = await createDefaultChatAdapter(page, {
       transcript: "[data-test=transcript]",
       messageRow: "[data-test=message-row]",
       messageRoleAttr: "data-role",

@@ -221,6 +221,26 @@ test("local runtime preserves repeated instrumented events", async () => {
   assert.equal(trace.entries.filter((entry) => entry.name === "order.lookup.started").length, 2);
 });
 
+test("local runtime preserves tool calls observed before an assistant message", async () => {
+  const runtime = createLocalRuntime();
+  const { runId } = await runtime.startRun({
+    scene: scene("startup-tool-call", { required_tools: ["lookup_order"] }),
+  });
+
+  await runtime.advanceRun({
+    runId,
+    snapshot: snapshot({
+      metadata: {
+        toolCalls: [{ name: "lookup_order", args: { id: "ORD-1" }, result: { found: true } }],
+      },
+    }),
+  });
+
+  const trace = await runtime.getTrace({ runId });
+  assert.equal(trace.entries.filter((entry) => entry.name === "lookup_order").length, 1);
+  assert.equal((await runtime.evaluateRun({ runId })).passed, true);
+});
+
 test("recordings preserve an append-only evidence bundle", async (t) => {
   const outputDir = mkdtempSync(join(tmpdir(), "mimiq-evidence-"));
   t.after(() => rmSync(outputDir, { recursive: true, force: true }));
@@ -281,6 +301,46 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.status, "completed");
   assert.deepEqual(transcript.turns.at(-1).toolCalls, [{ tool: "lookup_order", args: { id: "ORD-1" } }]);
+});
+
+test("failed browser actions finalize failed evidence bundles", async (t) => {
+  const outputDir = mkdtempSync(join(tmpdir(), "mimiq-failed-evidence-"));
+  t.after(() => rmSync(outputDir, { recursive: true, force: true }));
+
+  const runtime = createLocalRuntime({
+    recording: {
+      enabled: true,
+      outputDir,
+      screenshots: { enabled: false, timing: "before", format: "png" },
+    },
+  });
+  const { runId } = await runtime.startRun({ scene: scene("failed-evidence") });
+  const advance = await runtime.advanceRun({ runId, snapshot: snapshot() });
+
+  await runtime.recordActionResult({
+    runId,
+    action: advance.action,
+    succeeded: false,
+    error: "The control was not found.",
+  });
+
+  const sceneDir = join(outputDir, "failed-evidence");
+  const runDir = join(sceneDir, readdirSync(sceneDir)[0]);
+  const manifest = JSON.parse(readFileSync(join(runDir, "manifest.json"), "utf8"));
+  const transcript = JSON.parse(readFileSync(join(runDir, "transcript.json"), "utf8"));
+  const events = readFileSync(join(runDir, "events.jsonl"), "utf8")
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+
+  assert.equal(manifest.status, "failed");
+  assert.equal(transcript.terminalState, "action_failed");
+  assert.equal(events.at(-1).type, "run.finished");
+  assert.equal(events.at(-1).payload.status, "failed");
+  await assert.rejects(
+    runtime.advanceRun({ runId, snapshot: snapshot() }),
+    /ended after a browser action failed/,
+  );
 });
 
 test("runtime preserves named application telemetry without treating it as a tool call", async (t) => {
@@ -474,6 +534,15 @@ test("invalid personas and unsupported simulator types fail at setup", async () 
   assert.throws(
     () => createSimulator({ ...scene("bad-simulator"), simulator: { type: "unsupported-policy" } }),
     /simulator.type must be "llm" or "browser-use"/,
+  );
+
+  await assert.rejects(
+    runtime.startRun({
+      scene: scene("bad-accessibility", {
+        accessibility_audit: { level: "AA", required_pass: "false" },
+      }),
+    }),
+    /accessibility_audit.required_pass must be a boolean/,
   );
 });
 

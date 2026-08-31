@@ -66,6 +66,7 @@ interface ActiveRun {
   recordedAssistantTurnKeys: Set<string>;
   recordedToolCallKeys: Set<string>;
   applicationTelemetry: ApplicationTelemetryEvent[];
+  actionFailure?: string;
   pendingAction?: {
     action: BrowserSimAction;
     observationSequence?: number;
@@ -208,6 +209,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const trace: Trace = {
         scene_id: scene.id,
         turns: [],
+        tool_calls: [],
         started_at: new Date().toISOString(),
       };
 
@@ -240,6 +242,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const run = activeRuns.get(input.runId);
       if (!run) {
         throw new Error(`Run not found: ${input.runId}`);
+      }
+      if (run.actionFailure) {
+        throw new Error(`Run ${input.runId} ended after a browser action failed: ${run.actionFailure}`);
       }
 
       const snapshot = input.snapshot;
@@ -328,13 +333,18 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
           const toolCallKey = tc.id
             ? `id:${tc.id}`
             : `${index}:${tc.name}:${JSON.stringify(tc.args)}:${JSON.stringify(tc.result)}`;
-          if (!run.recordedToolCallKeys.has(toolCallKey) && lastAgentTurn) {
+          if (!run.recordedToolCallKeys.has(toolCallKey)) {
             run.recordedToolCallKeys.add(toolCallKey);
-            lastAgentTurn.tool_calls.push({
+            const call = {
               tool_name: tc.name,
               arguments: tc.args,
-              result: tc.result,
-            });
+              ...(tc.result === undefined ? {} : { result: tc.result }),
+            };
+            if (lastAgentTurn) {
+              lastAgentTurn.tool_calls.push(call);
+            } else {
+              run.trace.tool_calls?.push(call);
+            }
             traceDelta.push({
               id: Math.random().toString(36).substring(2, 10),
               actor: "assistant_tool",
@@ -504,6 +514,13 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
           : {}),
       });
       run.pendingAction = undefined;
+      if (!input.succeeded) {
+        run.actionFailure = input.error ?? "Browser action failed.";
+        run.trace.finished_at = new Date().toISOString();
+        run.trace.terminal_state = "action_failed";
+        run.recorder?.setTerminalState("action_failed");
+        run.recorder?.markFailed();
+      }
     },
 
     async evaluateRun(input: EvaluateRunRequest): Promise<EvaluationReport> {
@@ -522,6 +539,13 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         passed: c.passed,
         details: c.detail,
       }));
+      if (run.actionFailure) {
+        checks.push({
+          name: "browser_action",
+          passed: false,
+          details: run.actionFailure,
+        });
+      }
 
       if (expectations.judges?.length) {
         for (const judgeConfig of expectations.judges) {
@@ -635,7 +659,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         evaluation,
       });
 
-      if (run.recorder) {
+      if (run.recorder && !run.actionFailure) {
         if (passed) {
           run.recorder.finalize();
         } else {
@@ -675,6 +699,17 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
             result: call.result as TraceEntry["result"],
           });
         }
+      }
+      for (const call of run.trace.tool_calls ?? []) {
+        entries.push({
+          id: Math.random().toString(36).substring(2, 10),
+          actor: "assistant_tool",
+          kind: "tool",
+          name: call.tool_name,
+          args: call.arguments as TraceEntry["args"],
+          result: call.result as TraceEntry["result"],
+          timestamp: call.timestamp,
+        });
       }
       for (const event of run.applicationTelemetry) {
         entries.push({

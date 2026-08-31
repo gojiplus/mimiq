@@ -14,6 +14,7 @@ import type { PlaywrightBrowserAdapter, Selector } from "../../types";
 import {
   collectApplicationTelemetry,
   discoverPageActionTargets,
+  installApplicationTelemetryCollector,
 } from "./browserAdapter";
 
 export interface DefaultChatAdapterConfig {
@@ -115,30 +116,40 @@ function parseToolCalls(text: string): AgentToolCall[] {
   });
 }
 
-async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]> {
-  const events: unknown = await page.evaluate(() => {
-    const eventName = "mimiq:agent-tool-call";
-    const queueKey = "__mimiqAgentToolCalls";
-    const listenerKey = "__mimiqAgentToolCallListener";
-    const sequenceKey = "__mimiqAgentToolCallSequence";
-    const target = window as typeof window & Record<string, unknown>;
+function installInstrumentedToolCallListener(): void {
+  const eventName = "mimiq:agent-tool-call";
+  const queueKey = "__mimiqAgentToolCalls";
+  const listenerKey = "__mimiqAgentToolCallListener";
+  const sequenceKey = "__mimiqAgentToolCallSequence";
+  const target = window as typeof window & Record<string, unknown>;
 
-    if (!Array.isArray(target[queueKey])) {
-      target[queueKey] = [];
-    }
-    if (!target[listenerKey]) {
-      window.addEventListener(eventName, (event) => {
-        const sequence = Number(target[sequenceKey] ?? 0) + 1;
-        target[sequenceKey] = sequence;
-        (target[queueKey] as unknown[]).push({
-          id: `mimiq-agent-tool-call-${sequence}`,
-          detail: (event as CustomEvent<unknown>).detail,
-        });
+  if (!Array.isArray(target[queueKey])) {
+    target[queueKey] = [];
+  }
+  if (!target[listenerKey]) {
+    window.addEventListener(eventName, (event) => {
+      const sequence = Number(target[sequenceKey] ?? 0) + 1;
+      target[sequenceKey] = sequence;
+      (target[queueKey] as unknown[]).push({
+        id: `mimiq-agent-tool-call-${sequence}`,
+        detail: (event as CustomEvent<unknown>).detail,
       });
-      target[listenerKey] = true;
-    }
+    });
+    target[listenerKey] = true;
+  }
+}
 
-    const queue = target[queueKey] as unknown[];
+async function installInstrumentedToolCallCollector(page: Page): Promise<void> {
+  await page.addInitScript(installInstrumentedToolCallListener);
+}
+
+async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]> {
+  await page.evaluate(installInstrumentedToolCallListener);
+  const events: unknown = await page.evaluate(() => {
+    const target = window as typeof window & Record<string, unknown>;
+    const queue = Array.isArray(target.__mimiqAgentToolCalls)
+      ? target.__mimiqAgentToolCalls
+      : [];
     return queue.splice(0, queue.length);
   });
 
@@ -162,11 +173,15 @@ async function collectInstrumentedToolCalls(page: Page): Promise<AgentToolCall[]
   });
 }
 
-export function createDefaultChatAdapter(
+export async function createDefaultChatAdapter(
   page: Page,
   config: DefaultChatAdapterConfig,
-): PlaywrightBrowserAdapter {
+): Promise<PlaywrightBrowserAdapter> {
   const actionLocators = new Map<string, Locator>();
+  await installApplicationTelemetryCollector(page);
+  if (config.instrumentToolCalls !== false) {
+    await installInstrumentedToolCallCollector(page);
+  }
 
   return {
     async captureSnapshot(): Promise<AffordanceSnapshot> {

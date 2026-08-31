@@ -73,7 +73,7 @@ expectations:
 The adapter tells mimiq how to interact with your chat UI:
 
 ```typescript
-createDefaultChatAdapter(page, {
+await createDefaultChatAdapter(page, {
   transcript: "[data-test=transcript]",
   messageRow: "[data-test=message-row]",
   input: "[data-test=chat-input]",

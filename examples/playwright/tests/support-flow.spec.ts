@@ -16,9 +16,19 @@ import { mkdirSync, writeFileSync } from "fs";
 import { createBrowserAdapter } from "@gojiplus/mimiq/playwright";
 
 test.describe("Customer Support Flows", () => {
+  test("generic browser adapter captures telemetry emitted during navigation", async ({ page }) => {
+    const adapter = await createBrowserAdapter(page);
+    await page.goto(
+      "data:text/html,<script>window.dispatchEvent(new CustomEvent('mimiq:telemetry',{detail:{name:'page.started'}}))</script>",
+    );
+
+    const snapshot = await adapter.captureSnapshot();
+    expect(snapshot.metadata?.applicationTelemetry).toEqual([{ name: "page.started" }]);
+  });
+
   test("generic browser adapter captures arbitrary controls and app telemetry", async ({ page }) => {
     await page.goto("/");
-    const adapter = createBrowserAdapter(page);
+    const adapter = await createBrowserAdapter(page);
 
     const initialSnapshot = await adapter.captureSnapshot();
     expect(initialSnapshot.transcript).toEqual([]);
@@ -71,6 +81,39 @@ test.describe("Customer Support Flows", () => {
       args: { order_id: "ORD-10031" },
     }));
     expect((await mimiq.evaluate()).passed).toBe(true);
+  });
+
+  test("records agent tool calls emitted during navigation", async ({ page, mimiq }) => {
+    await page.addInitScript(() => {
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("mimiq:agent-tool-call", {
+            detail: { name: "lookup_order", args: { order_id: "ORD-10031" } },
+          }));
+        });
+      });
+    });
+    await page.goto("/");
+    await page.waitForTimeout(25);
+    await mimiq.startRun({
+      scene: {
+        id: "navigation-tool-call",
+        starting_prompt: "Hello",
+        conversation_plan: "Ask for help.",
+        persona: "cooperative",
+        max_turns: 1,
+        expectations: { required_tools: ["lookup_order"] },
+      },
+    });
+
+    await mimiq.runTurn();
+
+    const trace = await mimiq.getTrace();
+    expect(trace.entries).toContainEqual(expect.objectContaining({
+      actor: "assistant_tool",
+      name: "lookup_order",
+      args: { order_id: "ORD-10031" },
+    }));
   });
 
   test("replays recorded browser actions against a fresh page", async ({ page, mimiq }, testInfo) => {

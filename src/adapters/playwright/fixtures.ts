@@ -344,7 +344,7 @@ export interface MimiqFixtures {
 
 export interface MimiqWorkerFixtures {
   mimiqRuntimeFactory: () => MimiqRuntimeClient;
-  mimiqAdapterFactory: (page: Page) => PlaywrightBrowserAdapter;
+  mimiqAdapterFactory: (page: Page) => PlaywrightBrowserAdapter | Promise<PlaywrightBrowserAdapter>;
 }
 
 export const test = base.extend<MimiqFixtures, MimiqWorkerFixtures>({
@@ -376,7 +376,7 @@ export const test = base.extend<MimiqFixtures, MimiqWorkerFixtures>({
   },
 
   mimiqAdapter: async ({ page, mimiqAdapterFactory }, use) => {
-    const adapter = mimiqAdapterFactory(page);
+    const adapter = await mimiqAdapterFactory(page);
     await use(adapter);
   },
 

@@ -17,6 +17,29 @@ export interface BrowserAdapterConfig {
   telemetryEventName?: string;
 }
 
+function installApplicationTelemetryListener(eventName: string): void {
+  const queuesKey = "__mimiqTelemetryQueues";
+  const listenersKey = "__mimiqTelemetryListeners";
+  const target = window as typeof window & Record<string, unknown>;
+  const queues = (target[queuesKey] ??= {}) as Record<string, unknown[]>;
+  const listeners = (target[listenersKey] ??= {}) as Record<string, boolean>;
+
+  queues[eventName] ??= [];
+  if (!listeners[eventName]) {
+    window.addEventListener(eventName, (event) => {
+      queues[eventName].push((event as CustomEvent<unknown>).detail);
+    });
+    listeners[eventName] = true;
+  }
+}
+
+export async function installApplicationTelemetryCollector(
+  page: Page,
+  eventName = DEFAULT_TELEMETRY_EVENT_NAME,
+): Promise<void> {
+  await page.addInitScript(installApplicationTelemetryListener, eventName);
+}
+
 function isJsonValue(value: unknown): value is JsonValue {
   if (value === null || ["string", "boolean"].includes(typeof value)) {
     return true;
@@ -46,22 +69,13 @@ export async function collectApplicationTelemetry(
   page: Page,
   eventName = DEFAULT_TELEMETRY_EVENT_NAME,
 ): Promise<ApplicationTelemetryEvent[]> {
+  await page.evaluate(installApplicationTelemetryListener, eventName);
   const events = await page.evaluate((configuredEventName) => {
     const queuesKey = "__mimiqTelemetryQueues";
-    const listenersKey = "__mimiqTelemetryListeners";
     const target = window as typeof window & Record<string, unknown>;
-    const queues = (target[queuesKey] ??= {}) as Record<string, unknown[]>;
-    const listeners = (target[listenersKey] ??= {}) as Record<string, boolean>;
-
-    queues[configuredEventName] ??= [];
-    if (!listeners[configuredEventName]) {
-      window.addEventListener(configuredEventName, (event) => {
-        queues[configuredEventName].push((event as CustomEvent<unknown>).detail);
-      });
-      listeners[configuredEventName] = true;
-    }
-
-    return queues[configuredEventName].splice(0, queues[configuredEventName].length);
+    const queue = target[queuesKey] as Record<string, unknown[]> | undefined;
+    const events = queue?.[configuredEventName] ?? [];
+    return events.splice(0, events.length);
   }, eventName);
 
   if (!Array.isArray(events) || !events.every(isTelemetryEvent)) {
@@ -187,11 +201,15 @@ function requireObservedLocator(locators: Map<string, Locator>, targetId: string
   return locator;
 }
 
-export function createBrowserAdapter(
+export async function createBrowserAdapter(
   page: Page,
   config: BrowserAdapterConfig = {},
-): PlaywrightBrowserAdapter {
+): Promise<PlaywrightBrowserAdapter> {
   const actionLocators = new Map<string, Locator>();
+  await installApplicationTelemetryCollector(
+    page,
+    config.telemetryEventName,
+  );
 
   return {
     async captureSnapshot(): Promise<AffordanceSnapshot> {

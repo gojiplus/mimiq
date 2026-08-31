@@ -278,6 +278,11 @@ export function validateScene(scene: unknown): asserts scene is Scene {
           !["A", "AA", "AAA"].includes(expectations.accessibility_audit.level as string)
         ) {
           errors.push("expectations.accessibility_audit.level must be \"A\", \"AA\", or \"AAA\".");
+        } else if (
+          expectations.accessibility_audit.required_pass !== undefined &&
+          typeof expectations.accessibility_audit.required_pass !== "boolean"
+        ) {
+          errors.push("expectations.accessibility_audit.required_pass must be a boolean.");
         }
       }
     }
@@ -308,6 +313,7 @@ export interface Turn {
 export interface Trace {
   scene_id: string;
   turns: Turn[];
+  tool_calls?: ToolCall[];
   terminal_state?: string;
   started_at?: string;
   finished_at?: string;
@@ -315,7 +321,7 @@ export interface Trace {
 }
 
 export function traceToolCalls(trace: Trace): ToolCall[] {
-  const calls: ToolCall[] = [];
+  const calls: ToolCall[] = [...(trace.tool_calls ?? [])];
   for (const turn of trace.turns) {
     calls.push(...turn.tool_calls);
   }
@@ -328,6 +334,9 @@ export function traceCallSequence(trace: Trace): string[] {
 
 export function traceAgentsInvoked(trace: Trace): string[] {
   const agents = new Set<string>();
+  for (const call of trace.tool_calls ?? []) {
+    if (call.agent_name) agents.add(call.agent_name);
+  }
   for (const turn of trace.turns) {
     if (turn.agent_name) agents.add(turn.agent_name);
     for (const call of turn.tool_calls) {
@@ -343,6 +352,12 @@ export function traceAgentCalled(trace: Trace, agent: string, tool: string): boo
 
 export function traceConversationText(trace: Trace): string {
   const lines: string[] = [];
+  for (const call of trace.tool_calls ?? []) {
+    lines.push(`[AGENT TOOL]: ${call.tool_name}(${JSON.stringify(call.arguments)})`);
+    if (call.result !== undefined) {
+      lines.push(`  <- ${String(call.result)}`);
+    }
+  }
   for (const turn of trace.turns) {
     let prefix = turn.role === "user" ? "[USER]" : "[AGENT]";
     if (turn.agent_name) {
