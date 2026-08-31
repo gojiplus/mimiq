@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const usesLocalModel = process.env.LLM_MODEL?.startsWith("local/") ?? false;
+const usesLocalModel = (process.env.MIMIQ_LLM_BASE_URL ?? "http://127.0.0.1:11434/v1")
+  .includes("127.0.0.1:11434");
 
 export default defineConfig({
   testDir: "./tests",

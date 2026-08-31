@@ -4,7 +4,7 @@
  */
 
 import type { Scene } from "../core/models";
-import { complete } from "../core/llm";
+import { complete, DEFAULT_LLM_BASE_URL, DEFAULT_LLM_MODEL } from "../core/llm";
 import type { AffordanceSnapshot, BrowserSimAction } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "../core/simulatorInterface";
 import { createLogger } from "../utils/nodeLogger";
@@ -61,9 +61,9 @@ export class BrowserUseSimulator implements SimulatorInterface {
   constructor(scene: Scene, options: BrowserUseSimulatorOptions = {}) {
     this.scene = scene;
     this.options = {
-      model: options.model || process.env.SIMULATOR_MODEL || process.env.LLM_MODEL || "local/qwen3:8b",
-      baseURL: options.baseURL ?? process.env.LLM_BASE_URL ?? "",
-      apiKey: options.apiKey ?? process.env.LLM_API_KEY ?? "",
+      model: options.model || process.env.MIMIQ_SIMULATOR_MODEL || process.env.MIMIQ_MODEL || DEFAULT_LLM_MODEL,
+      baseURL: options.baseURL ?? process.env.MIMIQ_LLM_BASE_URL ?? DEFAULT_LLM_BASE_URL,
+      apiKey: options.apiKey ?? process.env.MIMIQ_LLM_API_KEY ?? "ollama",
     };
     this.maxTurns = scene.max_turns ?? 15;
   }

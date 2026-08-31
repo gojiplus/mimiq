@@ -110,8 +110,8 @@ generate_gif_for_scene() {
     done
   fi
 
-  # Check framework-specific directories (cypress, playwright, stagehand)
-  for framework in cypress playwright stagehand; do
+  # Check framework-specific directories.
+  for framework in cypress playwright; do
     if [ -d "$RECORDINGS_DIR/$framework/$scene_id" ]; then
       for run_dir in "$RECORDINGS_DIR/$framework/$scene_id"/run-*/; do
         if [ -d "$run_dir/screenshots" ]; then
@@ -152,14 +152,14 @@ generate_all() {
         local name
         name=$(basename "$item")
         # Skip framework directories, handle them separately
-        if [[ "$name" != "cypress" && "$name" != "playwright" && "$name" != "stagehand" ]]; then
+        if [[ "$name" != "cypress" && "$name" != "playwright" ]]; then
           generate_gif_for_scene "$name" || true
         fi
       fi
     done
 
     # Framework-specific recordings
-    for framework in cypress playwright stagehand; do
+    for framework in cypress playwright; do
       if [ -d "$RECORDINGS_DIR/$framework" ]; then
         for scene_dir in "$RECORDINGS_DIR/$framework"/*/; do
           if [ -d "$scene_dir" ]; then
@@ -201,7 +201,7 @@ list_available() {
       if [ -d "$item" ]; then
         local name
         name=$(basename "$item")
-        if [[ "$name" != "cypress" && "$name" != "playwright" && "$name" != "stagehand" && "$name" != ".gitkeep" ]]; then
+        if [[ "$name" != "cypress" && "$name" != "playwright" && "$name" != ".gitkeep" ]]; then
           for run_dir in "$item"/run-*/; do
             if [ -d "$run_dir/screenshots" ]; then
               local count
@@ -219,7 +219,7 @@ list_available() {
     done
 
     # Framework recordings
-    for framework in cypress playwright stagehand; do
+    for framework in cypress playwright; do
       if [ -d "$RECORDINGS_DIR/$framework" ]; then
         for scene_dir in "$RECORDINGS_DIR/$framework"/*/; do
           if [ -d "$scene_dir" ]; then

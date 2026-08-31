@@ -6,6 +6,7 @@ import test from "node:test";
 
 import { complete, createSimulator, runVisualAssertions } from "../dist/index.js";
 import { createLocalRuntime } from "../dist/node/index.js";
+import { MimiqTestHelper } from "../dist/adapters/playwright/index.js";
 
 function scene(id, expectations = {}) {
   return {
@@ -33,18 +34,48 @@ test("the published simulators subpath imports", async () => {
   assert.equal(typeof simulators.BrowserUseSimulator, "function");
 });
 
-test("local models use an OpenAI-compatible chat endpoint", async (t) => {
+test("completion observes the terminal state after the final allowed action", async () => {
+  let advances = 0;
+  const runtime = {
+    async startRun() {
+      return { runId: "completion-run" };
+    },
+    async advanceRun() {
+      advances++;
+      return advances === 1
+        ? { runId: "completion-run", turn: 1, action: { kind: "message", text: "Hello" } }
+        : { runId: "completion-run", turn: 1, action: { kind: "done", reason: "Finished" } };
+    },
+    async recordActionResult() {},
+  };
+  const adapter = {
+    async captureSnapshot() {
+      return snapshot();
+    },
+    async executeAction() {},
+    async awaitSettled() {},
+  };
+  const helper = new MimiqTestHelper({}, runtime, adapter);
+
+  await helper.startRun({ sceneId: "completion" });
+  await helper.runToCompletion({ maxTurns: 1 });
+
+  assert.equal(advances, 2);
+});
+
+test("configured model gateways use the chat-completions transport", async (t) => {
   const originalFetch = globalThis.fetch;
   let requestedUrl;
   globalThis.fetch = async (input, init) => {
     requestedUrl = String(input);
-    assert.match(String(init?.body), /"reasoning_effort":"none"/);
+    assert.equal(new Headers(init?.headers).get("authorization"), "Bearer proxy-key");
+    assert.equal(JSON.parse(String(init?.body)).reasoning_effort, "none");
     return new Response(
       JSON.stringify({
         id: "chatcmpl-local",
         object: "chat.completion",
         created: 0,
-        model: "qwen3:8b",
+        model: "mimiq-policy",
         choices: [{
           index: 0,
           message: { role: "assistant", content: "Local response" },
@@ -60,12 +91,13 @@ test("local models use an OpenAI-compatible chat endpoint", async (t) => {
   });
 
   const result = await complete("Say hello.", {
-    model: "local/qwen3:8b",
-    baseURL: "http://127.0.0.1:11434/v1",
+    model: "mimiq-policy",
+    baseURL: "http://127.0.0.1:4000",
+    apiKey: "proxy-key",
   });
 
   assert.equal(result, "Local response");
-  assert.equal(requestedUrl, "http://127.0.0.1:11434/v1/chat/completions");
+  assert.equal(requestedUrl, "http://127.0.0.1:4000/chat/completions");
 });
 
 test("LLM simulators include scene context in the generated prompt", async (t) => {
@@ -98,7 +130,7 @@ test("LLM simulators include scene context in the generated prompt", async (t) =
     context: { order_id: "ORD-CONTEXT" },
   }, {
     defaultSimulatorConfig: {
-      model: "local/qwen3:8b",
+      model: "qwen3:8b",
       baseURL: "http://127.0.0.1:11434/v1",
     },
   });
@@ -204,6 +236,66 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
   assert.deepEqual(transcript.turns.at(-1).toolCalls, [{ tool: "lookup_order", args: { id: "ORD-1" } }]);
 });
 
+test("runtime preserves named application telemetry without treating it as a tool call", async (t) => {
+  const outputDir = mkdtempSync(join(tmpdir(), "mimiq-telemetry-"));
+  t.after(() => rmSync(outputDir, { recursive: true, force: true }));
+
+  const runtime = createLocalRuntime({
+    recording: {
+      enabled: true,
+      outputDir,
+      screenshots: { enabled: false, timing: "before", format: "png" },
+    },
+  });
+  const { runId } = await runtime.startRun({ scene: scene("telemetry") });
+  await runtime.advanceRun({
+    runId,
+    snapshot: snapshot({
+      metadata: {
+        applicationTelemetry: [{
+          name: "refund.previewed",
+          data: { orderId: "ORD-1", amount: 17.5 },
+          timestamp: "2026-08-30T00:00:00.000Z",
+        }],
+      },
+    }),
+  });
+
+  const trace = await runtime.getTrace({ runId });
+  const telemetryEntry = trace.entries.find((entry) => entry.name === "refund.previewed");
+  assert.ok(telemetryEntry);
+  assert.deepEqual({
+    actor: "system",
+    kind: "state",
+    name: "refund.previewed",
+    metadata: {
+      data: { orderId: "ORD-1", amount: 17.5 },
+      sourceTimestamp: "2026-08-30T00:00:00.000Z",
+    },
+    timestamp: "2026-08-30T00:00:00.000Z",
+  }, {
+    actor: telemetryEntry.actor,
+    kind: telemetryEntry.kind,
+    name: telemetryEntry.name,
+    metadata: telemetryEntry.metadata,
+    timestamp: telemetryEntry.timestamp,
+  });
+
+  await runtime.evaluateRun({ runId });
+  const sceneDir = join(outputDir, "telemetry");
+  const runDir = join(sceneDir, readdirSync(sceneDir)[0]);
+  const events = readFileSync(join(runDir, "events.jsonl"), "utf8")
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+  assert.deepEqual(events.find((event) => event.type === "application.telemetry").payload, {
+    name: "refund.previewed",
+    data: { orderId: "ORD-1", amount: 17.5 },
+    sourceTimestamp: "2026-08-30T00:00:00.000Z",
+    observationSequence: 2,
+  });
+});
+
 test("runtime rejects malformed tool-call metadata", async () => {
   const runtime = createLocalRuntime();
   const { runId } = await runtime.startRun({ scene: scene("invalid-tool-calls") });
@@ -216,6 +308,31 @@ test("runtime rejects malformed tool-call metadata", async () => {
       }),
     }),
     /toolCalls must be an array of tool calls with name and object args/,
+  );
+});
+
+test("runtime rejects malformed application telemetry", async () => {
+  const runtime = createLocalRuntime();
+  const { runId } = await runtime.startRun({ scene: scene("invalid-telemetry") });
+
+  await assert.rejects(
+    runtime.advanceRun({
+      runId,
+      snapshot: snapshot({
+        metadata: { applicationTelemetry: [{ data: { missing: "name" } }] },
+      }),
+    }),
+    /applicationTelemetry must be an array of named events with JSON data/,
+  );
+
+  await assert.rejects(
+    runtime.advanceRun({
+      runId,
+      snapshot: snapshot({
+        metadata: { applicationTelemetry: [{ name: "invalid.number", data: Number.NaN }] },
+      }),
+    }),
+    /applicationTelemetry must be an array of named events with JSON data/,
   );
 });
 
@@ -308,7 +425,7 @@ test("invalid personas and unsupported simulator types fail at setup", async () 
   );
 
   assert.throws(
-    () => createSimulator({ ...scene("bad-simulator"), simulator: { type: "stagehand" } }),
+    () => createSimulator({ ...scene("bad-simulator"), simulator: { type: "unsupported-policy" } }),
     /simulator.type must be "llm" or "browser-use"/,
   );
 });
@@ -345,7 +462,7 @@ test("browser-use scenes select observed browser actions without an external bri
   const simulator = createSimulator({
     ...scene("browser-use"),
     max_turns: 2,
-    simulator: { type: "browser-use", model: "local/qwen3:8b" },
+    simulator: { type: "browser-use", model: "qwen3:8b" },
   }, {
     defaultSimulatorConfig: { baseURL: "http://127.0.0.1:11434/v1" },
   });

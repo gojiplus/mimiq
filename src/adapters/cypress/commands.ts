@@ -8,25 +8,24 @@ import type {
 } from "../../types";
 import type { CypressBrowserAdapter } from "../types";
 
-const RUN_ID_KEY = "__mimiqCurrentRunId";
-const TURN_KEY = "__mimiqTurnCount";
+let currentRunId: string | undefined;
+let currentTurnCount = 0;
 
 function getRunId(): string {
-  const runId = Cypress.env(RUN_ID_KEY);
-  if (!runId || typeof runId !== "string") {
+  if (!currentRunId) {
     throw new Error(
       "No active mimiq run. Call cy.mimiqStartRun() before running turns.",
     );
   }
-  return runId;
+  return currentRunId;
 }
 
 function getTurnCount(): number {
-  return Number(Cypress.env(TURN_KEY) ?? 0);
+  return currentTurnCount;
 }
 
 function setTurnCount(turn: number): void {
-  Cypress.env(TURN_KEY, turn);
+  currentTurnCount = turn;
 }
 
 export interface AccessibilityAuditOptions {
@@ -76,7 +75,7 @@ export function registerMimiqCommands(
   Cypress.Commands.add("mimiqStartRun", (input: StartRunRequest) => {
     return cy.task("mimiq:startRun", input, { log: false }).then((result) => {
       const { runId } = result as { runId: string };
-      Cypress.env(RUN_ID_KEY, runId);
+      currentRunId = runId;
       setTurnCount(0);
       return { runId };
     });
@@ -140,7 +139,7 @@ export function registerMimiqCommands(
       const maxTurns = input?.maxTurns ?? defaults?.maxTurns ?? 12;
 
       function loop(): Cypress.Chainable<void> {
-        if (getTurnCount() >= maxTurns) {
+        if (getTurnCount() > maxTurns) {
           throw new Error(
             `Turn budget exceeded before completion. maxTurns=${maxTurns}`,
           );
@@ -175,7 +174,7 @@ export function registerMimiqCommands(
   Cypress.Commands.add("mimiqCleanupRun", () => {
     const runId = getRunId();
     return cy.task("mimiq:cleanupRun", { runId }, { log: false }).then(() => {
-      Cypress.env(RUN_ID_KEY, undefined);
+      currentRunId = undefined;
       setTurnCount(0);
     }) as Cypress.Chainable<void>;
   });

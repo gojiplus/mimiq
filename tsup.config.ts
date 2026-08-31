@@ -18,7 +18,6 @@ export default defineConfig({
   external: [
     "cypress",
     "@playwright/test",
-    "@browserbase/stagehand",
     "yaml",
     "nunjucks",
     "fs",

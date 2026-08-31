@@ -30,6 +30,7 @@ import {
 } from "../eval/layoutlens";
 import type {
   AgentToolCall,
+  ApplicationTelemetryEvent,
   ActionExecutionResult,
   AdvanceRunRequest,
   AdvanceRunResponse,
@@ -64,6 +65,8 @@ interface ActiveRun {
   recorder?: RecordingCollector;
   recordedAssistantTurnKeys: Set<string>;
   recordedToolCallKeys: Set<string>;
+  recordedTelemetryKeys: Set<string>;
+  applicationTelemetry: ApplicationTelemetryEvent[];
   pendingAction?: {
     action: BrowserSimAction;
     observationSequence?: number;
@@ -137,6 +140,28 @@ function isToolCallList(value: unknown): value is AgentToolCall[] {
   ));
 }
 
+function isJsonValue(value: unknown): boolean {
+  if (value === null || ["string", "boolean"].includes(typeof value)) {
+    return true;
+  }
+  if (typeof value === "number") return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every(isJsonValue);
+  if (typeof value === "object") return Object.values(value).every(isJsonValue);
+  return false;
+}
+
+function isApplicationTelemetryList(value: unknown): value is ApplicationTelemetryEvent[] {
+  return Array.isArray(value) && value.every((event) => (
+    typeof event === "object"
+    && event !== null
+    && !Array.isArray(event)
+    && typeof event.name === "string"
+    && event.name.length > 0
+    && (event.data === undefined || isJsonValue(event.data))
+    && (event.timestamp === undefined || typeof event.timestamp === "string")
+  ));
+}
+
 export interface LocalRuntimeOptions {
   simulatorConfig?: LlmSimulatorConfig;
   scenesDir?: string;
@@ -148,7 +173,12 @@ export interface LocalRuntimeOptions {
 export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRuntimeClient {
   const tracesDir = options.tracesDir || join(tmpdir(), "mimiq-traces");
   const activeRuns = new Map<string, ActiveRun>();
-  const completedRuns = new Map<string, { scene: Scene; trace: Trace; evaluation?: EvaluationReport }>();
+  const completedRuns = new Map<string, {
+    scene: Scene;
+    trace: Trace;
+    applicationTelemetry: ApplicationTelemetryEvent[];
+    evaluation?: EvaluationReport;
+  }>();
 
   if (!existsSync(tracesDir)) {
     mkdirSync(tracesDir, { recursive: true });
@@ -200,6 +230,8 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         recorder,
         recordedAssistantTurnKeys: new Set(),
         recordedToolCallKeys: new Set(),
+        recordedTelemetryKeys: new Set(),
+        applicationTelemetry: [],
       });
 
       return { runId };
@@ -322,6 +354,38 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
               ...(tc.result === undefined ? {} : { result: tc.result }),
             });
           }
+        }
+      }
+
+      if (snapshot.metadata?.applicationTelemetry !== undefined) {
+        const applicationTelemetry = snapshot.metadata.applicationTelemetry;
+        if (!isApplicationTelemetryList(applicationTelemetry)) {
+          throw new Error(
+            "snapshot.metadata.applicationTelemetry must be an array of named events with JSON data.",
+          );
+        }
+        for (const event of applicationTelemetry) {
+          const eventKey = `${event.name}:${JSON.stringify(event.data)}:${event.timestamp ?? ""}`;
+          if (run.recordedTelemetryKeys.has(eventKey)) continue;
+          run.recordedTelemetryKeys.add(eventKey);
+          run.applicationTelemetry.push(event);
+          traceDelta.push({
+            id: Math.random().toString(36).substring(2, 10),
+            actor: "system",
+            kind: "state",
+            name: event.name,
+            metadata: {
+              ...(event.data === undefined ? {} : { data: event.data }),
+              ...(event.timestamp === undefined ? {} : { sourceTimestamp: event.timestamp }),
+            },
+            timestamp: new Date().toISOString(),
+          });
+          run.recorder?.recordEvent("application.telemetry", {
+            name: event.name,
+            ...(event.data === undefined ? {} : { data: event.data }),
+            ...(event.timestamp === undefined ? {} : { sourceTimestamp: event.timestamp }),
+            ...(observation ? { observationSequence: observation.sequence } : {}),
+          });
         }
       }
 
@@ -566,7 +630,12 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         ),
       );
 
-      completedRuns.set(run.runId, { scene: run.scene, trace: run.trace, evaluation });
+      completedRuns.set(run.runId, {
+        scene: run.scene,
+        trace: run.trace,
+        applicationTelemetry: run.applicationTelemetry,
+        evaluation,
+      });
 
       if (run.recorder) {
         if (passed) {
@@ -608,6 +677,19 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
             result: call.result as TraceEntry["result"],
           });
         }
+      }
+      for (const event of run.applicationTelemetry) {
+        entries.push({
+          id: Math.random().toString(36).substring(2, 10),
+          actor: "system",
+          kind: "state",
+          name: event.name,
+          metadata: {
+            ...(event.data === undefined ? {} : { data: event.data }),
+            ...(event.timestamp === undefined ? {} : { sourceTimestamp: event.timestamp }),
+          },
+          timestamp: event.timestamp ?? run.trace.started_at,
+        });
       }
 
       return {

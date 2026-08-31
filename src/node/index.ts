@@ -7,5 +7,3 @@ export { RecordingCollector, DEFAULT_RECORDING_CONFIG } from "./recordingCollect
 export type { RecordingCollectorOptions } from "./recordingCollector";
 export { JobManager } from "./jobManager";
 export { ReportGenerator, generateJobReport, type ReportGeneratorOptions } from "./reportGenerator";
-export { AgentRunner, runAgentScene } from "./agentRunner";
-export type { AgentRunnerOptions, AgentRunResult } from "./agentRunner";

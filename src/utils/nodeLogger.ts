@@ -1,6 +1,6 @@
 /**
  * Node.js-only logger using pino.
- * Use this in Node.js-only code (CLI, agentRunner, etc.)
+ * Use this in Node.js-only code (CLI and runtime modules).
  */
 
 import pino from "pino";

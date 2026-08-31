@@ -60,7 +60,20 @@ export interface AgentToolCall {
   result?: JsonValue;
 }
 
-export type SnapshotMetadata = Record<string, JsonValue | AgentToolCall[]>;
+/**
+ * An application-owned event added to the evidence bundle. Mimiq records this
+ * event as supplied; it does not infer business semantics from browser traffic.
+ */
+export interface ApplicationTelemetryEvent {
+  name: string;
+  data?: JsonValue;
+  timestamp?: string;
+}
+
+export type SnapshotMetadata = Record<
+  string,
+  JsonValue | AgentToolCall[] | ApplicationTelemetryEvent[]
+>;
 
 export interface AffordanceSnapshot {
   screenId?: string;
@@ -273,7 +286,7 @@ export interface RecordingActionLogConfig {
 export interface RecordingConfig {
   enabled: boolean;
   outputDir: string;
-  framework?: "playwright" | "cypress" | "stagehand";
+  framework?: "playwright" | "cypress";
   screenshots: RecordingScreenshotConfig;
   transcript: RecordingTranscriptConfig;
   actionLog: RecordingActionLogConfig;
@@ -327,6 +340,7 @@ export interface RecordingMetadata {
 export type EvidenceEventType =
   | "run.started"
   | "observation.captured"
+  | "application.telemetry"
   | "agent.message"
   | "agent.tool_called"
   | "simulator.action_chosen"
@@ -431,82 +445,4 @@ export interface JobEvalResults {
     byScene: Record<string, { total: number; passed: number; passRate: number }>;
     byEvaluator: Record<string, { total: number; passed: number; passRate: number }>;
   };
-}
-
-// Browser agent types
-
-export type BrowserAgentType = "stagehand" | "playwright-mcp";
-
-export interface BrowserAgentConfig {
-  type: BrowserAgentType;
-  model?: string;
-  headless?: boolean;
-  timeout?: number;
-}
-
-export interface BrowserTargetConfig {
-  url: string;
-  selector?: string;
-}
-
-export interface BrowserActionResult {
-  success: boolean;
-  text?: string;
-  error?: string;
-  screenshot?: string;
-}
-
-export interface BrowserObservation {
-  url: string;
-  title?: string;
-  visibleText?: string;
-  chatMessages?: Array<{ role: string; content: string }>;
-  stateMarkers?: string[];
-}
-
-export interface BrowserStepAction {
-  type: "act" | "extract" | "observe" | "message" | "navigate";
-  instruction?: string;
-  result?: string;
-  error?: string;
-}
-
-export interface BrowserStepResponse {
-  text: string;
-  toolCalls?: Array<{
-    tool: string;
-    args: JsonObject;
-    result?: JsonValue;
-  }>;
-}
-
-export interface BrowserStep {
-  turn: number;
-  timestamp: string;
-  action: BrowserStepAction;
-  response?: BrowserStepResponse;
-  screenshot?: string;
-  domSnapshot?: string;
-  url: string;
-}
-
-export interface BrowserTrace {
-  sceneId: string;
-  targetUrl: string;
-  startedAt: string;
-  finishedAt?: string;
-  steps: BrowserStep[];
-  terminalState?: string;
-  goalAchieved: boolean;
-}
-
-export interface AgentRunConfig {
-  scene: string | JsonObject;
-  url?: string;
-  agent?: BrowserAgentType;
-  model?: string;
-  headless?: boolean;
-  runs?: number;
-  jobId?: string;
-  outputDir?: string;
 }

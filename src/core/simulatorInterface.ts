@@ -1,6 +1,6 @@
 /**
  * Simulator interface for mimiq.
- * Defines the contract for all simulator implementations (LLM, Stagehand, browser-use).
+ * Defines the contract for all simulator implementations.
  */
 
 import type { AffordanceSnapshot, BrowserSimAction, DoneAction } from "../types";

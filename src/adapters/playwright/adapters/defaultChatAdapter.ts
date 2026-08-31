@@ -11,6 +11,10 @@ import type {
   UserToolAvailability,
 } from "../../../types";
 import type { PlaywrightBrowserAdapter, Selector } from "../../types";
+import {
+  collectApplicationTelemetry,
+  discoverPageActionTargets,
+} from "./browserAdapter";
 
 export interface DefaultChatAdapterConfig {
   transcript: Selector;
@@ -83,77 +87,6 @@ async function toActionTargets(
       metadata: { selector },
     });
     locators.set(id, el);
-  }
-
-  return targets;
-}
-
-async function discoverActionTargets(
-  page: Page,
-  locators: Map<string, Locator>,
-  maxActions: number,
-): Promise<UIActionTarget[]> {
-  const interactive = page.locator(
-    'button, [role="button"], a[href], select, textarea, input:not([type="hidden"]), [contenteditable="true"]',
-  );
-  const count = Math.min(await interactive.count(), maxActions);
-  const targets: UIActionTarget[] = [];
-
-  for (let index = 0; index < count; index++) {
-    const locator = interactive.nth(index);
-    if (!await locator.isVisible().catch(() => false)) continue;
-
-    const details = await locator.evaluate((element) => {
-      const htmlElement = element as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-      const tag = element.tagName.toLowerCase();
-      const inputType = tag === "input" ? htmlElement.type : "";
-      const kind = tag === "select"
-        ? "select"
-        : inputType === "file"
-          ? "upload"
-          : tag === "input" || tag === "textarea" || element.getAttribute("contenteditable") === "true"
-            ? "type"
-            : "click";
-      const label = element.getAttribute("aria-label")
-        || element.getAttribute("title")
-        || element.getAttribute("placeholder")
-        || element.textContent?.trim()
-        || element.getAttribute("name")
-        || element.id
-        || `${tag}-${inputType || "control"}`;
-      const options = tag === "select"
-        ? Array.from((element as HTMLSelectElement).options).map((option) => ({
-            value: option.value,
-            label: option.textContent?.trim() || option.value,
-          }))
-        : undefined;
-      const selector = element.id
-        ? `#${CSS.escape(element.id)}`
-        : (() => {
-            const path: string[] = [];
-            let current: Element | null = element;
-            while (current && current.parentElement) {
-              const tagName = current.tagName.toLowerCase();
-              const siblings = Array.from(current.parentElement.children)
-                .filter((sibling) => sibling.tagName === current!.tagName);
-              path.unshift(`${tagName}:nth-of-type(${siblings.indexOf(current) + 1})`);
-              current = current.parentElement;
-            }
-            return path.join(" > ");
-          })();
-      return { tag, inputType, kind, label, options, selector };
-    });
-    const id = `mimiq-${details.tag}-${index + 1}`;
-
-    targets.push({
-      id,
-      kind: details.kind as UIActionTarget["kind"],
-      label: details.label,
-      enabled: !await locator.isDisabled().catch(() => false),
-      ...(details.options ? { options: details.options } : {}),
-      metadata: { selector: details.selector },
-    });
-    locators.set(id, locator);
   }
 
   return targets;
@@ -246,7 +179,7 @@ export function createDefaultChatAdapter(
         ...(await toActionTargets(page, config.actionTargets, actionLocators)),
         ...(config.discoverActions === false
           ? []
-          : await discoverActionTargets(page, actionLocators, config.maxDiscoveredActions ?? 40)),
+          : await discoverPageActionTargets(page, actionLocators, config.maxDiscoveredActions ?? 40)),
       ];
 
       let toolCalls: AgentToolCall[] = [];
@@ -261,6 +194,7 @@ export function createDefaultChatAdapter(
       if (config.instrumentToolCalls !== false) {
         toolCalls.push(...await collectInstrumentedToolCalls(page));
       }
+      const applicationTelemetry = await collectApplicationTelemetry(page);
 
       const idleMarkerCount = await page.locator(config.idleMarker).count();
 
@@ -273,6 +207,7 @@ export function createDefaultChatAdapter(
         metadata: {
           ...config.snapshotMetadata?.(),
           toolCalls,
+          ...(applicationTelemetry.length > 0 ? { applicationTelemetry } : {}),
         },
       };
 

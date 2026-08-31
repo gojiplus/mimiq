@@ -21,7 +21,7 @@ OUTPUTS_DIR="$SCRIPT_DIR/outputs"
 NUM_RUNS=${NUM_RUNS:-3}
 SKIP_GIFS=false
 ONLY=""
-LLM_MODEL=${LLM_MODEL:-"openai/gpt-4o"}
+MIMIQ_MODEL=${MIMIQ_MODEL:-"qwen3:8b"}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -49,7 +49,7 @@ echo "============================================"
 echo "Mimiq Examples E2E Runner"
 echo "============================================"
 echo "Runs per test: $NUM_RUNS"
-echo "LLM Model: $LLM_MODEL"
+echo "LLM Model: $MIMIQ_MODEL"
 echo "Output dir: $OUTPUTS_DIR"
 echo ""
 
@@ -105,7 +105,7 @@ run_playwright() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Playwright Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts
+    MIMIQ_RECORDING=1 MIMIQ_MODEL="$MIMIQ_MODEL" npx playwright test --config=playwright.config.ts
   done
 
   echo "Playwright tests complete."
@@ -125,86 +125,10 @@ run_cypress() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Cypress Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx cypress run
+    MIMIQ_RECORDING=1 MIMIQ_MODEL="$MIMIQ_MODEL" npx cypress run
   done
 
   echo "Cypress tests complete."
-}
-
-# ============================================
-# Run Stagehand Tests
-# ============================================
-run_stagehand() {
-  echo ""
-  echo "============================================"
-  echo "Running Stagehand Tests ($NUM_RUNS runs each)"
-  echo "============================================"
-
-  cd "$SCRIPT_DIR/stagehand"
-
-  # Install dependencies including stagehand if not present
-  if [ ! -d "node_modules" ] || ! npm list @browserbasehq/stagehand 2>/dev/null | grep -q stagehand; then
-    echo "Installing stagehand dependencies..."
-    npm install && npm link @gojiplus/mimiq 2>&1 || {
-      echo "WARNING: Failed to install @browserbasehq/stagehand"
-      echo "Skipping stagehand tests."
-      return
-    }
-  fi
-
-  # Check for required API key
-  if [ -z "$OPENAI_API_KEY" ] && [ -z "$BROWSERBASE_API_KEY" ]; then
-    echo "Skipping Stagehand tests: OPENAI_API_KEY or BROWSERBASE_API_KEY is required."
-    return
-  fi
-
-  for run in $(seq 1 $NUM_RUNS); do
-    echo ""
-    echo "--- Stagehand Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts
-  done
-
-  echo "Stagehand tests complete."
-}
-
-# ============================================
-# Run Agent Tests
-# ============================================
-run_agent() {
-  echo ""
-  echo "============================================"
-  echo "Running Agent Evaluation ($NUM_RUNS runs each)"
-  echo "============================================"
-
-  cd "$SCRIPT_DIR"
-
-  local agent_scenes_dir="$SCRIPT_DIR/agent-scenes"
-
-  if [ ! -d "$agent_scenes_dir" ]; then
-    echo "WARNING: No agent-scenes directory found, skipping agent tests."
-    return
-  fi
-
-  local scene_count=$(ls -1 "$agent_scenes_dir"/*.yaml "$agent_scenes_dir"/*.yml 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$scene_count" -eq 0 ]; then
-    echo "WARNING: No agent scene files found, skipping agent tests."
-    return
-  fi
-
-  echo "Found $scene_count agent scene(s)"
-
-  mkdir -p "$OUTPUTS_DIR/recordings/stagehand"
-  mkdir -p "$OUTPUTS_DIR/evals/stagehand"
-  mkdir -p "$OUTPUTS_DIR/reports/stagehand"
-
-  npx mimiq agent \
-    --scenes "$agent_scenes_dir" \
-    --runs $NUM_RUNS \
-    --output "$OUTPUTS_DIR" \
-    --framework stagehand \
-    --headless
-
-  echo "Agent tests complete."
 }
 
 # ============================================
@@ -362,25 +286,17 @@ case "$ONLY" in
   cypress)
     run_cypress
     ;;
-  stagehand)
-    run_stagehand
-    ;;
-  agent)
-    run_agent
-    ;;
   "")
     # Run all
     run_playwright
     run_cypress
-    run_stagehand
-    run_agent
     generate_gifs
     run_layoutlens_evals
     generate_report
     ;;
   *)
     echo "Unknown test suite: $ONLY"
-    echo "Options: playwright, cypress, stagehand, agent"
+    echo "Options: playwright, cypress"
     exit 1
     ;;
 esac

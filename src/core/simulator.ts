@@ -6,7 +6,7 @@
 
 import type { Persona, Scene } from "./models";
 import { personaToPrompt, resolvePersona } from "./models";
-import { complete } from "./llm";
+import { complete, DEFAULT_LLM_BASE_URL, DEFAULT_LLM_MODEL } from "./llm";
 import type { AffordanceSnapshot, MessageAction } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "./simulatorInterface";
 import { createLogger } from "../utils/logger";
@@ -75,11 +75,11 @@ export class Simulator implements SimulatorInterface {
     this.config = {
       model:
         config.model ||
-        process.env.SIMULATOR_MODEL ||
-        process.env.LLM_MODEL ||
-        "google/gemini-2.0-flash",
-      baseURL: config.baseURL ?? process.env.LLM_BASE_URL ?? "",
-      apiKey: config.apiKey ?? process.env.LLM_API_KEY ?? "",
+        process.env.MIMIQ_SIMULATOR_MODEL ||
+        process.env.MIMIQ_MODEL ||
+        DEFAULT_LLM_MODEL,
+      baseURL: config.baseURL ?? process.env.MIMIQ_LLM_BASE_URL ?? DEFAULT_LLM_BASE_URL,
+      apiKey: config.apiKey ?? process.env.MIMIQ_LLM_API_KEY ?? "ollama",
     };
 
     log.debug({ persona: persona.description, model: this.config.model, maxTurns: this.maxTurns }, "Simulator initialized");

@@ -112,20 +112,7 @@ export interface JudgeConfig {
   model?: string;
 }
 
-import type { BrowserAgentType } from "../types";
 import type { SimulatorConfig as SceneSimulatorConfig } from "./simulatorInterface";
-
-export interface AgentConfig {
-  type: BrowserAgentType;
-  model?: string;
-  headless?: boolean;
-  timeout?: number;
-}
-
-export interface TargetConfig {
-  url: string;
-  selector?: string;
-}
 
 export interface Scene {
   id: string;
@@ -137,18 +124,6 @@ export interface Scene {
   context?: Record<string, unknown>;
   expectations?: Expectations;
   simulator?: SceneSimulatorConfig;
-}
-
-export interface AgentScene {
-  id: string;
-  description?: string;
-  agent: AgentConfig;
-  target: TargetConfig;
-  goal: string;
-  persona?: Persona | PersonaPreset;
-  max_turns?: number;
-  context?: Record<string, unknown>;
-  expectations?: Expectations;
 }
 
 export function resolvePersona(persona: Persona | PersonaPreset | string): Persona {

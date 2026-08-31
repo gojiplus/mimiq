@@ -13,8 +13,35 @@
 
 import { test, expect } from "../fixtures";
 import { mkdirSync, writeFileSync } from "fs";
+import { createBrowserAdapter } from "@gojiplus/mimiq/playwright";
 
 test.describe("Customer Support Flows", () => {
+  test("generic browser adapter captures arbitrary controls and app telemetry", async ({ page }) => {
+    await page.goto("/");
+    const adapter = createBrowserAdapter(page);
+
+    const initialSnapshot = await adapter.captureSnapshot();
+    expect(initialSnapshot.transcript).toEqual([]);
+    expect(initialSnapshot.availableActions).toContainEqual(expect.objectContaining({
+      kind: "click",
+      label: "Track Order",
+    }));
+
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("mimiq:telemetry", {
+        detail: {
+          name: "order.lookup.started",
+          data: { source: "support-widget" },
+        },
+      }));
+    });
+    const telemetrySnapshot = await adapter.captureSnapshot();
+    expect(telemetrySnapshot.metadata?.applicationTelemetry).toEqual([{
+      name: "order.lookup.started",
+      data: { source: "support-widget" },
+    }]);
+  });
+
   test("records agent tool calls emitted by application instrumentation", async ({ page, mimiq }) => {
     await page.goto("/");
     await mimiq.startRun({
@@ -129,7 +156,7 @@ test.describe("Customer Support Flows", () => {
           max_turns: 2,
           simulator: {
             type: "browser-use",
-            model: "local/qwen3:8b",
+            model: "qwen3:8b",
             options: { baseURL: "http://127.0.0.1:11434/v1" },
           },
         },

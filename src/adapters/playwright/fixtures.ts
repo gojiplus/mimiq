@@ -113,7 +113,7 @@ export class MimiqTestHelper {
   async runToCompletion(options?: { maxTurns?: number }): Promise<void> {
     const maxTurns = options?.maxTurns ?? this.options.maxTurns ?? 12;
 
-    while (this.turnCount < maxTurns) {
+    while (this.turnCount <= maxTurns) {
       const advance = await this.runTurn();
       if (advance.action.kind === "done") {
         return;

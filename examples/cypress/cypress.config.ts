@@ -33,6 +33,10 @@ const runtime = createLocalRuntime({
 });
 
 export default defineConfig({
+  allowCypressEnv: false,
+  expose: {
+    ADAPTER_MODE: process.env.MIMIQ_ADAPTER_MODE ?? "default",
+  },
   e2e: {
     baseUrl: "http://localhost:5173",
     supportFile: "support/e2e.ts",

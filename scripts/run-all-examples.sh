@@ -27,7 +27,7 @@ echo "Building mimiq..."
 npm run build
 echo ""
 
-EXAMPLES=("playwright-basic" "stagehand-autonomous" "layoutlens-visual")
+EXAMPLES=("playwright" "cypress")
 
 run_example() {
   local example="$1"

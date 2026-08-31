@@ -1,5 +1,5 @@
 import type { AffordanceSnapshot, TranscriptTurn } from "../types";
-import { complete } from "../core/llm";
+import { complete, DEFAULT_LLM_MODEL } from "../core/llm";
 
 const SIMULATOR_SYSTEM_PROMPT = `\
 You are simulating a user in a customer interaction. You are NOT the agent.
@@ -81,9 +81,9 @@ export class Simulator {
     this.config = {
       model:
         config.model ||
-        process.env.SIMULATOR_MODEL ||
-        process.env.LLM_MODEL ||
-        "google/gemini-2.0-flash",
+        process.env.MIMIQ_SIMULATOR_MODEL ||
+        process.env.MIMIQ_MODEL ||
+        DEFAULT_LLM_MODEL,
     };
   }
 

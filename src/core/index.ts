@@ -15,9 +15,3 @@ export {
 } from "./simulatorInterface";
 export { createSimulator, type SimulatorFactoryOptions } from "./simulatorFactory";
 export * from "./llm";
-
-export type {
-  AgentConfig,
-  TargetConfig,
-  AgentScene,
-} from "./models";
