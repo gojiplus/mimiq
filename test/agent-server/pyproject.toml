@@ -1,7 +1,7 @@
 [project]
-name = "understudy-demo-agent"
+name = "mimiq-demo-agent"
 version = "0.1.0"
-description = "Demo customer service agent using Google ADK for understudy-cypress examples"
+description = "Deterministic customer service agent for mimiq browser examples"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"

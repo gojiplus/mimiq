@@ -5,7 +5,7 @@
 
 import type { Trace } from "./models";
 import { traceConversationText } from "./models";
-import { complete } from "./llm";
+import { complete, DEFAULT_LLM_MODEL } from "./llm";
 
 const JUDGE_SYSTEM_PROMPT = `\
 You are evaluating the quality of an AI agent's conversation with a user.
@@ -45,9 +45,9 @@ export class Judge {
     this.samples = options.samples ?? 5;
     this.model =
       options.model ||
-      process.env.JUDGE_MODEL ||
-      process.env.LLM_MODEL ||
-      "google/gemini-2.0-flash";
+      process.env.MIMIQ_JUDGE_MODEL ||
+      process.env.MIMIQ_MODEL ||
+      DEFAULT_LLM_MODEL;
     this.config = options.config ?? {};
   }
 

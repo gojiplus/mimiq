@@ -8,7 +8,7 @@
 #   ./run-all.sh --runs 3     # Run each test 3 times (default)
 #   ./run-all.sh --skip-gifs  # Skip GIF generation
 #   ./run-all.sh --only playwright  # Only run playwright tests
-#   ./run-all.sh --only agent        # Only run agent tests
+#   ./run-all.sh --only cypress      # Only run Cypress tests
 #
 
 set -e
@@ -21,7 +21,7 @@ OUTPUTS_DIR="$SCRIPT_DIR/outputs"
 NUM_RUNS=${NUM_RUNS:-3}
 SKIP_GIFS=false
 ONLY=""
-LLM_MODEL=${LLM_MODEL:-"openai/gpt-4o"}
+MIMIQ_MODEL=${MIMIQ_MODEL:-"qwen3:8b"}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -49,7 +49,7 @@ echo "============================================"
 echo "Mimiq Examples E2E Runner"
 echo "============================================"
 echo "Runs per test: $NUM_RUNS"
-echo "LLM Model: $LLM_MODEL"
+echo "LLM Model: $MIMIQ_MODEL"
 echo "Output dir: $OUTPUTS_DIR"
 echo ""
 
@@ -70,24 +70,58 @@ echo "Building mimiq package..."
 cd "$ROOT_DIR"
 npm run build
 
-# Start test app
-echo "Starting test application..."
-cd "$ROOT_DIR/test/app"
-npm run dev &
-APP_PID=$!
-sleep 3
+# Start test services
+echo "Starting test services..."
+APP_PID=""
+AGENT_PID=""
 
-# Verify app is running
-if ! curl -s http://localhost:5173 > /dev/null; then
-  echo "ERROR: Test app failed to start"
-  kill $APP_PID 2>/dev/null || true
+if ! curl -fsS http://localhost:5173 > /dev/null; then
+  cd "$ROOT_DIR/test/app"
+  npm run dev &
+  APP_PID=$!
+fi
+
+if ! curl -fsS http://localhost:8001/health > /dev/null; then
+  cd "$ROOT_DIR/test/agent-server"
+  uv run uvicorn agent_server:app --app-dir src --port 8001 &
+  AGENT_PID=$!
+fi
+
+stop_services() {
+  if [[ -n "$APP_PID" ]]; then
+    kill "$APP_PID" 2>/dev/null || true
+  fi
+  if [[ -n "$AGENT_PID" ]]; then
+    kill "$AGENT_PID" 2>/dev/null || true
+  fi
+}
+
+wait_for_service() {
+  local url="$1"
+  local name="$2"
+  for _ in $(seq 1 30); do
+    if curl -fsS "$url" > /dev/null; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "ERROR: $name failed to start"
+  return 1
+}
+
+if ! wait_for_service http://localhost:5173 "Test app"; then
+  stop_services
   exit 1
 fi
-echo "Test app running on http://localhost:5173"
+if ! wait_for_service http://localhost:8001/health "Demo agent"; then
+  stop_services
+  exit 1
+fi
+echo "Test services running on http://localhost:5173 and http://localhost:8001"
 
 cleanup() {
-  echo "Stopping test app..."
-  kill $APP_PID 2>/dev/null || true
+  echo "Stopping test services..."
+  stop_services
 }
 trap cleanup EXIT
 
@@ -105,7 +139,7 @@ run_playwright() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Playwright Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts 2>&1 || true
+    MIMIQ_RECORDING=1 MIMIQ_MODEL="$MIMIQ_MODEL" npx playwright test --config=playwright.config.ts
   done
 
   echo "Playwright tests complete."
@@ -125,86 +159,10 @@ run_cypress() {
   for run in $(seq 1 $NUM_RUNS); do
     echo ""
     echo "--- Cypress Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx cypress run 2>&1 || true
+    MIMIQ_RECORDING=1 MIMIQ_MODEL="$MIMIQ_MODEL" npx cypress run
   done
 
   echo "Cypress tests complete."
-}
-
-# ============================================
-# Run Stagehand Tests
-# ============================================
-run_stagehand() {
-  echo ""
-  echo "============================================"
-  echo "Running Stagehand Tests ($NUM_RUNS runs each)"
-  echo "============================================"
-
-  cd "$SCRIPT_DIR/stagehand"
-
-  # Install dependencies including stagehand if not present
-  if [ ! -d "node_modules" ] || ! npm list @browserbasehq/stagehand 2>/dev/null | grep -q stagehand; then
-    echo "Installing stagehand dependencies..."
-    npm install && npm link @gojiplus/mimiq 2>&1 || {
-      echo "WARNING: Failed to install @browserbasehq/stagehand"
-      echo "Skipping stagehand tests."
-      return
-    }
-  fi
-
-  # Check for required API key
-  if [ -z "$OPENAI_API_KEY" ] && [ -z "$BROWSERBASE_API_KEY" ]; then
-    echo "WARNING: No API key found (OPENAI_API_KEY or BROWSERBASE_API_KEY)"
-    echo "Stagehand tests may fail without proper credentials."
-  fi
-
-  for run in $(seq 1 $NUM_RUNS); do
-    echo ""
-    echo "--- Stagehand Run $run of $NUM_RUNS ---"
-    MIMIQ_RECORDING=1 LLM_MODEL="$LLM_MODEL" npx playwright test --config=playwright.config.ts 2>&1 || true
-  done
-
-  echo "Stagehand tests complete."
-}
-
-# ============================================
-# Run Agent Tests
-# ============================================
-run_agent() {
-  echo ""
-  echo "============================================"
-  echo "Running Agent Evaluation ($NUM_RUNS runs each)"
-  echo "============================================"
-
-  cd "$SCRIPT_DIR"
-
-  local agent_scenes_dir="$SCRIPT_DIR/agent-scenes"
-
-  if [ ! -d "$agent_scenes_dir" ]; then
-    echo "WARNING: No agent-scenes directory found, skipping agent tests."
-    return
-  fi
-
-  local scene_count=$(ls -1 "$agent_scenes_dir"/*.yaml "$agent_scenes_dir"/*.yml 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$scene_count" -eq 0 ]; then
-    echo "WARNING: No agent scene files found, skipping agent tests."
-    return
-  fi
-
-  echo "Found $scene_count agent scene(s)"
-
-  mkdir -p "$OUTPUTS_DIR/recordings/stagehand"
-  mkdir -p "$OUTPUTS_DIR/evals/stagehand"
-  mkdir -p "$OUTPUTS_DIR/reports/stagehand"
-
-  npx mimiq agent \
-    --scenes "$agent_scenes_dir" \
-    --runs $NUM_RUNS \
-    --output "$OUTPUTS_DIR" \
-    --framework stagehand \
-    --headless || true
-
-  echo "Agent tests complete."
 }
 
 # ============================================
@@ -362,25 +320,17 @@ case "$ONLY" in
   cypress)
     run_cypress
     ;;
-  stagehand)
-    run_stagehand
-    ;;
-  agent)
-    run_agent
-    ;;
   "")
     # Run all
     run_playwright
     run_cypress
-    run_stagehand
-    run_agent
     generate_gifs
     run_layoutlens_evals
     generate_report
     ;;
   *)
     echo "Unknown test suite: $ONLY"
-    echo "Options: playwright, cypress, stagehand, agent"
+    echo "Options: playwright, cypress"
     exit 1
     ;;
 esac

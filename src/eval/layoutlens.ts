@@ -39,6 +39,24 @@ export interface VisualCompareConfig {
   threshold?: number;
 }
 
+function isAffirmative(answer: string): boolean {
+  return /^\s*(yes|pass|true)\b/i.test(answer);
+}
+
+function toLayoutLensResult(result: Record<string, unknown>): LayoutLensResult {
+  const answer = typeof result.answer === "string" ? result.answer : "";
+  const confidence = typeof result.confidence === "number" ? result.confidence : 0;
+
+  return {
+    passed: typeof result.passed === "boolean" ? result.passed : isAffirmative(answer),
+    answer,
+    confidence,
+    reasoning: typeof result.reasoning === "string" ? result.reasoning : undefined,
+    screenshotPath: typeof result.screenshot_path === "string" ? result.screenshot_path : undefined,
+    error: typeof result.error === "string" ? result.error : undefined,
+  };
+}
+
 function ensureScreenshotDir(dir: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -74,15 +92,7 @@ async function runLayoutLensHttp(
       };
     }
 
-    const result = await response.json();
-    return {
-      passed: result.passed ?? (result.confidence >= 0.8),
-      answer: result.answer || "",
-      confidence: result.confidence || 0,
-      reasoning: result.reasoning,
-      screenshotPath: result.screenshot_path,
-      error: result.error,
-    };
+    return toLayoutLensResult(await response.json() as Record<string, unknown>);
   } catch (err) {
     clearTimeout(timeoutId);
     const message = err instanceof Error ? err.message : String(err);
@@ -140,14 +150,7 @@ async function runLayoutLensCommand(
       }
 
       try {
-        const result = JSON.parse(stdout.trim());
-        resolve({
-          passed: result.passed ?? (result.confidence >= 0.8),
-          answer: result.answer || "",
-          confidence: result.confidence || 0,
-          reasoning: result.reasoning,
-          screenshotPath: result.screenshot_path,
-        });
+        resolve(toLayoutLensResult(JSON.parse(stdout.trim()) as Record<string, unknown>));
       } catch {
         resolve({
           passed: false,
@@ -174,7 +177,7 @@ export async function visualAssert(
     );
   }
 
-  const args = ["analyze", source, query, "--output", "json"];
+  const args = [source, "--query", query, "--output", "json"];
   return runLayoutLensCommand(args, config);
 }
 
@@ -194,14 +197,16 @@ export async function accessibilityAudit(
     );
   }
 
-  const args = [
-    "audit-accessibility",
-    source,
-    "--level",
-    level,
-    "--output",
-    "json",
-  ];
+  if (level !== "AA") {
+    return {
+      passed: false,
+      answer: "",
+      confidence: 0,
+      error: "The LayoutLens CLI only supports AA accessibility audits. Configure the HTTP bridge for A or AAA.",
+    };
+  }
+
+  const args = [source, "--a11y", "axe", "--output", "json"];
 
   return runLayoutLensCommand(args, config);
 }
@@ -224,11 +229,11 @@ export async function visualCompare(
   }
 
   const args = [
-    "compare",
     source,
     baselinePath,
-    "--threshold",
-    String(threshold),
+    "--compare",
+    "--query",
+    `Are these interfaces visually equivalent? Answer YES only if they meet a similarity threshold of ${threshold}.`,
     "--output",
     "json",
   ];
@@ -268,7 +273,7 @@ export async function runVisualAssertions(
   for (const assertion of assertions) {
     const minConfidence = assertion.minConfidence ?? 0.8;
     const result = await visualAssert(url, assertion.query, config);
-    const passed = !result.error && result.confidence >= minConfidence;
+    const passed = !result.error && result.passed && result.confidence >= minConfidence;
 
     results.push({
       query: assertion.query,

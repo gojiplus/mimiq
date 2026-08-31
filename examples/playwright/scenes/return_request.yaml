@@ -36,5 +36,4 @@ expectations:
   forbidden_tools:
     - issue_refund
   allowed_terminal_states:
-    - return_initiated
-    - return_label_sent
+    - return_created

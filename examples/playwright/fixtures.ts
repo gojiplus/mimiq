@@ -29,7 +29,7 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
             framework: "playwright",
             screenshots: {
               enabled: true,
-              timing: "before",
+              timing: "both",
               format: "png",
             },
             transcript: {
@@ -51,8 +51,8 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
 
   mimiqAdapterFactory: [
     async ({}, use) => {
-      await use((page: Page) =>
-        createDefaultChatAdapter(page, {
+      await use(async (page: Page) =>
+        await createDefaultChatAdapter(page, {
           transcript: "[data-test=transcript]",
           messageRow: "[data-test=message-row]",
           messageRoleAttr: "data-role",

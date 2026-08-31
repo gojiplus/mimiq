@@ -1,6 +1,7 @@
 export type {
   AdvanceRunRequest,
   AdvanceRunResponse,
+  ActionExecutionResult,
   CleanupRunRequest,
   EvaluationReport,
   GetTraceRequest,

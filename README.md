@@ -5,23 +5,27 @@
 [![API Docs](https://img.shields.io/badge/docs-API-blue)](https://gojiplus.github.io/mimiq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Test your AI agents like real users would.**
+**Simulate goal-directed users in real applications and keep replayable evidence of what happened.**
 
 ![mimiq demo](assets/demo-track-order.gif)
 
 ## What is mimiq?
 
-mimiq simulates realistic users to test AI chatbots and agents. Instead of scripted test cases, define user personas and goals—mimiq handles the conversation naturally.
+mimiq is the application-layer simulation harness. Playwright or Cypress runs the browser. mimiq observes the application, chooses the next allowed user action, executes it through the browser adapter, and records the result. The application does not need an agent SDK or framework integration.
 
-- **Realistic user simulation** — LLM-powered personas that behave like real customers
-- **Works with your stack** — Playwright, Cypress, and Stagehand adapters
-- **Automated evaluation** — Verify tool calls, terminal states, and qualitative behavior
+- **Goal-directed simulation** — Personas can send messages or choose observed controls, inputs, selects, uploads, and navigation.
+- **Browser-owned execution** — Playwright and Cypress remain responsible for clicking, typing, waiting, and screenshots.
+- **Evidence bundles** — Each recorded run has a manifest, ordered event log, observations, screenshots, application telemetry, and browser execution outcomes.
+- **Replay** — Re-run the successful browser actions in an evidence bundle against a fresh Playwright page.
+- **Optional evaluation** — Deterministic checks and judges consume the recorded run; visual analysis can be handled later by LayoutLens.
 
 ## 30-Second Setup
 
 ```bash
 npm install @gojiplus/mimiq @playwright/test --save-dev
-export GOOGLE_GENERATIVE_AI_API_KEY=your-key  # or OPENAI_API_KEY
+ollama run qwen3:8b
+export MIMIQ_MODEL=qwen3:8b
+export MIMIQ_LLM_BASE_URL=http://127.0.0.1:11434/v1
 ```
 
 Define a scene (`scenes/return_backpack.yaml`):
@@ -58,11 +62,11 @@ test("processes valid return", async ({ page, mimiq }) => {
 
 | Feature | Description |
 |---------|-------------|
-| **LLM-powered personas** | cooperative, frustrated, adversarial, vague, impatient |
-| **Multi-provider** | Google Gemini, OpenAI, Anthropic via Vercel AI SDK |
+| **Simulation policies** | conversational personas and browser-use-style observed-action policy |
+| **Private model gateway** | Ollama directly, or any model routed through a LiteLLM gateway |
 | **Deterministic checks** | required/forbidden tools, terminal states |
 | **LLM-as-judge** | Qualitative evaluation with majority voting |
-| **Recording pipeline** | Screenshots, transcripts, action logs |
+| **Recording pipeline** | Manifest, append-only events, observations, screenshots, transcripts, action outcomes |
 | **Visual assertions** | UI validation with confidence thresholds |
 
 ## Persona Presets
@@ -86,8 +90,8 @@ persona: string               # cooperative, frustrated_but_cooperative, adversa
 max_turns: number             # Maximum turns (default: 15)
 
 simulator:
-  type: llm | stagehand | browser-use
-  model: "google/gemini-2.0-flash"
+  type: llm | browser-use
+  model: "qwen3:8b"
 
 context:                      # World state
   customer: { ... }
@@ -102,6 +106,22 @@ expectations:
       rubric: string
       samples: number
 ```
+
+`browser-use` is mimiq's in-process browser action policy. It is not a dependency on the Python browser-use package or a separate browser service. The policy receives the current observed affordances and may select only those targets; the Playwright or Cypress adapter executes the action.
+
+## Model Gateway
+
+The policy model is a runtime concern, not an application integration. Mimiq uses Ollama directly by default. For hosted models or routing, point the runtime at a LiteLLM gateway. The transport is private to Mimiq; scenes and the browser adapter do not identify model providers or contain provider credentials.
+
+The local Qwen default uses the gateway's `reasoning_effort: "none"` control so browser turns do not spend their turn budget on a hidden reasoning trace. Set `MIMIQ_LLM_REASONING_EFFORT` for a gateway-specific supported level, or pass `reasoningEffort: null` in a programmatic model configuration to omit the control.
+
+```bash
+export MIMIQ_MODEL=mimiq-policy
+export MIMIQ_LLM_BASE_URL=http://127.0.0.1:4000
+export MIMIQ_LLM_API_KEY=your-litellm-key
+```
+
+`mimiq-policy` is a LiteLLM model alias. Define its provider, deployment, and credentials in LiteLLM's configuration.
 
 ## Playwright Setup
 
@@ -122,6 +142,10 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
       await use(() =>
         createLocalRuntime({
           scenesDir: "./scenes",
+          recording: {
+            enabled: true,
+            outputDir: "./test/recordings",
+          },
         })
       );
     },
@@ -130,8 +154,8 @@ export const test = mimiqTest.extend<MimiqFixtures, MimiqWorkerFixtures>({
 
   mimiqAdapterFactory: [
     async ({}, use) => {
-      await use((page: Page) =>
-        createDefaultChatAdapter(page, {
+      await use(async (page: Page) =>
+        await createDefaultChatAdapter(page, {
           transcript: "[data-test=transcript]",
           messageRow: "[data-test=message-row]",
           messageRoleAttr: "data-role",
@@ -158,6 +182,49 @@ export { expect } from "@playwright/test";
 | `mimiq.runTurn()` | Execute one turn |
 | `mimiq.evaluate()` | Run all checks and judges |
 | `mimiq.getTrace()` | Get conversation trace |
+| `mimiq.replayEvidenceBundle(runDir)` | Replay successful recorded browser actions against the current page |
+
+## Arbitrary Browser Applications
+
+For a non-chat UI, use the generic browser adapter. It discovers visible buttons, links, inputs, selects, uploads, and editable controls, and only executes targets observed in the current page. No application-side instrumentation is required for browser evidence.
+
+```typescript
+import { createBrowserAdapter } from "@gojiplus/mimiq/playwright";
+
+const adapter = await createBrowserAdapter(page);
+```
+
+The generic adapter treats a scene's initial chat message as intent only: it records that turn but does not send it to the page because no message control is configured. Subsequent policy turns operate the discovered controls. Use `createDefaultChatAdapter` for a chat UI, or provide a dedicated adapter for an application-specific interaction.
+
+## Optional Application Telemetry
+
+Browser evidence records what Mimiq observed and did. When the application can expose a meaningful business event, it may add a named event to the evidence bundle. This is optional and does not require an agent SDK.
+
+```typescript
+window.dispatchEvent(new CustomEvent("mimiq:telemetry", {
+  detail: {
+    name: "refund.previewed",
+    data: { orderId: "ORD-10031", amount: 17.5 },
+  },
+}));
+```
+
+Mimiq records the event exactly as supplied. Do not put credentials, authentication headers, or sensitive payloads in telemetry. Generic browser/network capture is not treated as a business-tool call because Mimiq cannot safely infer that meaning.
+
+### Agent Tool Telemetry
+
+When an agent calls tools that are not visible in the UI, emit the normalized event below. The default Playwright chat adapter records it with the next observation so tool-specific checks can use it; no agent SDK integration is required.
+
+```typescript
+window.dispatchEvent(new CustomEvent("mimiq:agent-tool-call", {
+  detail: {
+    id: "lookup-order-attempt-1",
+    name: "lookup_order",
+    args: { order_id: "ORD-10031" },
+    result: { found: true },
+  },
+}));
+```
 
 ## Cypress Setup
 
@@ -257,12 +324,13 @@ createLocalRuntime({
 
 | Variable | Description |
 |----------|-------------|
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
-| `OPENAI_API_KEY` | OpenAI API key |
-| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `MIMIQ_MODEL` | Model or gateway alias; defaults to `qwen3:8b` |
+| `MIMIQ_LLM_BASE_URL` | Private model-gateway URL; defaults to Ollama at `http://127.0.0.1:11434/v1` |
+| `MIMIQ_LLM_API_KEY` | Private model-gateway key; defaults to `ollama`, which Ollama ignores |
+| `MIMIQ_LLM_REASONING_EFFORT` | Model-gateway reasoning level; defaults to `none` for responsive Qwen browser turns |
 | `MIMIQ_RECORDING` | Enable recording (`1` to enable) |
-| `SIMULATOR_MODEL` | Default model for simulation |
-| `JUDGE_MODEL` | Default model for judges |
+| `MIMIQ_SIMULATOR_MODEL` | Overrides `MIMIQ_MODEL` for simulation |
+| `MIMIQ_JUDGE_MODEL` | Overrides `MIMIQ_MODEL` for judges |
 
 ## License
 

@@ -1,52 +1,70 @@
 /**
- * Shared LLM client using Vercel AI SDK for multi-provider support.
- * Supports Google, OpenAI, and Anthropic providers.
+ * Private model-gateway client for simulator and judge policies.
+ * Use Ollama directly or route any provider through a LiteLLM gateway.
  */
 
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
-import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 export interface LLMConfig {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  baseURL?: string;
+  apiKey?: string;
+  reasoningEffort?: string | null;
 }
 
 export interface LLMResult {
   text: string;
 }
 
-function parseModel(modelString: string) {
-  const [provider, ...rest] = modelString.split("/");
-  const modelName = rest.join("/");
+export const DEFAULT_LLM_MODEL = "qwen3:8b";
+export const DEFAULT_LLM_BASE_URL = "http://127.0.0.1:11434/v1";
+export const DEFAULT_LLM_REASONING_EFFORT = "none";
 
-  switch (provider) {
-    case "google":
-      return google(modelName);
-    case "openai":
-      return openai(modelName);
-    case "anthropic":
-      return anthropic(modelName);
-    default:
-      return google(modelString);
-  }
+function resolveLLMConfig(config: LLMConfig) {
+  return {
+    model: config.model ?? process.env.MIMIQ_MODEL ?? DEFAULT_LLM_MODEL,
+    baseURL: config.baseURL ?? process.env.MIMIQ_LLM_BASE_URL ?? DEFAULT_LLM_BASE_URL,
+    apiKey: config.apiKey ?? process.env.MIMIQ_LLM_API_KEY ?? "ollama",
+    reasoningEffort: config.reasoningEffort === null
+      ? undefined
+      : config.reasoningEffort
+        ?? process.env.MIMIQ_LLM_REASONING_EFFORT
+        ?? DEFAULT_LLM_REASONING_EFFORT,
+  };
+}
+
+function languageModel(config: LLMConfig) {
+  const resolved = resolveLLMConfig(config);
+  const provider = createOpenAICompatible({
+    name: "mimiq",
+    baseURL: resolved.baseURL,
+    apiKey: resolved.apiKey,
+  });
+  return provider.chatModel(resolved.model);
+}
+
+function modelGatewayOptions(config: ReturnType<typeof resolveLLMConfig>) {
+  return config.reasoningEffort === undefined
+    ? undefined
+    : { mimiq: { reasoningEffort: config.reasoningEffort } };
 }
 
 export async function complete(
   prompt: string,
   config: LLMConfig = {},
 ): Promise<string> {
-  const modelString =
-    config.model || process.env.LLM_MODEL || "google/gemini-2.0-flash";
-  const model = parseModel(modelString);
+  const resolved = resolveLLMConfig(config);
+  const model = languageModel(resolved);
 
   const { text } = await generateText({
     model,
     prompt,
     maxOutputTokens: config.maxTokens,
     temperature: config.temperature,
+    providerOptions: modelGatewayOptions(resolved),
   });
 
   return text;
@@ -57,9 +75,8 @@ export async function completeWithImage(
   imageBase64: string,
   config: LLMConfig = {},
 ): Promise<string> {
-  const modelString =
-    config.model || process.env.LLM_MODEL || "google/gemini-2.0-flash";
-  const model = parseModel(modelString);
+  const resolved = resolveLLMConfig(config);
+  const model = languageModel(resolved);
 
   const { text } = await generateText({
     model,
@@ -74,6 +91,7 @@ export async function completeWithImage(
     ],
     maxOutputTokens: config.maxTokens,
     temperature: config.temperature,
+    providerOptions: modelGatewayOptions(resolved),
   });
 
   return text;
@@ -85,9 +103,8 @@ export async function completeWithHtmlAndImage(
   imageBase64: string,
   config: LLMConfig = {},
 ): Promise<string> {
-  const modelString =
-    config.model || process.env.LLM_MODEL || "google/gemini-2.0-flash";
-  const model = parseModel(modelString);
+  const resolved = resolveLLMConfig(config);
+  const model = languageModel(resolved);
 
   const { text } = await generateText({
     model,
@@ -103,6 +120,7 @@ export async function completeWithHtmlAndImage(
     ],
     maxOutputTokens: config.maxTokens,
     temperature: config.temperature,
+    providerOptions: modelGatewayOptions(resolved),
   });
 
   return text;

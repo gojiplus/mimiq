@@ -62,7 +62,7 @@ ${query}
 Format: YES|NO <confidence>`;
 
         const response = await completeWithImage(prompt, imageBase64, {
-          model: process.env.LLM_MODEL || "openai/gpt-4o",
+          model: process.env.MIMIQ_JUDGE_MODEL || process.env.MIMIQ_MODEL || "qwen3:8b",
         });
 
         const match = response.match(/(YES|NO)\s*(\d+)?/i);

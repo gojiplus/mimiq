@@ -2,9 +2,10 @@
  * Factory for creating simulators based on scene configuration.
  */
 
-import type { Scene } from "./models";
+import { validateScene, type Scene } from "./models";
 import { Simulator, type SimulatorConfig } from "./simulator";
-import type { SimulatorInterface, SimulatorConfig as SceneSimulatorConfig } from "./simulatorInterface";
+import type { SimulatorInterface } from "./simulatorInterface";
+import { BrowserUseSimulator, type BrowserUseSimulatorOptions } from "../simulators/browserUseSimulator";
 
 export interface SimulatorFactoryOptions {
   defaultSimulatorConfig?: SimulatorConfig;
@@ -18,22 +19,26 @@ export function createSimulator(
   scene: Scene,
   options: SimulatorFactoryOptions = {},
 ): SimulatorInterface {
-  const sceneSimConfig = (scene as Scene & { simulator?: SceneSimulatorConfig }).simulator;
+  validateScene(scene);
+  const sceneSimConfig = scene.simulator;
 
   if (!sceneSimConfig || sceneSimConfig.type === "llm") {
-    return new Simulator(scene, options.defaultSimulatorConfig);
-  }
-
-  if (sceneSimConfig.type === "stagehand") {
-    const config: SimulatorConfig = {
-      model: (sceneSimConfig.options?.model as string) || options.defaultSimulatorConfig?.model,
-    };
-    return new Simulator(scene, config);
+    return new Simulator(scene, {
+      ...options.defaultSimulatorConfig,
+      model: sceneSimConfig?.model ?? options.defaultSimulatorConfig?.model,
+    });
   }
 
   if (sceneSimConfig.type === "browser-use") {
-    throw new Error(
-      "browser-use simulator requires async initialization. Use createSimulatorAsync() instead."
+    const browserOptions = sceneSimConfig.options as BrowserUseSimulatorOptions | undefined;
+    return new BrowserUseSimulator(
+      scene,
+      {
+        ...browserOptions,
+        model: sceneSimConfig.model ?? browserOptions?.model ?? options.defaultSimulatorConfig?.model,
+        baseURL: browserOptions?.baseURL ?? options.defaultSimulatorConfig?.baseURL,
+        apiKey: browserOptions?.apiKey ?? options.defaultSimulatorConfig?.apiKey,
+      },
     );
   }
 

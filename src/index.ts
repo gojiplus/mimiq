@@ -3,8 +3,7 @@
  *
  * Main entry point providing core types and Cypress-compatible exports.
  * For Playwright support, import from "@gojiplus/mimiq/playwright".
- * For browser agent simulators, import from "@gojiplus/mimiq/simulators".
- * For browser agent evaluation, use the AgentRunner from "@gojiplus/mimiq/node".
+ * For browser action policies, import from "@gojiplus/mimiq/simulators".
  */
 
 export type * from "./types";

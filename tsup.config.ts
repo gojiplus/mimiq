@@ -7,6 +7,7 @@ export default defineConfig({
     "node/index": "src/node/index.ts",
     "adapters/cypress/index": "src/adapters/cypress/index.ts",
     "adapters/playwright/index": "src/adapters/playwright/index.ts",
+    "simulators/index": "src/simulators/index.ts",
     "cli/index": "src/cli/index.ts",
   },
   format: ["esm"],
@@ -17,7 +18,6 @@ export default defineConfig({
   external: [
     "cypress",
     "@playwright/test",
-    "@browserbase/stagehand",
     "yaml",
     "nunjucks",
     "fs",

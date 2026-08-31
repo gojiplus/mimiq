@@ -1,12 +1,11 @@
 {
   "name": "@gojiplus/mimiq",
-  "version": "0.5.0",
-  "description": "Simulate users and evaluate AI agents in Cypress and Playwright e2e tests",
+  "version": "0.6.0",
+  "description": "Application-layer user simulation with replayable browser evidence",
   "type": "module",
   "workspaces": [
     "examples/playwright",
-    "examples/cypress",
-    "examples/stagehand"
+    "examples/cypress"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -48,13 +47,11 @@
     "dev:app": "npm run dev --prefix test/app",
     "test:cypress": "npm test --prefix examples/cypress",
     "test:playwright": "npm test --prefix examples/playwright",
-    "test": "npm run test:playwright",
-    "test:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --headless",
-    "demo:agent": "cd examples && npx mimiq agent --scenes ./agent-scenes --no-headless",
+    "test:unit": "npm run build && node --test test/*.test.mjs",
+    "test": "npm run test:unit",
     "docs": "typedoc"
   },
   "peerDependencies": {
-    "@browserbasehq/stagehand": "^3.0.0",
     "@playwright/test": "^1.40.0",
     "cypress": "^15.16.0"
   },
@@ -64,13 +61,9 @@
     },
     "@playwright/test": {
       "optional": true
-    },
-    "@browserbasehq/stagehand": {
-      "optional": true
     }
   },
   "devDependencies": {
-    "@browserbasehq/stagehand": "^3.2.1",
     "@playwright/test": "^1.59.1",
     "@types/node": "^22.19.15",
     "@types/nunjucks": "^3.2.6",
@@ -109,15 +102,14 @@
   },
   "homepage": "https://github.com/gojiplus/mimiq#readme",
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.58",
-    "@ai-sdk/google": "^3.0.43",
-    "@ai-sdk/openai": "^3.0.41",
+    "@ai-sdk/openai-compatible": "^2.0.40",
     "ai": "^6.0.116",
     "commander": "^14.0.3",
     "nunjucks": "^3.2.4",
     "pino": "^10.3.1"
   },
   "overrides": {
-    "playwright": "$@playwright/test"
+    "playwright": "$@playwright/test",
+    "esbuild": "^0.28.2"
   }
 }

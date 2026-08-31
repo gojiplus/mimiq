@@ -1,6 +1,6 @@
 /**
  * Simulator interface for mimiq.
- * Defines the contract for all simulator implementations (LLM, Stagehand, browser-use).
+ * Defines the contract for all simulator implementations.
  */
 
 import type { AffordanceSnapshot, BrowserSimAction, DoneAction } from "../types";
@@ -42,12 +42,13 @@ export interface SimulatorInterface {
 /**
  * Simulator type identifier for scene configuration.
  */
-export type SimulatorType = "llm" | "stagehand" | "browser-use";
+export type SimulatorType = "llm" | "browser-use";
 
 /**
  * Configuration for simulator in scene files.
  */
 export interface SimulatorConfig {
   type: SimulatorType;
+  model?: string;
   options?: Record<string, unknown>;
 }

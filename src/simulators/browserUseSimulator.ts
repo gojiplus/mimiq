@@ -1,182 +1,162 @@
 /**
- * browser-use based simulator.
- * Uses browser-use Python library via HTTP bridge for autonomous browser automation.
+ * Autonomous browser-action policy.
+ * Playwright owns the browser; this simulator chooses the next allowed user action.
  */
 
 import type { Scene } from "../core/models";
-import type { AffordanceSnapshot } from "../types";
+import { complete, DEFAULT_LLM_BASE_URL, DEFAULT_LLM_MODEL } from "../core/llm";
+import type { AffordanceSnapshot, BrowserSimAction } from "../types";
 import type { SimulatorInterface, SimulatorResult } from "../core/simulatorInterface";
 import { createLogger } from "../utils/nodeLogger";
 
 const log = createLogger("BrowserUseSimulator");
 
+const ACTION_POLICY_PROMPT = `You are an autonomous user operating a real application.
+Your goal is defined by the scene. Choose exactly one next action from the observed affordances.
+
+SCENE GOAL:
+{goal}
+
+SCENE CONTEXT:
+{context}
+
+CURRENT OBSERVATION:
+{observation}
+
+Return only JSON. Valid forms are:
+{"kind":"message","text":"..."}
+{"kind":"click","targetId":"..."}
+{"kind":"type","targetId":"...","text":"...","clearFirst":true}
+{"kind":"select","targetId":"...","value":"..."}
+{"kind":"upload","targetId":"...","fileRef":"..."}
+{"kind":"navigate","url":"https://..."}
+{"kind":"navigate","targetId":"..."}
+{"kind":"done","reason":"..."}
+
+Never invent a targetId. Do not claim an action succeeded; the browser will report that separately.`;
+
 export interface BrowserUseSimulatorOptions {
-  apiUrl?: string;
   model?: string;
-  timeout?: number;
+  baseURL?: string;
+  apiKey?: string;
 }
 
-/**
- * Simulator that uses browser-use for autonomous browser automation.
- * Requires a running browser-use HTTP bridge service.
- */
+interface ParsedAction {
+  kind?: unknown;
+  text?: unknown;
+  targetId?: unknown;
+  value?: unknown;
+  fileRef?: unknown;
+  url?: unknown;
+  clearFirst?: unknown;
+  reason?: unknown;
+}
+
 export class BrowserUseSimulator implements SimulatorInterface {
   private scene: Scene;
   private options: Required<BrowserUseSimulatorOptions>;
   private maxTurns: number;
-  private startingPrompt: string;
-  private sessionId: string | null = null;
-  private turnCount: number = 0;
+  private turnCount = 0;
 
   constructor(scene: Scene, options: BrowserUseSimulatorOptions = {}) {
     this.scene = scene;
     this.options = {
-      apiUrl: options.apiUrl || process.env.BROWSER_USE_API_URL || "http://localhost:8000",
-      model: options.model || process.env.BROWSER_USE_MODEL || "gpt-4o",
-      timeout: options.timeout || 30000,
+      model: options.model || process.env.MIMIQ_SIMULATOR_MODEL || process.env.MIMIQ_MODEL || DEFAULT_LLM_MODEL,
+      baseURL: options.baseURL ?? process.env.MIMIQ_LLM_BASE_URL ?? DEFAULT_LLM_BASE_URL,
+      apiKey: options.apiKey ?? process.env.MIMIQ_LLM_API_KEY ?? "ollama",
     };
     this.maxTurns = scene.max_turns ?? 15;
-    this.startingPrompt = scene.starting_prompt;
-
-    log.debug({
-      apiUrl: this.options.apiUrl,
-      model: this.options.model,
-      timeout: this.options.timeout,
-      maxTurns: this.maxTurns,
-    }, "BrowserUseSimulator initialized");
   }
 
   async nextTurn(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
-    if (this.turnCount === 0) {
-      this.turnCount++;
-      await this.initSession(snapshot);
-      return { kind: "message", text: this.startingPrompt };
+    if (this.turnCount >= this.maxTurns) {
+      return { kind: "done", reason: "Max turns reached" };
     }
 
+    this.turnCount++;
+    if (this.turnCount === 1 && this.scene.starting_prompt.trim()) {
+      return { kind: "message", text: this.scene.starting_prompt };
+    }
+
+    const prompt = ACTION_POLICY_PROMPT
+      .replace("{goal}", this.scene.conversation_plan)
+      .replace("{context}", JSON.stringify(this.scene.context ?? {}))
+      .replace("{observation}", JSON.stringify(snapshot));
+    const response = await complete(prompt, {
+      model: this.options.model,
+      baseURL: this.options.baseURL || undefined,
+      apiKey: this.options.apiKey || undefined,
+      maxTokens: 256,
+    });
+    const action = this.parseAction(response);
+    this.validateAction(action, snapshot);
+    log.debug({ actionKind: action.kind, turn: this.turnCount }, "Browser action chosen");
+    return action;
+  }
+
+  private parseAction(response: string): BrowserSimAction | { kind: "done"; reason?: string } {
+    const match = response.match(/```(?:json)?\s*([\s\S]*?)\s*```/) ?? [undefined, response];
+    let parsed: ParsedAction;
     try {
-      log.debug({ turn: this.turnCount, sessionId: this.sessionId }, "Getting next action");
-      const action = await this.getNextAction(snapshot);
-      log.debug({ turn: this.turnCount, actionKind: action?.kind ?? "null" }, "Action received");
-      this.turnCount++;
-      return action;
-    } catch (error) {
-      log.error({ turn: this.turnCount, sessionId: this.sessionId, error }, "browser-use error");
-      return { kind: "done", reason: `browser-use error: ${error}` };
+      parsed = JSON.parse(match[1].trim()) as ParsedAction;
+    } catch {
+      throw new Error(`Browser action policy returned invalid JSON: ${response}`);
     }
+
+    if (typeof parsed.kind !== "string") {
+      throw new Error("Browser action policy response must include a string kind.");
+    }
+    if (parsed.kind === "done") {
+      return { kind: "done", ...(typeof parsed.reason === "string" ? { reason: parsed.reason } : {}) };
+    }
+    if (parsed.kind === "message" && typeof parsed.text === "string") {
+      return { kind: "message", text: parsed.text };
+    }
+    if (parsed.kind === "click" && typeof parsed.targetId === "string") {
+      return { kind: "click", targetId: parsed.targetId };
+    }
+    if (parsed.kind === "type" && typeof parsed.targetId === "string" && typeof parsed.text === "string") {
+      return {
+        kind: "type",
+        targetId: parsed.targetId,
+        text: parsed.text,
+        ...(typeof parsed.clearFirst === "boolean" ? { clearFirst: parsed.clearFirst } : {}),
+      };
+    }
+    if (parsed.kind === "select" && typeof parsed.targetId === "string" && typeof parsed.value === "string") {
+      return { kind: "select", targetId: parsed.targetId, value: parsed.value };
+    }
+    if (parsed.kind === "upload" && typeof parsed.targetId === "string" && typeof parsed.fileRef === "string") {
+      return { kind: "upload", targetId: parsed.targetId, fileRef: parsed.fileRef };
+    }
+    if (parsed.kind === "navigate" && (typeof parsed.targetId === "string" || typeof parsed.url === "string")) {
+      return {
+        kind: "navigate",
+        ...(typeof parsed.targetId === "string" ? { targetId: parsed.targetId } : {}),
+        ...(typeof parsed.url === "string" ? { url: parsed.url } : {}),
+      };
+    }
+    throw new Error(`Browser action policy returned an invalid ${parsed.kind} action.`);
   }
 
-  private async initSession(snapshot: AffordanceSnapshot): Promise<void> {
-    log.debug({ url: snapshot.url, model: this.options.model }, "Initializing browser-use session");
-
-    const response = await fetch(`${this.options.apiUrl}/session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        goal: this.scene.conversation_plan,
-        starting_url: snapshot.url,
-        model: this.options.model,
-        max_steps: this.maxTurns,
-      }),
-      signal: AbortSignal.timeout(this.options.timeout),
-    });
-
-    if (!response.ok) {
-      log.error({ status: response.status, statusText: response.statusText }, "Failed to init session");
-      throw new Error(`Failed to init browser-use session: ${response.statusText}`);
+  private validateAction(
+    action: BrowserSimAction | { kind: "done"; reason?: string },
+    snapshot: AffordanceSnapshot,
+  ): void {
+    if (action.kind === "done" || action.kind === "message" || (action.kind === "navigate" && action.url)) {
+      return;
     }
 
-    const data = await response.json();
-    this.sessionId = data.session_id;
-    log.info({ sessionId: this.sessionId }, "Session initialized");
-  }
-
-  private async getNextAction(snapshot: AffordanceSnapshot): Promise<SimulatorResult> {
-    if (!this.sessionId) {
-      throw new Error("No active browser-use session");
+    const targetId = action.targetId;
+    const target = snapshot.availableActions.find((candidate) => candidate.id === targetId);
+    if (!target) {
+      throw new Error(`Browser action policy selected unobserved target "${targetId}".`);
     }
-
-    const lastAgentMessage = [...snapshot.transcript]
-      .reverse()
-      .find((t) => t.role === "assistant");
-
-    log.debug({
-      sessionId: this.sessionId,
-      url: snapshot.url,
-      availableActions: snapshot.availableActions.length,
-    }, "Requesting next action");
-
-    const response = await fetch(`${this.options.apiUrl}/session/${this.sessionId}/step`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        current_url: snapshot.url,
-        page_content: snapshot.transcript.map((t) => `${t.role}: ${t.text}`).join("\n"),
-        last_agent_message: lastAgentMessage?.text,
-        available_actions: snapshot.availableActions,
-        state_markers: snapshot.stateMarkers,
-      }),
-      signal: AbortSignal.timeout(this.options.timeout),
-    });
-
-    if (!response.ok) {
-      log.error({ status: response.status, statusText: response.statusText, sessionId: this.sessionId }, "Step request failed");
-      throw new Error(`browser-use step failed: ${response.statusText}`);
+    if (!target.enabled) {
+      throw new Error(`Browser action policy selected disabled target "${targetId}".`);
     }
-
-    const data = await response.json();
-    log.debug({ sessionId: this.sessionId, responseKeys: Object.keys(data) }, "Step response received");
-    return this.parseResponse(data);
-  }
-
-  private parseResponse(data: Record<string, unknown>): SimulatorResult {
-    if (data.done || data.completed) {
-      return { kind: "done", reason: data.reason as string | undefined };
-    }
-
-    const actionType = data.action_type || data.type;
-
-    switch (actionType) {
-      case "click":
-        return {
-          kind: "click",
-          targetId: String(data.target || data.selector || data.element_id),
-        };
-
-      case "type":
-      case "input":
-        return {
-          kind: "type",
-          targetId: String(data.target || data.selector || "chat-input"),
-          text: String(data.text || data.value),
-          clearFirst: Boolean(data.clear_first),
-        };
-
-      case "select":
-        return {
-          kind: "select",
-          targetId: String(data.target || data.selector),
-          value: String(data.value),
-        };
-
-      case "navigate":
-      case "goto":
-        return {
-          kind: "navigate",
-          url: String(data.url),
-        };
-
-      case "message":
-      case "send_message":
-        return {
-          kind: "message",
-          text: String(data.text || data.message),
-        };
-
-      default:
-        if (data.text || data.message) {
-          return { kind: "message", text: String(data.text || data.message) };
-        }
-        return { kind: "done", reason: "Unknown action type" };
+    if (target.kind !== action.kind) {
+      throw new Error(`Browser action policy selected "${targetId}" as ${action.kind}, but it is ${target.kind}.`);
     }
   }
 
@@ -185,20 +165,8 @@ export class BrowserUseSimulator implements SimulatorInterface {
   }
 
   getStartingPrompt(): string {
-    return this.startingPrompt;
+    return this.scene.starting_prompt;
   }
 
-  async cleanup(): Promise<void> {
-    if (this.sessionId) {
-      try {
-        await fetch(`${this.options.apiUrl}/session/${this.sessionId}`, {
-          method: "DELETE",
-          signal: AbortSignal.timeout(5000),
-        });
-      } catch {
-        // Ignore cleanup errors
-      }
-      this.sessionId = null;
-    }
-  }
+  async cleanup(): Promise<void> {}
 }

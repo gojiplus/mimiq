@@ -8,7 +8,7 @@ import {
 
 type AdapterMode = "default" | "html" | "hybrid" | "vision";
 
-const ADAPTER_MODE = (Cypress.env("ADAPTER_MODE") || "default") as AdapterMode;
+const ADAPTER_MODE = (Cypress.expose("ADAPTER_MODE") || "default") as AdapterMode;
 
 function createAdapter(): BrowserAdapter {
   switch (ADAPTER_MODE) {

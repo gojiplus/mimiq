@@ -12,8 +12,210 @@
  */
 
 import { test, expect } from "../fixtures";
+import { mkdirSync, writeFileSync } from "fs";
+import { createBrowserAdapter } from "@gojiplus/mimiq/playwright";
 
 test.describe("Customer Support Flows", () => {
+  test("generic browser adapter captures telemetry emitted during navigation", async ({ page }) => {
+    const adapter = await createBrowserAdapter(page);
+    await page.goto(
+      "data:text/html,<script>window.dispatchEvent(new CustomEvent('mimiq:telemetry',{detail:{name:'page.started'}}))</script>",
+    );
+
+    const snapshot = await adapter.captureSnapshot();
+    expect(snapshot.metadata?.applicationTelemetry).toEqual([{ name: "page.started" }]);
+  });
+
+  test("generic browser adapter captures arbitrary controls and app telemetry", async ({ page }) => {
+    await page.goto("/");
+    const adapter = await createBrowserAdapter(page);
+
+    const initialSnapshot = await adapter.captureSnapshot();
+    expect(initialSnapshot.transcript).toEqual([]);
+    expect(initialSnapshot.availableActions).toContainEqual(expect.objectContaining({
+      kind: "click",
+      label: "Track Order",
+    }));
+    await expect(adapter.executeAction({ kind: "message", text: "Track an order" })).resolves.toBeUndefined();
+
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("mimiq:telemetry", {
+        detail: {
+          name: "order.lookup.started",
+          data: { source: "support-widget" },
+        },
+      }));
+    });
+    const telemetrySnapshot = await adapter.captureSnapshot();
+    expect(telemetrySnapshot.metadata?.applicationTelemetry).toEqual([{
+      name: "order.lookup.started",
+      data: { source: "support-widget" },
+    }]);
+  });
+
+  test("records agent tool calls emitted by application instrumentation", async ({ page, mimiq }) => {
+    await page.goto("/");
+    await mimiq.startRun({
+      scene: {
+        id: "instrumented-tool-call",
+        starting_prompt: "Hello",
+        conversation_plan: "Ask for help.",
+        persona: "cooperative",
+        max_turns: 1,
+        expectations: { required_tools: ["lookup_order"] },
+      },
+    });
+
+    await mimiq.runTurn();
+    await page.evaluate(() => {
+      window.dispatchEvent(new CustomEvent("mimiq:agent-tool-call", {
+        detail: { name: "lookup_order", args: { order_id: "ORD-10031" }, result: { found: true } },
+      }));
+    });
+    await mimiq.runTurn();
+
+    const trace = await mimiq.getTrace();
+    expect(trace.entries).toContainEqual(expect.objectContaining({
+      actor: "assistant_tool",
+      name: "lookup_order",
+      args: { order_id: "ORD-10031" },
+    }));
+    expect((await mimiq.evaluate()).passed).toBe(true);
+  });
+
+  test("records agent tool calls emitted during navigation", async ({ page, mimiq }) => {
+    await page.addInitScript(() => {
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("mimiq:agent-tool-call", {
+            detail: { name: "lookup_order", args: { order_id: "ORD-10031" } },
+          }));
+        });
+      });
+    });
+    await page.goto("/");
+    await page.waitForTimeout(25);
+    await mimiq.startRun({
+      scene: {
+        id: "navigation-tool-call",
+        starting_prompt: "Hello",
+        conversation_plan: "Ask for help.",
+        persona: "cooperative",
+        max_turns: 1,
+        expectations: { required_tools: ["lookup_order"] },
+      },
+    });
+
+    await mimiq.runTurn();
+
+    const trace = await mimiq.getTrace();
+    expect(trace.entries).toContainEqual(expect.objectContaining({
+      actor: "assistant_tool",
+      name: "lookup_order",
+      args: { order_id: "ORD-10031" },
+    }));
+  });
+
+  test("replays recorded browser actions against a fresh page", async ({ page, mimiq }, testInfo) => {
+    await page.goto("/");
+
+    const runDir = testInfo.outputPath("evidence");
+    mkdirSync(runDir, { recursive: true });
+    writeFileSync(
+      `${runDir}/events.jsonl`,
+      [
+        {
+          sequence: 1,
+          timestamp: new Date().toISOString(),
+          type: "observation.captured",
+          payload: {
+            snapshot: {
+              transcript: [],
+              availableActions: [{
+                id: "recorded-track-order",
+                kind: "click",
+                label: "Track Order",
+                enabled: true,
+                metadata: {
+                  selector: "body:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+                },
+              }],
+              availableUserTools: [],
+            },
+          },
+        },
+        {
+          sequence: 2,
+          timestamp: new Date().toISOString(),
+          type: "browser.action_executed",
+          payload: { action: { kind: "message", text: "Hello" }, succeeded: true },
+        },
+        {
+          sequence: 3,
+          timestamp: new Date().toISOString(),
+          type: "browser.action_executed",
+          payload: {
+            action: { kind: "click", targetId: "recorded-track-order" },
+            succeeded: true,
+            observationSequence: 1,
+          },
+        },
+      ].map((event) => JSON.stringify(event)).join("\n"),
+    );
+
+    const replay = await mimiq.replayEvidenceBundle(runDir);
+    expect(replay.replayedActions).toEqual([
+      { kind: "message", text: "Hello" },
+      { kind: "click", targetId: "mimiq-button-1" },
+    ]);
+    expect(replay.skippedActions).toEqual([]);
+    await expect(page.locator("[data-test=transcript]")).toContainText("I'd like to track my order.");
+  });
+
+  test("browser policy can execute a dynamically observed control", async ({ page, mimiq }) => {
+    await page.goto("/");
+
+    const snapshot = await mimiq.captureSnapshot();
+    const trackOrder = snapshot.availableActions.find(
+      (action) => action.id.startsWith("mimiq-button-") && action.label === "Track Order",
+    );
+    expect(trackOrder).toBeDefined();
+    expect(trackOrder?.metadata?.selector).toContain("button");
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async () => new Response(
+      JSON.stringify({
+        choices: [{ index: 0, message: { role: "assistant", content: JSON.stringify({ kind: "click", targetId: trackOrder!.id }) }, finish_reason: "stop" }],
+      }),
+      { headers: { "Content-Type": "application/json" } },
+    );
+
+    try {
+      await mimiq.startRun({
+        scene: {
+          id: "observed-control",
+          starting_prompt: "Hello",
+          conversation_plan: "Track the customer's order using the visible control.",
+          persona: "cooperative",
+          max_turns: 2,
+          simulator: {
+            type: "browser-use",
+            model: "qwen3:8b",
+            options: { baseURL: "http://127.0.0.1:11434/v1" },
+          },
+        },
+      });
+
+      await mimiq.runTurn();
+      const advance = await mimiq.runTurn();
+      expect(advance.action).toEqual({ kind: "click", targetId: trackOrder!.id });
+      await expect(page.locator("[data-test=transcript]")).toContainText("I'd like to track my order.");
+      expect((await mimiq.evaluate()).passed).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   test("customer asks about order status", async ({ page, mimiq }) => {
     await page.goto("/");
 
@@ -52,6 +254,7 @@ test.describe("Customer Support Flows", () => {
     console.log("Return Request Evaluation:");
     console.log(`  Passed: ${report.passed}`);
     console.log(`  Checks: ${report.summary}`);
+    expect(report.passed).toBe(true);
 
     const trace = await mimiq.getTrace();
     console.log(`  Conversation turns: ${trace.entries.length}`);
