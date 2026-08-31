@@ -68,6 +68,7 @@ interface ActiveRun {
   applicationTelemetry: ApplicationTelemetryEvent[];
   actionFailure?: string;
   evaluation?: EvaluationReport;
+  evaluationPromise?: Promise<EvaluationReport>;
   pendingAction?: {
     action: BrowserSimAction;
     observationSequence?: number;
@@ -243,6 +244,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       const run = activeRuns.get(input.runId);
       if (!run) {
         throw new Error(`Run not found: ${input.runId}`);
+      }
+      if (run.evaluation || run.evaluationPromise) {
+        throw new Error(`Run ${input.runId} has already been evaluated.`);
       }
       if (run.actionFailure) {
         throw new Error(`Run ${input.runId} ended after a browser action failed: ${run.actionFailure}`);
@@ -482,6 +486,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       if (!run) {
         throw new Error(`Run not found: ${input.runId}`);
       }
+      if (run.evaluation || run.evaluationPromise) {
+        throw new Error(`Run ${input.runId} has already been evaluated.`);
+      }
       if (!run.pendingAction) {
         throw new Error(`No pending browser action for run: ${input.runId}`);
       }
@@ -530,8 +537,16 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         throw new Error(`Run not found: ${input.runId}`);
       }
       if (run.evaluation) {
-        return run.evaluation;
+        return structuredClone(run.evaluation);
       }
+      if (run.evaluationPromise) {
+        return structuredClone(await run.evaluationPromise);
+      }
+      if (run.pendingAction) {
+        throw new Error(`Run ${input.runId} has a pending browser action.`);
+      }
+
+      const evaluationPromise = (async (): Promise<EvaluationReport> => {
 
       run.trace.finished_at = new Date().toISOString();
 
@@ -641,7 +656,6 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         checks,
         summary: `${passedCount}/${checks.length} checks passed`,
       };
-      run.evaluation = evaluation;
 
       const traceFile = join(tracesDir, `${run.runId}.json`);
       writeFileSync(
@@ -672,11 +686,20 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         }
       }
 
+      run.evaluation = evaluation;
+
       if (run.simulator.cleanup) {
         await run.simulator.cleanup();
       }
 
       return evaluation;
+      })();
+      run.evaluationPromise = evaluationPromise;
+      try {
+        return structuredClone(await evaluationPromise);
+      } finally {
+        run.evaluationPromise = undefined;
+      }
     },
 
     async getTrace(input: GetTraceRequest): Promise<RunTrace> {

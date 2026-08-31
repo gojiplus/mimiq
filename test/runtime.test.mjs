@@ -227,7 +227,7 @@ test("local runtime preserves tool calls observed before an assistant message", 
     scene: scene("startup-tool-call", { required_tools: ["lookup_order"] }),
   });
 
-  await runtime.advanceRun({
+  const advance = await runtime.advanceRun({
     runId,
     snapshot: snapshot({
       metadata: {
@@ -235,10 +235,82 @@ test("local runtime preserves tool calls observed before an assistant message", 
       },
     }),
   });
+  await runtime.recordActionResult({ runId, action: advance.action, succeeded: true });
 
   const trace = await runtime.getTrace({ runId });
   assert.equal(trace.entries.filter((entry) => entry.name === "lookup_order").length, 1);
   assert.equal((await runtime.evaluateRun({ runId })).passed, true);
+});
+
+test("evaluation requires a settled run and prevents later mutation", async () => {
+  const runtime = createLocalRuntime();
+  const { runId } = await runtime.startRun({ scene: scene("evaluation-lock") });
+  const advance = await runtime.advanceRun({ runId, snapshot: snapshot() });
+
+  await assert.rejects(
+    runtime.evaluateRun({ runId }),
+    /has a pending browser action/,
+  );
+  await runtime.recordActionResult({ runId, action: advance.action, succeeded: true });
+  await runtime.evaluateRun({ runId });
+
+  await assert.rejects(
+    runtime.advanceRun({ runId, snapshot: snapshot() }),
+    /has already been evaluated/,
+  );
+  await assert.rejects(
+    runtime.recordActionResult({ runId, action: advance.action, succeeded: true }),
+    /has already been evaluated/,
+  );
+});
+
+test("concurrent evaluation writes one terminal evidence event", async (t) => {
+  const outputDir = mkdtempSync(join(tmpdir(), "mimiq-concurrent-evaluation-"));
+  const originalFetch = globalThis.fetch;
+  let fetchCalls = 0;
+  let releaseFetch;
+  globalThis.fetch = async () => {
+    fetchCalls++;
+    return new Promise((resolve) => {
+      releaseFetch = () => resolve(new Response(
+        JSON.stringify({ passed: true, answer: "YES", confidence: 1 }),
+        { headers: { "Content-Type": "application/json" } },
+      ));
+    });
+  };
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    rmSync(outputDir, { recursive: true, force: true });
+  });
+
+  const runtime = createLocalRuntime({
+    layoutLensConfig: { httpEndpoint: "http://layoutlens.test" },
+    recording: { enabled: true, outputDir },
+  });
+  const { runId } = await runtime.startRun({
+    scene: scene("concurrent-evaluation", {
+      visual_assertions: [{ query: "The page is usable." }],
+    }),
+  });
+  const advance = await runtime.advanceRun({ runId, snapshot: snapshot() });
+  await runtime.recordActionResult({ runId, action: advance.action, succeeded: true });
+
+  const first = runtime.evaluateRun({ runId });
+  const second = runtime.evaluateRun({ runId });
+  assert.equal(fetchCalls, 1);
+  releaseFetch();
+
+  const [firstReport, secondReport] = await Promise.all([first, second]);
+  assert.deepEqual(firstReport, secondReport);
+  assert.notEqual(firstReport, secondReport);
+
+  const sceneDir = join(outputDir, "concurrent-evaluation");
+  const runDir = join(sceneDir, readdirSync(sceneDir)[0]);
+  const events = readFileSync(join(runDir, "events.jsonl"), "utf8")
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+  assert.equal(events.filter((event) => event.type === "run.finished").length, 1);
 });
 
 test("recordings preserve an append-only evidence bundle", async (t) => {
@@ -270,7 +342,9 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
     }),
   });
   const evaluation = await runtime.evaluateRun({ runId });
-  assert.equal(await runtime.evaluateRun({ runId }), evaluation);
+  const repeatedEvaluation = await runtime.evaluateRun({ runId });
+  assert.deepEqual(repeatedEvaluation, evaluation);
+  assert.notEqual(repeatedEvaluation, evaluation);
 
   const sceneDir = join(outputDir, "evidence");
   const runDir = join(sceneDir, readdirSync(sceneDir)[0]);
@@ -356,7 +430,7 @@ test("runtime preserves named application telemetry without treating it as a too
     },
   });
   const { runId } = await runtime.startRun({ scene: scene("telemetry") });
-  await runtime.advanceRun({
+  const advance = await runtime.advanceRun({
     runId,
     snapshot: snapshot({
       metadata: {
@@ -368,6 +442,7 @@ test("runtime preserves named application telemetry without treating it as a too
       },
     }),
   });
+  await runtime.recordActionResult({ runId, action: advance.action, succeeded: true });
 
   const trace = await runtime.getTrace({ runId });
   const telemetryEntry = trace.entries.find((entry) => entry.name === "refund.previewed");
@@ -478,7 +553,8 @@ test("visual and accessibility expectations run against the captured URL", async
     }),
   });
 
-  await runtime.advanceRun({ runId: run.runId, snapshot: snapshot() });
+  const advance = await runtime.advanceRun({ runId: run.runId, snapshot: snapshot() });
+  await runtime.recordActionResult({ runId: run.runId, action: advance.action, succeeded: true });
   const report = await runtime.evaluateRun(run);
 
   assert.equal(report.passed, true);
