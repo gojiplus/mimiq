@@ -67,6 +67,7 @@ interface ActiveRun {
   recordedToolCallKeys: Set<string>;
   applicationTelemetry: ApplicationTelemetryEvent[];
   actionFailure?: string;
+  evaluation?: EvaluationReport;
   pendingAction?: {
     action: BrowserSimAction;
     observationSequence?: number;
@@ -528,6 +529,9 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
       if (!run) {
         throw new Error(`Run not found: ${input.runId}`);
       }
+      if (run.evaluation) {
+        return run.evaluation;
+      }
 
       run.trace.finished_at = new Date().toISOString();
 
@@ -637,6 +641,7 @@ export function createLocalRuntime(options: LocalRuntimeOptions = {}): MimiqRunt
         checks,
         summary: `${passedCount}/${checks.length} checks passed`,
       };
+      run.evaluation = evaluation;
 
       const traceFile = join(tracesDir, `${run.runId}.json`);
       writeFileSync(

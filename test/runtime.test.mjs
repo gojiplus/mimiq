@@ -269,7 +269,8 @@ test("recordings preserve an append-only evidence bundle", async (t) => {
       metadata: { toolCalls: [{ name: "lookup_order", args: { id: "ORD-1" } }] },
     }),
   });
-  await runtime.evaluateRun({ runId });
+  const evaluation = await runtime.evaluateRun({ runId });
+  assert.equal(await runtime.evaluateRun({ runId }), evaluation);
 
   const sceneDir = join(outputDir, "evidence");
   const runDir = join(sceneDir, readdirSync(sceneDir)[0]);
