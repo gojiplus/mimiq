@@ -31,6 +31,15 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # Majors that must move together land in one PR; minor and patch
+      # bumps match the group above first and keep flowing through it.
+      eslint:
+        applies-to: version-updates
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
       npm-security:
         applies-to: security-updates
         patterns:
@@ -49,6 +58,20 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # plugin-react majors require the matching vite major, and the React
+      # type packages require matching react and react-dom majors.
+      test-app-vite:
+        applies-to: version-updates
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+      test-app-react:
+        applies-to: version-updates
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
       test-app-security:
         applies-to: security-updates
         patterns:
