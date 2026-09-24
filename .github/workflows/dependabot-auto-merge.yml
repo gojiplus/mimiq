@@ -18,10 +18,15 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Auto-merge everything except npm and uv majors:
+      # Auto-merge everything except majors to the published package's runtime
+      # dependencies:
       # - grouped PRs report the highest bump anywhere in the group (including
       #   transitive lockfile updates), so trust our own minor-and-patch groups
       # - GitHub-Actions majors are CI-validated and low blast radius
+      # - majors to root devDependencies and to the test harnesses under /test
+      #   never ship to users of @gojiplus/mimiq, and `gate` builds and tests
+      #   everything they touch; runtime-dependency majors stay manual because
+      #   passing tests do not show the published API still behaves the same
       # An unrecognised or empty update-type is NOT eligible, so metadata
       # failures leave the PR open rather than merging it. Each branch is a
       # full if/case, never `test && var=true`: under `bash -e` a failing test
@@ -32,6 +37,8 @@ jobs:
           ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
           GROUP: ${{ steps.metadata.outputs.dependency-group }}
           UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEPENDENCY_TYPE: ${{ steps.metadata.outputs.dependency-type }}
+          DIRECTORY: ${{ steps.metadata.outputs.directory }}
         run: |
           eligible=false
           if [ "$ECOSYSTEM" = "github_actions" ]; then
@@ -43,7 +50,14 @@ jobs:
           case "$UPDATE_TYPE" in
             version-update:semver-minor|version-update:semver-patch) eligible=true ;;
           esac
-          echo "ecosystem=$ECOSYSTEM group=$GROUP update-type=$UPDATE_TYPE eligible=$eligible"
+          case "$DIRECTORY" in
+            /test/*) eligible=true ;;
+          esac
+          if [ "$DIRECTORY" = "/" ] && [ "$DEPENDENCY_TYPE" = "direct:development" ]; then
+            eligible=true
+          fi
+          echo "ecosystem=$ECOSYSTEM group=$GROUP update-type=$UPDATE_TYPE" \
+            "dependency-type=$DEPENDENCY_TYPE directory=$DIRECTORY eligible=$eligible"
           echo "eligible=$eligible" >> "$GITHUB_OUTPUT"
 
       # No `gh pr review --approve`: it fails outright where the repo has
@@ -80,4 +94,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr comment "$PR_URL" --body \
-            "Left open for manual review — auto-merge covers GitHub-Actions updates, our minor-and-patch groups, and patch/minor npm and uv bumps."
+            "Left open for manual review — auto-merge covers GitHub-Actions updates, our minor-and-patch groups, patch/minor npm and uv bumps, and majors to devDependencies or the test harnesses under /test. This one changes a runtime dependency of the published package."
