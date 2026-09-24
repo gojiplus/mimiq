@@ -39,6 +39,7 @@ jobs:
           UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
           DEPENDENCY_TYPE: ${{ steps.metadata.outputs.dependency-type }}
           DIRECTORY: ${{ steps.metadata.outputs.directory }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           eligible=false
           if [ "$ECOSYSTEM" = "github_actions" ]; then
@@ -50,8 +51,14 @@ jobs:
           case "$UPDATE_TYPE" in
             version-update:semver-minor|version-update:semver-patch) eligible=true ;;
           esac
+          # fetch-metadata reports directory "/" for multi-package PRs that are
+          # not in a group (#80: react and @types/react in /test/app), so the
+          # branch name, which always carries the manifest path, is checked too.
           case "$DIRECTORY" in
-            /test/*) eligible=true ;;
+            /test/app|/test/agent-server) eligible=true ;;
+          esac
+          case "$HEAD_REF" in
+            dependabot/*/test/app/*|dependabot/*/test/agent-server/*) eligible=true ;;
           esac
           if [ "$DIRECTORY" = "/" ] && [ "$DEPENDENCY_TYPE" = "direct:development" ]; then
             eligible=true
