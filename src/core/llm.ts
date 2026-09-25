@@ -85,7 +85,7 @@ export async function completeWithImage(
         role: "user",
         content: [
           { type: "text", text: prompt },
-          { type: "image", image: imageBase64 },
+          { type: "file", mediaType: "image", data: { type: "data", data: imageBase64 } },
         ],
       },
     ],
@@ -114,7 +114,7 @@ export async function completeWithHtmlAndImage(
         content: [
           { type: "text", text: prompt },
           { type: "text", text: `HTML:\n${html}` },
-          { type: "image", image: imageBase64 },
+          { type: "file", mediaType: "image", data: { type: "data", data: imageBase64 } },
         ],
       },
     ],
