@@ -102,8 +102,8 @@
   },
   "homepage": "https://github.com/gojiplus/mimiq#readme",
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.40",
-    "ai": "^6.0.116",
+    "@ai-sdk/openai-compatible": "^3.0.55",
+    "ai": "^7.0.114",
     "commander": "^14.0.3",
     "nunjucks": "^3.2.4",
     "pino": "^10.3.1"

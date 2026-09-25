@@ -33,6 +33,13 @@ updates:
           - "patch"
       # Majors that must move together land in one PR; minor and patch
       # bumps match the group above first and keep flowing through it.
+      # Provider packages return model types that only the matching `ai`
+      # major accepts (#123 needed #124).
+      ai-sdk:
+        applies-to: version-updates
+        patterns:
+          - "ai"
+          - "@ai-sdk/*"
       eslint:
         applies-to: version-updates
         patterns:
