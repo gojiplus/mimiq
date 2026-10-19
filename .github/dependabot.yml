@@ -19,9 +19,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     ignore:
-      # TypeDoc and typescript-eslint support TypeScript below 6.1.
+      # The declaration build is incompatible with TypeScript 6.
       - dependency-name: "typescript"
-        versions: [">=6.1.0"]
+        versions: [">=6.0.0"]
     schedule:
       interval: "weekly"
       day: "monday"
@@ -94,7 +94,7 @@ updates:
       # google-adk 2.12 requires OpenTelemetry <=1.42.1; FastAPI needs >=1.44.
       # Remove this bound when ADK supports the newer OpenTelemetry release.
       - dependency-name: "fastapi"
-        versions: [">=0.143.0"]
+        versions: [">=0.142.0"]
     schedule:
       interval: "weekly"
       day: "monday"
